@@ -18,6 +18,7 @@ const DrivePage = lazy(() => import('@/pages/drive/Drive').then(m => ({ default:
 const BookingPage = lazy(() => import('@/pages/booking/Booking').then(m => ({ default: m.BookingPage })))
 const SuperAdminPage = lazy(() => import('@/pages/super-admin/SuperAdmin').then(m => ({ default: m.SuperAdminPage })))
 const SettingsPage = lazy(() => import('@/pages/settings/Settings').then(m => ({ default: m.SettingsPage })))
+const DeveloperPage = lazy(() => import('@/pages/developer/Developer').then(m => ({ default: m.DeveloperPage })))
 
 function PageLoader() {
   return (
@@ -49,6 +50,7 @@ function App() {
             <Route path="/drive" element={<Suspense fallback={<PageLoader />}><DrivePage /></Suspense>} />
             <Route path="/booking" element={<Suspense fallback={<PageLoader />}><BookingPage /></Suspense>} />
             <Route path="/settings" element={<Suspense fallback={<PageLoader />}><SettingsPage /></Suspense>} />
+            <Route path="/developer" element={<Suspense fallback={<PageLoader />}><DeveloperPage /></Suspense>} />
             <Route path="/super-admin" element={<Suspense fallback={<PageLoader />}><SuperAdminPage /></Suspense>} />
           </Route>
         </Routes>

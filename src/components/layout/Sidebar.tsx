@@ -16,6 +16,7 @@ import {
   Calendar,
   HardDrive,
   Clock,
+  Code,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -99,6 +100,19 @@ export function Sidebar() {
         >
           <Settings className="w-5 h-5" />
           Settings
+        </Link>
+        <Link
+          to="/developer"
+          onClick={() => setMobileOpen(false)}
+          className={cn(
+            'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
+            location.pathname.startsWith('/developer')
+              ? 'bg-sidebar-accent text-sidebar-primary'
+              : 'text-sidebar-foreground hover:bg-sidebar-accent'
+          )}
+        >
+          <Code className="w-5 h-5" />
+          Developer
         </Link>
         <button
           onClick={signOut}

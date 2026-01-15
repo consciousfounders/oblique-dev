@@ -275,6 +275,182 @@ export type Database = {
           created_at?: string
         }
       }
+      activities: {
+        Row: {
+          id: string
+          tenant_id: string
+          user_id: string | null
+          entity_type: string
+          entity_id: string
+          activity_type: string
+          subject: string | null
+          description: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          user_id?: string | null
+          entity_type: string
+          entity_id: string
+          activity_type: string
+          subject?: string | null
+          description?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          user_id?: string | null
+          entity_type?: string
+          entity_id?: string
+          activity_type?: string
+          subject?: string | null
+          description?: string | null
+          created_at?: string
+        }
+      }
+      api_keys: {
+        Row: {
+          id: string
+          tenant_id: string
+          user_id: string
+          name: string
+          key_hash: string
+          key_prefix: string
+          scopes: string[]
+          rate_limit_per_minute: number
+          rate_limit_per_day: number
+          last_used_at: string | null
+          expires_at: string | null
+          revoked_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          user_id: string
+          name: string
+          key_hash: string
+          key_prefix: string
+          scopes?: string[]
+          rate_limit_per_minute?: number
+          rate_limit_per_day?: number
+          last_used_at?: string | null
+          expires_at?: string | null
+          revoked_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          user_id?: string
+          name?: string
+          key_hash?: string
+          key_prefix?: string
+          scopes?: string[]
+          rate_limit_per_minute?: number
+          rate_limit_per_day?: number
+          last_used_at?: string | null
+          expires_at?: string | null
+          revoked_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      api_usage: {
+        Row: {
+          id: string
+          api_key_id: string | null
+          tenant_id: string
+          endpoint: string
+          method: string
+          status_code: number
+          response_time_ms: number | null
+          request_size_bytes: number | null
+          response_size_bytes: number | null
+          ip_address: string | null
+          user_agent: string | null
+          error_message: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          api_key_id?: string | null
+          tenant_id: string
+          endpoint: string
+          method: string
+          status_code: number
+          response_time_ms?: number | null
+          request_size_bytes?: number | null
+          response_size_bytes?: number | null
+          ip_address?: string | null
+          user_agent?: string | null
+          error_message?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          api_key_id?: string | null
+          tenant_id?: string
+          endpoint?: string
+          method?: string
+          status_code?: number
+          response_time_ms?: number | null
+          request_size_bytes?: number | null
+          response_size_bytes?: number | null
+          ip_address?: string | null
+          user_agent?: string | null
+          error_message?: string | null
+          created_at?: string
+        }
+      }
+      webhooks: {
+        Row: {
+          id: string
+          tenant_id: string
+          user_id: string
+          name: string
+          url: string
+          secret: string
+          events: string[]
+          is_active: boolean
+          last_triggered_at: string | null
+          failure_count: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          user_id: string
+          name: string
+          url: string
+          secret: string
+          events?: string[]
+          is_active?: boolean
+          last_triggered_at?: string | null
+          failure_count?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          user_id?: string
+          name?: string
+          url?: string
+          secret?: string
+          events?: string[]
+          is_active?: boolean
+          last_triggered_at?: string | null
+          failure_count?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }
