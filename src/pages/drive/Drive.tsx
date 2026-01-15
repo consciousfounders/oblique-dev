@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { VirtualList } from '@/components/ui/virtual-list'
 import { FileUploadDialog } from '@/components/drive/FileUploadDialog'
+import { FilePreviewDialog } from '@/components/drive/FilePreviewDialog'
 import {
   HardDrive,
   Folder,
@@ -27,6 +28,7 @@ import {
   ExternalLink,
   ArrowLeft,
   RotateCcw,
+  Eye,
 } from 'lucide-react'
 
 export function DrivePage() {
@@ -38,6 +40,8 @@ export function DrivePage() {
   const [showNewFolder, setShowNewFolder] = useState(false)
   const [newFolderName, setNewFolderName] = useState('')
   const [showUploadDialog, setShowUploadDialog] = useState(false)
+  const [previewFile, setPreviewFile] = useState<ParsedDriveFile | null>(null)
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false)
 
   // Initialize Google Token Service
   const hasGoogleAuth = !!session?.provider_token
@@ -123,6 +127,11 @@ export function DrivePage() {
     return File
   }
 
+  function handlePreviewFile(file: ParsedDriveFile) {
+    setPreviewFile(file)
+    setShowPreviewDialog(true)
+  }
+
   function formatSize(bytes: number): string {
     if (bytes === 0) return '-'
     const k = 1024
@@ -146,15 +155,13 @@ export function DrivePage() {
               <span className="truncate">{file.name}</span>
             </button>
           ) : (
-            <a
-              href={file.webViewLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 flex-1 min-w-0"
+            <button
+              onClick={() => handlePreviewFile(file)}
+              className="flex items-center gap-3 flex-1 min-w-0 text-left"
             >
               <Icon className="w-5 h-5 text-muted-foreground" />
               <span className="truncate">{file.name}</span>
-            </a>
+            </button>
           )}
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="hidden sm:block">{formatSize(file.size)}</span>
@@ -172,14 +179,24 @@ export function DrivePage() {
               />
             </button>
             {!file.isFolder && (
-              <a
-                href={file.webViewLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-foreground"
-              >
-                <ExternalLink className="w-4 h-4" />
-              </a>
+              <>
+                <button
+                  onClick={() => handlePreviewFile(file)}
+                  className="hover:text-foreground"
+                  title="Preview"
+                >
+                  <Eye className="w-4 h-4" />
+                </button>
+                <a
+                  href={file.webViewLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground"
+                  title="Open in Google Drive"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </>
             )}
           </div>
         </div>
@@ -335,6 +352,13 @@ export function DrivePage() {
         onOpenChange={setShowUploadDialog}
         currentFolderId={currentFolder}
         currentFolderPath={folderPath}
+      />
+
+      {/* Preview Dialog */}
+      <FilePreviewDialog
+        file={previewFile}
+        open={showPreviewDialog}
+        onOpenChange={setShowPreviewDialog}
       />
     </div>
   )
