@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Mail, Search, RefreshCw, Send, ArrowLeft, Paperclip } from 'lucide-react'
 
 export function EmailPage() {
-  const { session } = useAuth()
+  const { session, signInWithGoogle } = useAuth()
   const [threads, setThreads] = useState<EmailThread[]>([])
   const [selectedThread, setSelectedThread] = useState<EmailThread | null>(null)
   const [loading, setLoading] = useState(true)
@@ -24,24 +24,18 @@ export function EmailPage() {
   const [sending, setSending] = useState(false)
 
   useEffect(() => {
-    checkGoogleAuth()
-  }, [session])
+    // Check immediately - don't wait
+    if (session === undefined) return // Still loading auth state
 
-  async function checkGoogleAuth() {
-    try {
-      if (session?.provider_token) {
-        await GoogleTokenService.initialize(session)
-        setHasGoogleAuth(true)
-        fetchEmails()
-      } else {
-        setHasGoogleAuth(false)
-        setLoading(false)
-      }
-    } catch {
+    if (session?.provider_token) {
+      GoogleTokenService.initialize(session)
+      setHasGoogleAuth(true)
+      fetchEmails()
+    } else {
       setHasGoogleAuth(false)
       setLoading(false)
     }
-  }
+  }, [session])
 
   async function fetchEmails() {
     setLoading(true)
@@ -114,9 +108,9 @@ export function EmailPage() {
             <p className="text-muted-foreground">
               Sign in with Google to access your Gmail inbox and send emails directly from Oblique.
             </p>
-            <p className="text-sm text-muted-foreground">
-              Sign out and sign back in with Google to enable email access.
-            </p>
+            <Button onClick={signInWithGoogle} className="w-full">
+              Connect with Google
+            </Button>
           </CardContent>
         </Card>
       </div>

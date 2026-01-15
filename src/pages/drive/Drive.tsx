@@ -26,7 +26,7 @@ import {
 } from 'lucide-react'
 
 export function DrivePage() {
-  const { session } = useAuth()
+  const { session, signInWithGoogle } = useAuth()
   const [files, setFiles] = useState<ParsedDriveFile[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -40,24 +40,17 @@ export function DrivePage() {
   const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
-    checkGoogleAuth()
-  }, [session])
+    if (session === undefined) return // Still loading auth state
 
-  async function checkGoogleAuth() {
-    try {
-      if (session?.provider_token) {
-        await GoogleTokenService.initialize(session)
-        setHasGoogleAuth(true)
-        fetchFiles()
-      } else {
-        setHasGoogleAuth(false)
-        setLoading(false)
-      }
-    } catch {
+    if (session?.provider_token) {
+      GoogleTokenService.initialize(session)
+      setHasGoogleAuth(true)
+      fetchFiles()
+    } else {
       setHasGoogleAuth(false)
       setLoading(false)
     }
-  }
+  }, [session])
 
   async function fetchFiles() {
     setLoading(true)
@@ -187,6 +180,9 @@ export function DrivePage() {
             <p className="text-muted-foreground">
               Sign in with Google to browse and manage your Drive files.
             </p>
+            <Button onClick={signInWithGoogle} className="w-full">
+              Connect with Google
+            </Button>
           </CardContent>
         </Card>
       </div>

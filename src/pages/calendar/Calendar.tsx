@@ -21,7 +21,7 @@ import {
 type ViewMode = 'month' | 'week' | 'day'
 
 export function CalendarPage() {
-  const { session } = useAuth()
+  const { session, signInWithGoogle } = useAuth()
   const [events, setEvents] = useState<ParsedCalendarEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -40,24 +40,17 @@ export function CalendarPage() {
   const [creating, setCreating] = useState(false)
 
   useEffect(() => {
-    checkGoogleAuth()
-  }, [session])
+    if (session === undefined) return // Still loading auth state
 
-  async function checkGoogleAuth() {
-    try {
-      if (session?.provider_token) {
-        await GoogleTokenService.initialize(session)
-        setHasGoogleAuth(true)
-        fetchEvents()
-      } else {
-        setHasGoogleAuth(false)
-        setLoading(false)
-      }
-    } catch {
+    if (session?.provider_token) {
+      GoogleTokenService.initialize(session)
+      setHasGoogleAuth(true)
+      fetchEvents()
+    } else {
       setHasGoogleAuth(false)
       setLoading(false)
     }
-  }
+  }, [session])
 
   async function fetchEvents() {
     setLoading(true)
@@ -171,6 +164,9 @@ export function CalendarPage() {
             <p className="text-muted-foreground">
               Sign in with Google to view and manage your calendar events.
             </p>
+            <Button onClick={signInWithGoogle} className="w-full">
+              Connect with Google
+            </Button>
           </CardContent>
         </Card>
       </div>
