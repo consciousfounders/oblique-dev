@@ -5,6 +5,8 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ActivityTimeline, ActivityForm } from '@/components/activity'
+import { NotesPanel } from '@/components/notes'
+import { AttachmentsPanel } from '@/components/attachments'
 import { ArrowLeft, DollarSign, Building2, User, Calendar, TrendingUp } from 'lucide-react'
 
 interface DealStage {
@@ -223,6 +225,9 @@ export function DealDetailPage() {
               </CardContent>
             </Card>
           )}
+
+          <NotesPanel entityType="deal" entityId={deal.id} />
+          <AttachmentsPanel entityType="deal" entityId={deal.id} />
         </div>
 
         <div className="space-y-6">

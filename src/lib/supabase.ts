@@ -646,6 +646,168 @@ export type Database = {
           updated_at?: string
         }
       }
+      notes: {
+        Row: {
+          id: string
+          tenant_id: string
+          user_id: string | null
+          entity_type: string
+          entity_id: string
+          content: string
+          content_plain: string | null
+          is_pinned: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          user_id?: string | null
+          entity_type: string
+          entity_id: string
+          content: string
+          content_plain?: string | null
+          is_pinned?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          user_id?: string | null
+          entity_type?: string
+          entity_id?: string
+          content?: string
+          content_plain?: string | null
+          is_pinned?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      note_mentions: {
+        Row: {
+          id: string
+          note_id: string
+          mentioned_user_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          note_id: string
+          mentioned_user_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          note_id?: string
+          mentioned_user_id?: string
+          created_at?: string
+        }
+      }
+      attachments: {
+        Row: {
+          id: string
+          tenant_id: string
+          user_id: string | null
+          entity_type: string
+          entity_id: string
+          file_name: string
+          file_size: number | null
+          file_mime_type: string | null
+          storage_type: 'supabase' | 'google_drive' | 'external'
+          storage_path: string | null
+          external_url: string | null
+          drive_file_id: string | null
+          version: number
+          parent_attachment_id: string | null
+          description: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          user_id?: string | null
+          entity_type: string
+          entity_id: string
+          file_name: string
+          file_size?: number | null
+          file_mime_type?: string | null
+          storage_type?: 'supabase' | 'google_drive' | 'external'
+          storage_path?: string | null
+          external_url?: string | null
+          drive_file_id?: string | null
+          version?: number
+          parent_attachment_id?: string | null
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          user_id?: string | null
+          entity_type?: string
+          entity_id?: string
+          file_name?: string
+          file_size?: number | null
+          file_mime_type?: string | null
+          storage_type?: 'supabase' | 'google_drive' | 'external'
+          storage_path?: string | null
+          external_url?: string | null
+          drive_file_id?: string | null
+          version?: number
+          parent_attachment_id?: string | null
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      storage_quotas: {
+        Row: {
+          id: string
+          tenant_id: string
+          max_storage_bytes: number
+          used_storage_bytes: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          max_storage_bytes?: number
+          used_storage_bytes?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          max_storage_bytes?: number
+          used_storage_bytes?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }
+
+// Helper types for Notes and Attachments
+export type EntityType = 'contact' | 'account' | 'deal' | 'lead'
+
+export type Note = Database['public']['Tables']['notes']['Row'] & {
+  users?: { full_name: string | null } | null
+}
+
+export type NoteInsert = Database['public']['Tables']['notes']['Insert']
+export type NoteUpdate = Database['public']['Tables']['notes']['Update']
+
+export type Attachment = Database['public']['Tables']['attachments']['Row'] & {
+  users?: { full_name: string | null } | null
+}
+
+export type AttachmentInsert = Database['public']['Tables']['attachments']['Insert']
+export type AttachmentUpdate = Database['public']['Tables']['attachments']['Update']
+
+export type StorageQuota = Database['public']['Tables']['storage_quotas']['Row']

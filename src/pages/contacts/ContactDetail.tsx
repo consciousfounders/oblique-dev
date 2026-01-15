@@ -5,6 +5,8 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ActivityTimeline, ActivityForm } from '@/components/activity'
+import { NotesPanel } from '@/components/notes'
+import { AttachmentsPanel } from '@/components/attachments'
 import { ArrowLeft, Phone, Mail, Building2, Briefcase } from 'lucide-react'
 
 interface Contact {
@@ -141,6 +143,9 @@ export function ContactDetailPage() {
               </div>
             </CardContent>
           </Card>
+
+          <NotesPanel entityType="contact" entityId={contact.id} />
+          <AttachmentsPanel entityType="contact" entityId={contact.id} />
         </div>
 
         <div className="space-y-6">
