@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Suspense, lazy } from 'react'
+import { Toaster } from 'sonner'
 import { AuthProvider } from '@/lib/hooks/useAuth'
 import { ThemeProvider } from '@/lib/hooks/useTheme'
+import { GoogleApiProvider } from '@/lib/hooks/useGoogleApi'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { LoginPage } from '@/pages/auth/Login'
 import { AuthCallback } from '@/pages/auth/Callback'
@@ -33,6 +35,7 @@ function App() {
     <BrowserRouter>
       <ThemeProvider>
       <AuthProvider>
+      <GoogleApiProvider>
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
@@ -54,6 +57,15 @@ function App() {
             <Route path="/super-admin" element={<Suspense fallback={<PageLoader />}><SuperAdminPage /></Suspense>} />
           </Route>
         </Routes>
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            className: 'bg-background text-foreground border-border',
+          }}
+          richColors
+          closeButton
+        />
+      </GoogleApiProvider>
       </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>
