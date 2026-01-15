@@ -12,6 +12,7 @@ import { DealsPage } from '@/pages/deals/Deals'
 import { EmailPage } from '@/pages/email/Email'
 import { CalendarPage } from '@/pages/calendar/Calendar'
 import { DrivePage } from '@/pages/drive/Drive'
+import { BookingPage } from '@/pages/booking/Booking'
 import { SuperAdminPage } from '@/pages/super-admin/SuperAdmin'
 import { SettingsPage } from '@/pages/settings/Settings'
 
@@ -35,6 +36,7 @@ function App() {
             <Route path="/email" element={<EmailPage />} />
             <Route path="/calendar" element={<CalendarPage />} />
             <Route path="/drive" element={<DrivePage />} />
+            <Route path="/booking" element={<BookingPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/super-admin" element={<SuperAdminPage />} />
           </Route>

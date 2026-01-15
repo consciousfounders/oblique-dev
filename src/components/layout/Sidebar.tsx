@@ -15,6 +15,7 @@ import {
   Mail,
   Calendar,
   HardDrive,
+  Clock,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -28,6 +29,7 @@ const navItems = [
   { href: '/email', label: 'Email', icon: Mail },
   { href: '/calendar', label: 'Calendar', icon: Calendar },
   { href: '/drive', label: 'Drive', icon: HardDrive },
+  { href: '/booking', label: 'Booking', icon: Clock },
 ]
 
 export function Sidebar() {
