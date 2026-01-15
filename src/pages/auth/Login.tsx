@@ -1,10 +1,18 @@
+import { useState } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { Navigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export function LoginPage() {
-  const { user, loading, signInWithGoogle } = useAuth()
+  const { user, loading, signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth()
+  const [isSignUp, setIsSignUp] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
 
   if (loading) {
     return (
@@ -18,14 +26,45 @@ export function LoginPage() {
     return <Navigate to="/" replace />
   }
 
+  async function handleEmailSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError(null)
+    setMessage(null)
+    setSubmitting(true)
+
+    try {
+      if (isSignUp) {
+        const { error } = await signUpWithEmail(email, password)
+        if (error) {
+          setError(error.message)
+        } else {
+          setMessage('Check your email for a confirmation link!')
+          setEmail('')
+          setPassword('')
+        }
+      } else {
+        const { error } = await signInWithEmail(email, password)
+        if (error) {
+          setError(error.message)
+        }
+      }
+    } catch (err) {
+      setError('An unexpected error occurred')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Welcome to CRM</CardTitle>
-          <CardDescription>Sign in to manage your sales pipeline</CardDescription>
+          <CardTitle className="text-2xl">Welcome to Oblique</CardTitle>
+          <CardDescription>
+            {isSignUp ? 'Create an account to get started' : 'Sign in to manage your sales pipeline'}
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <Button
             onClick={signInWithGoogle}
             variant="outline"
@@ -52,6 +91,66 @@ export function LoginPage() {
             </svg>
             Continue with Google
           </Button>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Or continue with email</span>
+            </div>
+          </div>
+
+          <form onSubmit={handleEmailSubmit} className="space-y-3">
+            <Input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <Input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+            />
+
+            {error && (
+              <p className="text-sm text-destructive">{error}</p>
+            )}
+
+            {message && (
+              <p className="text-sm text-primary">{message}</p>
+            )}
+
+            <Button type="submit" className="w-full" size="lg" disabled={submitting}>
+              {submitting ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+              ) : isSignUp ? (
+                'Create Account'
+              ) : (
+                'Sign In'
+              )}
+            </Button>
+          </form>
+
+          <p className="text-center text-sm text-muted-foreground">
+            {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+            <button
+              type="button"
+              onClick={() => {
+                setIsSignUp(!isSignUp)
+                setError(null)
+                setMessage(null)
+              }}
+              className="text-primary hover:underline font-medium"
+            >
+              {isSignUp ? 'Sign in' : 'Sign up'}
+            </button>
+          </p>
         </CardContent>
       </Card>
     </div>
