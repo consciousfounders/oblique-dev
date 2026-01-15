@@ -1,12 +1,13 @@
 import { useState, useCallback } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { useDriveFiles, useCreateFolder, useUploadFile, useToggleStar } from '@/lib/hooks/useDrive'
+import { useDriveFiles, useCreateFolder, useToggleStar } from '@/lib/hooks/useDrive'
 import { GoogleTokenService } from '@/lib/services/googleTokenService'
 import { type ParsedDriveFile, MIME_TYPES } from '@/lib/services/driveService'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { VirtualList } from '@/components/ui/virtual-list'
+import { FileUploadDialog } from '@/components/drive/FileUploadDialog'
 import {
   HardDrive,
   Folder,
@@ -36,6 +37,7 @@ export function DrivePage() {
   const [folderPath, setFolderPath] = useState<Array<{ id: string; name: string }>>([])
   const [showNewFolder, setShowNewFolder] = useState(false)
   const [newFolderName, setNewFolderName] = useState('')
+  const [showUploadDialog, setShowUploadDialog] = useState(false)
 
   // Initialize Google Token Service
   const hasGoogleAuth = !!session?.provider_token
@@ -61,10 +63,9 @@ export function DrivePage() {
 
   // Mutations
   const createFolder = useCreateFolder()
-  const uploadFile = useUploadFile()
   const toggleStar = useToggleStar()
 
-  const error = filesError?.message || createFolder.error?.message || uploadFile.error?.message || null
+  const error = filesError?.message || createFolder.error?.message || null
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
@@ -84,22 +85,6 @@ export function DrivePage() {
       setShowNewFolder(false)
     } catch (err) {
       console.error('Failed to create folder:', err)
-    }
-  }
-
-  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    try {
-      await uploadFile.mutateAsync({
-        file,
-        parentId: currentFolder || undefined,
-      })
-    } catch (err) {
-      console.error('Failed to upload file:', err)
-    } finally {
-      e.target.value = ''
     }
   }
 
@@ -236,17 +221,9 @@ export function DrivePage() {
             <FolderPlus className="w-4 h-4 mr-2" />
             New Folder
           </Button>
-          <Button asChild>
-            <label className="cursor-pointer">
-              <Upload className="w-4 h-4 mr-2" />
-              {uploadFile.isPending ? 'Uploading...' : 'Upload'}
-              <input
-                type="file"
-                className="hidden"
-                onChange={handleUpload}
-                disabled={uploadFile.isPending}
-              />
-            </label>
+          <Button onClick={() => setShowUploadDialog(true)}>
+            <Upload className="w-4 h-4 mr-2" />
+            Upload
           </Button>
         </div>
       </div>
@@ -351,6 +328,14 @@ export function DrivePage() {
           />
         </CardContent>
       </Card>
+
+      {/* Upload Dialog */}
+      <FileUploadDialog
+        open={showUploadDialog}
+        onOpenChange={setShowUploadDialog}
+        currentFolderId={currentFolder}
+        currentFolderPath={folderPath}
+      />
     </div>
   )
 }
