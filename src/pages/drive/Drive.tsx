@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useGoogleApi } from '@/lib/hooks/useGoogleApi'
 import { DriveService, type ParsedDriveFile, MIME_TYPES } from '@/lib/services/driveService'
 import { GoogleTokenService } from '@/lib/services/googleTokenService'
 import { Card, CardContent } from '@/components/ui/card'
@@ -23,10 +24,12 @@ import {
   Star,
   ExternalLink,
   ArrowLeft,
+  RotateCcw,
 } from 'lucide-react'
 
 export function DrivePage() {
   const { session, signInWithGoogle } = useAuth()
+  const { executeWithRetry } = useGoogleApi()
   const [files, setFiles] = useState<ParsedDriveFile[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -38,6 +41,27 @@ export function DrivePage() {
   const [newFolderName, setNewFolderName] = useState('')
   const [creating, setCreating] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [lastFailedAction, setLastFailedAction] = useState<(() => Promise<void>) | null>(null)
+
+  const fetchFiles = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    setLastFailedAction(null)
+    try {
+      const { files: fetchedFiles } = await executeWithRetry(() =>
+        DriveService.listFiles({
+          folderId: currentFolder || undefined,
+        })
+      )
+      setFiles(fetchedFiles)
+    } catch (err) {
+      console.error('Failed to fetch files:', err)
+      setError(err instanceof Error ? err.message : 'Failed to fetch files')
+      setLastFailedAction(() => fetchFiles)
+    } finally {
+      setLoading(false)
+    }
+  }, [currentFolder, executeWithRetry])
 
   useEffect(() => {
     if (session === undefined) return // Still loading auth state
@@ -51,22 +75,6 @@ export function DrivePage() {
       setLoading(false)
     }
   }, [session])
-
-  async function fetchFiles() {
-    setLoading(true)
-    setError(null)
-    try {
-      const { files: fetchedFiles } = await DriveService.listFiles({
-        folderId: currentFolder || undefined,
-      })
-      setFiles(fetchedFiles)
-    } catch (err) {
-      console.error('Failed to fetch files:', err)
-      setError(err instanceof Error ? err.message : 'Failed to fetch files')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   useEffect(() => {
     if (hasGoogleAuth) {
@@ -82,11 +90,14 @@ export function DrivePage() {
     }
 
     setLoading(true)
+    setError(null)
+    setLastFailedAction(null)
     try {
-      const results = await DriveService.search(search)
+      const results = await executeWithRetry(() => DriveService.search(search))
       setFiles(results)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Search failed')
+      setLastFailedAction(() => () => handleSearch(e))
     } finally {
       setLoading(false)
     }
@@ -97,13 +108,18 @@ export function DrivePage() {
     if (!newFolderName.trim()) return
 
     setCreating(true)
+    setError(null)
+    setLastFailedAction(null)
     try {
-      await DriveService.createFolder(newFolderName, currentFolder || undefined)
+      await executeWithRetry(() =>
+        DriveService.createFolder(newFolderName, currentFolder || undefined)
+      )
       setNewFolderName('')
       setShowNewFolder(false)
       fetchFiles()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create folder')
+      setLastFailedAction(() => () => handleCreateFolder(e))
     } finally {
       setCreating(false)
     }
@@ -114,16 +130,26 @@ export function DrivePage() {
     if (!file) return
 
     setUploading(true)
+    setError(null)
+    setLastFailedAction(null)
     try {
-      await DriveService.uploadFile(file, {
-        parentId: currentFolder || undefined,
-      })
+      await executeWithRetry(() =>
+        DriveService.uploadFile(file, {
+          parentId: currentFolder || undefined,
+        })
+      )
       fetchFiles()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to upload file')
     } finally {
       setUploading(false)
       e.target.value = ''
+    }
+  }
+
+  async function handleRetry() {
+    if (lastFailedAction) {
+      await lastFailedAction()
     }
   }
 
@@ -277,8 +303,14 @@ export function DrivePage() {
       )}
 
       {error && (
-        <div className="p-3 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-sm">
-          {error}
+        <div className="p-3 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-sm flex items-center justify-between">
+          <span>{error}</span>
+          {lastFailedAction && (
+            <Button variant="ghost" size="sm" onClick={handleRetry} className="ml-2 text-destructive hover:text-destructive">
+              <RotateCcw className="w-4 h-4 mr-1" />
+              Retry
+            </Button>
+          )}
         </div>
       )}
 

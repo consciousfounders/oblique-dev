@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useGoogleApi } from '@/lib/hooks/useGoogleApi'
 import { GmailService, type EmailThread } from '@/lib/services/gmailService'
 import { GoogleTokenService } from '@/lib/services/googleTokenService'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Mail, Search, RefreshCw, Send, ArrowLeft, Paperclip } from 'lucide-react'
+import { Mail, Search, RefreshCw, Send, ArrowLeft, Paperclip, RotateCcw } from 'lucide-react'
 
 export function EmailPage() {
   const { session, signInWithGoogle } = useAuth()
+  const { executeWithRetry } = useGoogleApi()
   const [threads, setThreads] = useState<EmailThread[]>([])
   const [selectedThread, setSelectedThread] = useState<EmailThread | null>(null)
   const [loading, setLoading] = useState(true)
@@ -16,12 +18,34 @@ export function EmailPage() {
   const [search, setSearch] = useState('')
   const [showCompose, setShowCompose] = useState(false)
   const [hasGoogleAuth, setHasGoogleAuth] = useState(false)
+  const [lastFailedAction, setLastFailedAction] = useState<(() => Promise<void>) | null>(null)
 
   // Compose state
   const [composeTo, setComposeTo] = useState('')
   const [composeSubject, setComposeSubject] = useState('')
   const [composeBody, setComposeBody] = useState('')
   const [sending, setSending] = useState(false)
+
+  const fetchEmails = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    setLastFailedAction(null)
+    try {
+      const { threads: fetchedThreads } = await executeWithRetry(() =>
+        GmailService.listThreads({
+          maxResults: 30,
+          q: search || undefined,
+        })
+      )
+      setThreads(fetchedThreads)
+    } catch (err) {
+      console.error('Failed to fetch emails:', err)
+      setError(err instanceof Error ? err.message : 'Failed to fetch emails')
+      setLastFailedAction(() => fetchEmails)
+    } finally {
+      setLoading(false)
+    }
+  }, [search, executeWithRetry])
 
   useEffect(() => {
     // Check immediately - don't wait
@@ -37,23 +61,6 @@ export function EmailPage() {
     }
   }, [session])
 
-  async function fetchEmails() {
-    setLoading(true)
-    setError(null)
-    try {
-      const { threads: fetchedThreads } = await GmailService.listThreads({
-        maxResults: 30,
-        q: search || undefined,
-      })
-      setThreads(fetchedThreads)
-    } catch (err) {
-      console.error('Failed to fetch emails:', err)
-      setError(err instanceof Error ? err.message : 'Failed to fetch emails')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault()
     fetchEmails()
@@ -64,12 +71,16 @@ export function EmailPage() {
     if (!composeTo || !composeSubject) return
 
     setSending(true)
+    setError(null)
+    setLastFailedAction(null)
     try {
-      await GmailService.sendEmail({
-        to: composeTo.split(',').map((s) => s.trim()),
-        subject: composeSubject,
-        body: composeBody,
-      })
+      await executeWithRetry(() =>
+        GmailService.sendEmail({
+          to: composeTo.split(',').map((s) => s.trim()),
+          subject: composeSubject,
+          body: composeBody,
+        })
+      )
       setShowCompose(false)
       setComposeTo('')
       setComposeSubject('')
@@ -78,8 +89,15 @@ export function EmailPage() {
     } catch (err) {
       console.error('Failed to send email:', err)
       setError(err instanceof Error ? err.message : 'Failed to send email')
+      setLastFailedAction(() => () => handleSend(e))
     } finally {
       setSending(false)
+    }
+  }
+
+  async function handleRetry() {
+    if (lastFailedAction) {
+      await lastFailedAction()
     }
   }
 
@@ -216,20 +234,26 @@ export function EmailPage() {
                 e.preventDefault()
                 if (!composeBody) return
                 setSending(true)
+                setError(null)
                 try {
                   const lastMessage = selectedThread.messages[selectedThread.messages.length - 1]
-                  await GmailService.sendEmail({
-                    to: [lastMessage.fromEmail],
-                    subject: `Re: ${selectedThread.subject}`,
-                    body: composeBody,
-                    threadId: selectedThread.id,
-                  })
+                  await executeWithRetry(() =>
+                    GmailService.sendEmail({
+                      to: [lastMessage.fromEmail],
+                      subject: `Re: ${selectedThread.subject}`,
+                      body: composeBody,
+                      threadId: selectedThread.id,
+                    })
+                  )
                   setComposeBody('')
                   // Refresh thread
-                  const updated = await GmailService.getThread(selectedThread.id)
+                  const updated = await executeWithRetry(() =>
+                    GmailService.getThread(selectedThread.id)
+                  )
                   setSelectedThread(updated)
                 } catch (err) {
                   console.error('Failed to reply:', err)
+                  setError(err instanceof Error ? err.message : 'Failed to send reply')
                 } finally {
                   setSending(false)
                 }
@@ -286,8 +310,14 @@ export function EmailPage() {
       </form>
 
       {error && (
-        <div className="p-3 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-sm">
-          {error}
+        <div className="p-3 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-sm flex items-center justify-between">
+          <span>{error}</span>
+          {lastFailedAction && (
+            <Button variant="ghost" size="sm" onClick={handleRetry} className="ml-2 text-destructive hover:text-destructive">
+              <RotateCcw className="w-4 h-4 mr-1" />
+              Retry
+            </Button>
+          )}
         </div>
       )}
 

@@ -1,5 +1,6 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useGoogleApi } from '@/lib/hooks/useGoogleApi'
 import { CalendarService, type ParsedCalendarEvent } from '@/lib/services/calendarService'
 import { GoogleTokenService } from '@/lib/services/googleTokenService'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,12 +17,14 @@ import {
   Users,
   Video,
   X,
+  RotateCcw,
 } from 'lucide-react'
 
 type ViewMode = 'month' | 'week' | 'day'
 
 export function CalendarPage() {
   const { session, signInWithGoogle } = useAuth()
+  const { executeWithRetry } = useGoogleApi()
   const [events, setEvents] = useState<ParsedCalendarEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -30,6 +33,7 @@ export function CalendarPage() {
   const [_viewMode, _setViewMode] = useState<ViewMode>('month') // Reserved for future view switching
   const [selectedEvent, setSelectedEvent] = useState<ParsedCalendarEvent | null>(null)
   const [showCreate, setShowCreate] = useState(false)
+  const [lastFailedAction, setLastFailedAction] = useState<(() => Promise<void>) | null>(null)
 
   // Create event state
   const [newTitle, setNewTitle] = useState('')
@@ -38,6 +42,27 @@ export function CalendarPage() {
   const [newEndTime, setNewEndTime] = useState('10:00')
   const [newDescription, setNewDescription] = useState('')
   const [creating, setCreating] = useState(false)
+
+  const fetchEvents = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    setLastFailedAction(null)
+    try {
+      const start = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+      const end = new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 0)
+
+      const fetchedEvents = await executeWithRetry(() =>
+        CalendarService.getEventsForDateRange(start, end)
+      )
+      setEvents(fetchedEvents)
+    } catch (err) {
+      console.error('Failed to fetch events:', err)
+      setError(err instanceof Error ? err.message : 'Failed to fetch events')
+      setLastFailedAction(() => fetchEvents)
+    } finally {
+      setLoading(false)
+    }
+  }, [currentDate, executeWithRetry])
 
   useEffect(() => {
     if (session === undefined) return // Still loading auth state
@@ -52,23 +77,6 @@ export function CalendarPage() {
     }
   }, [session])
 
-  async function fetchEvents() {
-    setLoading(true)
-    setError(null)
-    try {
-      const start = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
-      const end = new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 0)
-
-      const fetchedEvents = await CalendarService.getEventsForDateRange(start, end)
-      setEvents(fetchedEvents)
-    } catch (err) {
-      console.error('Failed to fetch events:', err)
-      setError(err instanceof Error ? err.message : 'Failed to fetch events')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   useEffect(() => {
     if (hasGoogleAuth) {
       fetchEvents()
@@ -80,16 +88,20 @@ export function CalendarPage() {
     if (!newTitle || !newDate) return
 
     setCreating(true)
+    setError(null)
+    setLastFailedAction(null)
     try {
       const startDate = new Date(`${newDate}T${newStartTime}`)
       const endDate = new Date(`${newDate}T${newEndTime}`)
 
-      await CalendarService.createEvent({
-        title: newTitle,
-        description: newDescription,
-        start: startDate,
-        end: endDate,
-      })
+      await executeWithRetry(() =>
+        CalendarService.createEvent({
+          title: newTitle,
+          description: newDescription,
+          start: startDate,
+          end: endDate,
+        })
+      )
 
       setShowCreate(false)
       setNewTitle('')
@@ -101,8 +113,15 @@ export function CalendarPage() {
     } catch (err) {
       console.error('Failed to create event:', err)
       setError(err instanceof Error ? err.message : 'Failed to create event')
+      setLastFailedAction(() => () => handleCreateEvent(e))
     } finally {
       setCreating(false)
+    }
+  }
+
+  async function handleRetry() {
+    if (lastFailedAction) {
+      await lastFailedAction()
     }
   }
 
@@ -204,8 +223,14 @@ export function CalendarPage() {
       </div>
 
       {error && (
-        <div className="p-3 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-sm">
-          {error}
+        <div className="p-3 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-sm flex items-center justify-between">
+          <span>{error}</span>
+          {lastFailedAction && (
+            <Button variant="ghost" size="sm" onClick={handleRetry} className="ml-2 text-destructive hover:text-destructive">
+              <RotateCcw className="w-4 h-4 mr-1" />
+              Retry
+            </Button>
+          )}
         </div>
       )}
 

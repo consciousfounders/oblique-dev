@@ -35,6 +35,10 @@ export function GoogleApiProvider({ children }: { children: ReactNode }) {
   const [isReauthenticating, setIsReauthenticating] = useState(false)
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([])
 
+  // Track if we've shown a recent refresh notification to avoid spamming
+  const [lastRefreshNotification, setLastRefreshNotification] = useState<number>(0)
+  const REFRESH_NOTIFICATION_COOLDOWN = 30000 // 30 seconds between notifications
+
   // Set up token error callback
   useEffect(() => {
     const handleTokenError = (error: TokenError) => {
@@ -50,10 +54,16 @@ export function GoogleApiProvider({ children }: { children: ReactNode }) {
     }
 
     const handleTokenRefresh = () => {
-      toast.success('Session refreshed', {
-        description: 'Your authentication has been automatically refreshed.',
-        duration: 3000,
-      })
+      const now = Date.now()
+      // Only show notification if enough time has passed since last one
+      // This prevents spam during proactive background refreshes
+      if (now - lastRefreshNotification > REFRESH_NOTIFICATION_COOLDOWN) {
+        setLastRefreshNotification(now)
+        toast.success('Session refreshed', {
+          description: 'Your authentication has been automatically refreshed.',
+          duration: 3000,
+        })
+      }
     }
 
     GoogleTokenService.setTokenErrorCallback(handleTokenError)
@@ -63,7 +73,7 @@ export function GoogleApiProvider({ children }: { children: ReactNode }) {
       GoogleTokenService.setTokenErrorCallback(null)
       GoogleTokenService.setTokenRefreshCallback(null)
     }
-  }, [])
+  }, [lastRefreshNotification])
 
   // Initialize token service when session changes
   useEffect(() => {
