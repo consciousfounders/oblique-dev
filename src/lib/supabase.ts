@@ -1087,6 +1087,106 @@ export type Database = {
           updated_at?: string
         }
       }
+      notifications: {
+        Row: {
+          id: string
+          tenant_id: string
+          user_id: string
+          title: string
+          message: string
+          notification_type: NotificationType
+          category: NotificationCategory
+          entity_type: string | null
+          entity_id: string | null
+          action_url: string | null
+          metadata: Record<string, unknown> | null
+          read_at: string | null
+          actioned_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          user_id: string
+          title: string
+          message: string
+          notification_type: NotificationType
+          category: NotificationCategory
+          entity_type?: string | null
+          entity_id?: string | null
+          action_url?: string | null
+          metadata?: Record<string, unknown> | null
+          read_at?: string | null
+          actioned_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          user_id?: string
+          title?: string
+          message?: string
+          notification_type?: NotificationType
+          category?: NotificationCategory
+          entity_type?: string | null
+          entity_id?: string | null
+          action_url?: string | null
+          metadata?: Record<string, unknown> | null
+          read_at?: string | null
+          actioned_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      notification_preferences: {
+        Row: {
+          id: string
+          tenant_id: string
+          user_id: string
+          email_enabled: boolean
+          in_app_enabled: boolean
+          browser_push_enabled: boolean
+          quiet_hours_enabled: boolean
+          quiet_hours_start: string | null
+          quiet_hours_end: string | null
+          digest_mode: 'immediate' | 'hourly' | 'daily'
+          category_preferences: Record<string, boolean> | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          user_id: string
+          email_enabled?: boolean
+          in_app_enabled?: boolean
+          browser_push_enabled?: boolean
+          quiet_hours_enabled?: boolean
+          quiet_hours_start?: string | null
+          quiet_hours_end?: string | null
+          digest_mode?: 'immediate' | 'hourly' | 'daily'
+          category_preferences?: Record<string, boolean> | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          user_id?: string
+          email_enabled?: boolean
+          in_app_enabled?: boolean
+          browser_push_enabled?: boolean
+          quiet_hours_enabled?: boolean
+          quiet_hours_start?: string | null
+          quiet_hours_end?: string | null
+          digest_mode?: 'immediate' | 'hourly' | 'daily'
+          category_preferences?: Record<string, boolean> | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }
@@ -1147,3 +1247,25 @@ export type LinkedInSavedLeadUpdate = Database['public']['Tables']['linkedin_sav
 export type LinkedInIntegrationSettings = Database['public']['Tables']['linkedin_integration_settings']['Row']
 export type LinkedInIntegrationSettingsInsert = Database['public']['Tables']['linkedin_integration_settings']['Insert']
 export type LinkedInIntegrationSettingsUpdate = Database['public']['Tables']['linkedin_integration_settings']['Update']
+
+// Notification types
+export type NotificationType = 'system' | 'mention' | 'activity' | 'reminder' | 'alert'
+
+export type NotificationCategory =
+  | 'task_due'
+  | 'task_overdue'
+  | 'deal_stage_change'
+  | 'lead_assigned'
+  | 'mention_in_note'
+  | 'email_reply'
+  | 'meeting_reminder'
+  | 'quota_alert'
+  | 'system'
+
+export type Notification = Database['public']['Tables']['notifications']['Row']
+export type NotificationInsert = Database['public']['Tables']['notifications']['Insert']
+export type NotificationUpdate = Database['public']['Tables']['notifications']['Update']
+
+export type NotificationPreferences = Database['public']['Tables']['notification_preferences']['Row']
+export type NotificationPreferencesInsert = Database['public']['Tables']['notification_preferences']['Insert']
+export type NotificationPreferencesUpdate = Database['public']['Tables']['notification_preferences']['Update']

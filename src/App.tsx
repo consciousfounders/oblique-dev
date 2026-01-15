@@ -25,6 +25,7 @@ const DrivePage = lazy(() => import('@/pages/drive/Drive').then(m => ({ default:
 const BookingPage = lazy(() => import('@/pages/booking/Booking').then(m => ({ default: m.BookingPage })))
 const SuperAdminPage = lazy(() => import('@/pages/super-admin/SuperAdmin').then(m => ({ default: m.SuperAdminPage })))
 const SettingsPage = lazy(() => import('@/pages/settings/Settings').then(m => ({ default: m.SettingsPage })))
+const NotificationSettingsPage = lazy(() => import('@/pages/settings/NotificationSettings').then(m => ({ default: m.NotificationSettingsPage })))
 const DeveloperPage = lazy(() => import('@/pages/developer/Developer').then(m => ({ default: m.DeveloperPage })))
 const ActivityPage = lazy(() => import('@/pages/activity/Activity').then(m => ({ default: m.ActivityPage })))
 const LinkedInPage = lazy(() => import('@/pages/linkedin/LinkedIn').then(m => ({ default: m.LinkedInPage })))
@@ -67,6 +68,7 @@ function App() {
             <Route path="/drive" element={<Suspense fallback={<PageLoader />}><DrivePage /></Suspense>} />
             <Route path="/booking" element={<Suspense fallback={<PageLoader />}><BookingPage /></Suspense>} />
             <Route path="/settings" element={<Suspense fallback={<PageLoader />}><SettingsPage /></Suspense>} />
+            <Route path="/settings/notifications" element={<Suspense fallback={<PageLoader />}><NotificationSettingsPage /></Suspense>} />
             <Route path="/developer" element={<Suspense fallback={<PageLoader />}><DeveloperPage /></Suspense>} />
             <Route path="/super-admin" element={<Suspense fallback={<PageLoader />}><SuperAdminPage /></Suspense>} />
             <Route path="/activity" element={<Suspense fallback={<PageLoader />}><ActivityPage /></Suspense>} />

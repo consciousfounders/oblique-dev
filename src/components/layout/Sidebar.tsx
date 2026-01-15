@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { NotificationBell } from '@/components/notifications/NotificationBell'
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -44,9 +45,10 @@ export function Sidebar() {
 
   const sidebarContent = (
     <div className="flex flex-col h-full">
-      {/* Logo */}
-      <div className="p-4 border-b border-sidebar-border">
+      {/* Logo and Notifications */}
+      <div className="p-4 border-b border-sidebar-border flex items-center justify-between">
         <h1 className="text-xl font-bold text-sidebar-foreground">CRM</h1>
+        <NotificationBell />
       </div>
 
       {/* Navigation */}
