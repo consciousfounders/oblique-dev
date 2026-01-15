@@ -30,19 +30,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      if (session?.user) {
-        fetchUserProfile(session.user)
-      } else {
-        setLoading(false)
-      }
-    })
+    let mounted = true
+
+    // Get initial session with error handling
+    supabase.auth.getSession()
+      .then(({ data: { session }, error }) => {
+        if (!mounted) return
+        if (error) {
+          console.error('Error getting session:', error)
+          setLoading(false)
+          return
+        }
+        setSession(session)
+        if (session?.user) {
+          fetchUserProfile(session.user)
+        } else {
+          setLoading(false)
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to get session:', err)
+        if (mounted) setLoading(false)
+      })
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        if (!mounted) return
         setSession(session)
         if (session?.user) {
           await fetchUserProfile(session.user)
@@ -53,17 +67,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     )
 
-    return () => subscription.unsubscribe()
+    // Safety timeout - never spin forever
+    const timeout = setTimeout(() => {
+      if (mounted) {
+        console.warn('Auth loading timeout - forcing load complete')
+        setLoading(false)
+      }
+    }, 10000)
+
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+      clearTimeout(timeout)
+    }
   }, [])
 
   async function fetchUserProfile(authUser: User) {
     try {
-      // Check if super admin
+      // Check if super admin (use maybeSingle to avoid error on 0 rows)
       const { data: superAdmin } = await supabase
         .from('super_admins')
         .select('id')
         .eq('email', authUser.email)
-        .single()
+        .maybeSingle()
 
       if (superAdmin) {
         setUser({
@@ -78,12 +104,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return
       }
 
-      // Get regular user profile
+      // Get regular user profile (use maybeSingle to handle new users)
       const { data: profile } = await supabase
         .from('users')
         .select('tenant_id, full_name, role')
         .eq('id', authUser.id)
-        .single()
+        .maybeSingle()
 
       setUser({
         id: authUser.id,
