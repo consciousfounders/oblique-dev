@@ -21,6 +21,7 @@ import {
   Book,
   Code,
   Layers,
+  Terminal,
 } from 'lucide-react'
 
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE'
@@ -302,6 +303,347 @@ export function ApiDocs() {
                         <span className="text-muted-foreground text-xs">{description}</span>
                       </div>
                     ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* SDK Code Examples */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Terminal className="w-5 h-5" />
+                    SDK & Code Examples
+                  </CardTitle>
+                  <CardDescription>
+                    Ready-to-use code snippets for integrating with the Oblique CRM API
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* JavaScript/TypeScript SDK */}
+                  <div className="space-y-3">
+                    <h4 className="font-medium flex items-center gap-2">
+                      <span className="px-2 py-0.5 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded text-xs font-mono">JS</span>
+                      JavaScript / TypeScript
+                    </h4>
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">Initialize the client:</p>
+                      <pre className="p-3 bg-muted rounded-md text-xs overflow-x-auto">
+                        <code>{`// oblique-sdk.ts
+class ObliqueCRM {
+  private apiKey: string;
+  private baseUrl: string;
+
+  constructor(apiKey: string, baseUrl = '${baseUrl}/api/v1') {
+    this.apiKey = apiKey;
+    this.baseUrl = baseUrl;
+  }
+
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> {
+    const response = await fetch(\`\${this.baseUrl}\${endpoint}\`, {
+      ...options,
+      headers: {
+        'Authorization': \`Bearer \${this.apiKey}\`,
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error?.message || 'API request failed');
+    }
+
+    return response.json();
+  }
+
+  // Accounts
+  async listAccounts(params?: { page?: number; limit?: number }) {
+    const query = new URLSearchParams(params as Record<string, string>);
+    return this.request(\`/accounts?\${query}\`);
+  }
+
+  async getAccount(id: string) {
+    return this.request(\`/accounts/\${id}\`);
+  }
+
+  async createAccount(data: { name: string; domain?: string; industry?: string }) {
+    return this.request('/accounts', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateAccount(id: string, data: Partial<{ name: string; domain: string }>) {
+    return this.request(\`/accounts/\${id}\`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteAccount(id: string) {
+    return this.request(\`/accounts/\${id}\`, { method: 'DELETE' });
+  }
+
+  // Similar methods for contacts, leads, deals...
+}
+
+// Usage
+const crm = new ObliqueCRM('obl_your_api_key_here');
+
+// List accounts with pagination
+const accounts = await crm.listAccounts({ page: 1, limit: 50 });
+
+// Create a new account
+const newAccount = await crm.createAccount({
+  name: 'Acme Corp',
+  domain: 'acme.com',
+  industry: 'Technology'
+});`}</code>
+                      </pre>
+                    </div>
+                  </div>
+
+                  {/* Python SDK */}
+                  <div className="space-y-3">
+                    <h4 className="font-medium flex items-center gap-2">
+                      <span className="px-2 py-0.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded text-xs font-mono">PY</span>
+                      Python
+                    </h4>
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">Python SDK implementation:</p>
+                      <pre className="p-3 bg-muted rounded-md text-xs overflow-x-auto">
+                        <code>{`# oblique_sdk.py
+import requests
+from typing import Optional, Dict, Any, List
+
+class ObliqueCRM:
+    def __init__(self, api_key: str, base_url: str = '${baseUrl}/api/v1'):
+        self.api_key = api_key
+        self.base_url = base_url
+        self.session = requests.Session()
+        self.session.headers.update({
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json'
+        })
+
+    def _request(self, method: str, endpoint: str, **kwargs) -> Dict[str, Any]:
+        response = self.session.request(
+            method,
+            f'{self.base_url}{endpoint}',
+            **kwargs
+        )
+        response.raise_for_status()
+        return response.json()
+
+    # Accounts
+    def list_accounts(
+        self,
+        page: int = 1,
+        limit: int = 50,
+        sort_by: Optional[str] = None,
+        sort_order: str = 'asc'
+    ) -> Dict[str, Any]:
+        params = {'page': page, 'limit': limit}
+        if sort_by:
+            params['sort_by'] = sort_by
+            params['sort_order'] = sort_order
+        return self._request('GET', '/accounts', params=params)
+
+    def get_account(self, account_id: str, expand: Optional[List[str]] = None) -> Dict[str, Any]:
+        params = {}
+        if expand:
+            params['expand'] = ','.join(expand)
+        return self._request('GET', f'/accounts/{account_id}', params=params)
+
+    def create_account(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        return self._request('POST', '/accounts', json=data)
+
+    def update_account(self, account_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
+        return self._request('PATCH', f'/accounts/{account_id}', json=data)
+
+    def delete_account(self, account_id: str) -> Dict[str, Any]:
+        return self._request('DELETE', f'/accounts/{account_id}')
+
+    # Bulk operations
+    def bulk_create_contacts(self, records: List[Dict[str, Any]]) -> Dict[str, Any]:
+        return self._request('POST', '/contacts/bulk', json={'records': records})
+
+    # Search
+    def search_contacts(self, query: str, page: int = 1, limit: int = 50) -> Dict[str, Any]:
+        return self._request('GET', '/contacts/search', params={
+            'q': query, 'page': page, 'limit': limit
+        })
+
+
+# Usage
+crm = ObliqueCRM('obl_your_api_key_here')
+
+# List accounts
+accounts = crm.list_accounts(page=1, limit=25)
+print(f"Found {accounts['meta']['total']} accounts")
+
+# Create a contact
+contact = crm.create_account({
+    'name': 'Acme Corporation',
+    'domain': 'acme.com',
+    'industry': 'Technology'
+})
+
+# Get account with expanded relationships
+account = crm.get_account(contact['data']['id'], expand=['contacts', 'deals'])`}</code>
+                      </pre>
+                    </div>
+                  </div>
+
+                  {/* Webhook Handler Example */}
+                  <div className="space-y-3">
+                    <h4 className="font-medium">Webhook Handler Examples</h4>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">Express.js (Node.js):</p>
+                        <pre className="p-3 bg-muted rounded-md text-xs overflow-x-auto">
+                          <code>{`const crypto = require('crypto');
+const express = require('express');
+const app = express();
+
+app.use(express.raw({ type: 'application/json' }));
+
+const WEBHOOK_SECRET = 'whsec_your_secret';
+
+app.post('/webhooks/oblique', (req, res) => {
+  const signature = req.headers['x-webhook-signature'];
+  const payload = req.body;
+
+  // Verify signature
+  const hmac = crypto.createHmac('sha256', WEBHOOK_SECRET);
+  hmac.update(payload);
+  const expected = 'sha256=' + hmac.digest('hex');
+
+  if (!crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expected)
+  )) {
+    return res.status(401).json({ error: 'Invalid signature' });
+  }
+
+  const event = JSON.parse(payload);
+
+  switch (event.event) {
+    case 'deal.won':
+      console.log('Deal won:', event.data);
+      // Handle won deal...
+      break;
+    case 'contact.created':
+      console.log('New contact:', event.data);
+      // Handle new contact...
+      break;
+  }
+
+  res.json({ received: true });
+});`}</code>
+                        </pre>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">Flask (Python):</p>
+                        <pre className="p-3 bg-muted rounded-md text-xs overflow-x-auto">
+                          <code>{`import hmac
+import hashlib
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+WEBHOOK_SECRET = 'whsec_your_secret'
+
+def verify_signature(payload, signature):
+    expected = 'sha256=' + hmac.new(
+        WEBHOOK_SECRET.encode(),
+        payload,
+        hashlib.sha256
+    ).hexdigest()
+    return hmac.compare_digest(signature, expected)
+
+@app.route('/webhooks/oblique', methods=['POST'])
+def handle_webhook():
+    signature = request.headers.get('X-Webhook-Signature')
+    payload = request.get_data()
+
+    if not verify_signature(payload, signature):
+        return jsonify({'error': 'Invalid signature'}), 401
+
+    event = request.get_json()
+
+    if event['event'] == 'deal.won':
+        print(f"Deal won: {event['data']}")
+        # Handle won deal...
+    elif event['event'] == 'contact.created':
+        print(f"New contact: {event['data']}")
+        # Handle new contact...
+
+    return jsonify({'received': True})`}</code>
+                        </pre>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* OAuth Flow Example */}
+                  <div className="space-y-3">
+                    <h4 className="font-medium">OAuth 2.0 Integration Example</h4>
+                    <pre className="p-3 bg-muted rounded-md text-xs overflow-x-auto">
+                      <code>{`// OAuth 2.0 Authorization Code Flow - React Example
+
+// Step 1: Redirect user to authorization
+function startOAuthFlow() {
+  const params = new URLSearchParams({
+    client_id: 'your_client_id',
+    redirect_uri: 'https://yourapp.com/callback',
+    response_type: 'code',
+    scope: 'accounts:read contacts:read deals:write',
+    state: crypto.randomUUID(), // Store this to verify later
+  });
+
+  window.location.href = \`${baseUrl}/oauth/authorize?\${params}\`;
+}
+
+// Step 2: Handle callback and exchange code for tokens
+async function handleOAuthCallback(code: string, state: string) {
+  // Verify state matches what you stored
+
+  const response = await fetch('${baseUrl}/oauth/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      grant_type: 'authorization_code',
+      client_id: 'your_client_id',
+      client_secret: 'your_client_secret',
+      code: code,
+      redirect_uri: 'https://yourapp.com/callback',
+    }),
+  });
+
+  const tokens = await response.json();
+  // tokens = { access_token, refresh_token, expires_in, token_type }
+
+  // Store tokens securely and use access_token for API requests
+}
+
+// Step 3: Refresh expired tokens
+async function refreshAccessToken(refreshToken: string) {
+  const response = await fetch('${baseUrl}/oauth/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      grant_type: 'refresh_token',
+      client_id: 'your_client_id',
+      client_secret: 'your_client_secret',
+      refresh_token: refreshToken,
+    }),
+  });
+
+  return response.json();
+}`}</code>
+                    </pre>
                   </div>
                 </CardContent>
               </Card>
