@@ -18,6 +18,7 @@ import {
   Clock,
   Code,
   Activity,
+  Linkedin,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -33,6 +34,7 @@ const navItems = [
   { href: '/calendar', label: 'Calendar', icon: Calendar },
   { href: '/drive', label: 'Drive', icon: HardDrive },
   { href: '/booking', label: 'Booking', icon: Clock },
+  { href: '/linkedin', label: 'LinkedIn', icon: Linkedin },
 ]
 
 export function Sidebar() {

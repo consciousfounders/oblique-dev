@@ -789,9 +789,325 @@ export type Database = {
           updated_at?: string
         }
       }
+      linkedin_profiles: {
+        Row: {
+          id: string
+          tenant_id: string
+          contact_id: string | null
+          lead_id: string | null
+          linkedin_id: string | null
+          linkedin_url: string | null
+          public_identifier: string | null
+          headline: string | null
+          summary: string | null
+          location: string | null
+          industry: string | null
+          profile_picture_url: string | null
+          current_company: string | null
+          current_title: string | null
+          connection_status: 'not_connected' | 'pending' | 'connected' | 'following'
+          connection_degree: number | null
+          mutual_connections: number
+          last_synced_at: string | null
+          raw_data: Record<string, unknown> | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          contact_id?: string | null
+          lead_id?: string | null
+          linkedin_id?: string | null
+          linkedin_url?: string | null
+          public_identifier?: string | null
+          headline?: string | null
+          summary?: string | null
+          location?: string | null
+          industry?: string | null
+          profile_picture_url?: string | null
+          current_company?: string | null
+          current_title?: string | null
+          connection_status?: 'not_connected' | 'pending' | 'connected' | 'following'
+          connection_degree?: number | null
+          mutual_connections?: number
+          last_synced_at?: string | null
+          raw_data?: Record<string, unknown> | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          contact_id?: string | null
+          lead_id?: string | null
+          linkedin_id?: string | null
+          linkedin_url?: string | null
+          public_identifier?: string | null
+          headline?: string | null
+          summary?: string | null
+          location?: string | null
+          industry?: string | null
+          profile_picture_url?: string | null
+          current_company?: string | null
+          current_title?: string | null
+          connection_status?: 'not_connected' | 'pending' | 'connected' | 'following'
+          connection_degree?: number | null
+          mutual_connections?: number
+          last_synced_at?: string | null
+          raw_data?: Record<string, unknown> | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      linkedin_activities: {
+        Row: {
+          id: string
+          tenant_id: string
+          user_id: string | null
+          linkedin_profile_id: string
+          activity_type: LinkedInActivityType
+          subject: string | null
+          description: string | null
+          inmail_id: string | null
+          inmail_subject: string | null
+          inmail_body: string | null
+          responded_at: string | null
+          response_content: string | null
+          metadata: Record<string, unknown> | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          user_id?: string | null
+          linkedin_profile_id: string
+          activity_type: LinkedInActivityType
+          subject?: string | null
+          description?: string | null
+          inmail_id?: string | null
+          inmail_subject?: string | null
+          inmail_body?: string | null
+          responded_at?: string | null
+          response_content?: string | null
+          metadata?: Record<string, unknown> | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          user_id?: string | null
+          linkedin_profile_id?: string
+          activity_type?: LinkedInActivityType
+          subject?: string | null
+          description?: string | null
+          inmail_id?: string | null
+          inmail_subject?: string | null
+          inmail_body?: string | null
+          responded_at?: string | null
+          response_content?: string | null
+          metadata?: Record<string, unknown> | null
+          created_at?: string
+        }
+      }
+      linkedin_inmail_templates: {
+        Row: {
+          id: string
+          tenant_id: string
+          user_id: string
+          name: string
+          subject: string
+          body: string
+          use_count: number
+          last_used_at: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          user_id: string
+          name: string
+          subject: string
+          body: string
+          use_count?: number
+          last_used_at?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          user_id?: string
+          name?: string
+          subject?: string
+          body?: string
+          use_count?: number
+          last_used_at?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      linkedin_saved_leads: {
+        Row: {
+          id: string
+          tenant_id: string
+          user_id: string | null
+          sales_nav_lead_id: string | null
+          linkedin_url: string | null
+          first_name: string
+          last_name: string | null
+          headline: string | null
+          location: string | null
+          profile_picture_url: string | null
+          company_name: string | null
+          company_linkedin_url: string | null
+          company_industry: string | null
+          company_size: string | null
+          lead_score: number | null
+          recommendation_reason: string | null
+          imported_to_lead_id: string | null
+          imported_to_contact_id: string | null
+          imported_at: string | null
+          list_name: string | null
+          list_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          user_id?: string | null
+          sales_nav_lead_id?: string | null
+          linkedin_url?: string | null
+          first_name: string
+          last_name?: string | null
+          headline?: string | null
+          location?: string | null
+          profile_picture_url?: string | null
+          company_name?: string | null
+          company_linkedin_url?: string | null
+          company_industry?: string | null
+          company_size?: string | null
+          lead_score?: number | null
+          recommendation_reason?: string | null
+          imported_to_lead_id?: string | null
+          imported_to_contact_id?: string | null
+          imported_at?: string | null
+          list_name?: string | null
+          list_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          user_id?: string | null
+          sales_nav_lead_id?: string | null
+          linkedin_url?: string | null
+          first_name?: string
+          last_name?: string | null
+          headline?: string | null
+          location?: string | null
+          profile_picture_url?: string | null
+          company_name?: string | null
+          company_linkedin_url?: string | null
+          company_industry?: string | null
+          company_size?: string | null
+          lead_score?: number | null
+          recommendation_reason?: string | null
+          imported_to_lead_id?: string | null
+          imported_to_contact_id?: string | null
+          imported_at?: string | null
+          list_name?: string | null
+          list_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      linkedin_integration_settings: {
+        Row: {
+          id: string
+          tenant_id: string
+          integration_method: 'api' | 'extension' | 'manual'
+          api_key_encrypted: string | null
+          api_secret_encrypted: string | null
+          access_token_encrypted: string | null
+          refresh_token_encrypted: string | null
+          token_expires_at: string | null
+          rocketreach_api_key_encrypted: string | null
+          auto_sync_enabled: boolean
+          sync_interval_hours: number
+          auto_log_activities: boolean
+          last_sync_at: string | null
+          last_sync_status: string | null
+          last_sync_error: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          integration_method?: 'api' | 'extension' | 'manual'
+          api_key_encrypted?: string | null
+          api_secret_encrypted?: string | null
+          access_token_encrypted?: string | null
+          refresh_token_encrypted?: string | null
+          token_expires_at?: string | null
+          rocketreach_api_key_encrypted?: string | null
+          auto_sync_enabled?: boolean
+          sync_interval_hours?: number
+          auto_log_activities?: boolean
+          last_sync_at?: string | null
+          last_sync_status?: string | null
+          last_sync_error?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          integration_method?: 'api' | 'extension' | 'manual'
+          api_key_encrypted?: string | null
+          api_secret_encrypted?: string | null
+          access_token_encrypted?: string | null
+          refresh_token_encrypted?: string | null
+          token_expires_at?: string | null
+          rocketreach_api_key_encrypted?: string | null
+          auto_sync_enabled?: boolean
+          sync_interval_hours?: number
+          auto_log_activities?: boolean
+          last_sync_at?: string | null
+          last_sync_status?: string | null
+          last_sync_error?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }
+
+// LinkedIn activity types
+export type LinkedInActivityType =
+  | 'connection_request_sent'
+  | 'connection_request_accepted'
+  | 'connection_request_declined'
+  | 'inmail_sent'
+  | 'inmail_opened'
+  | 'inmail_replied'
+  | 'profile_viewed'
+  | 'post_liked'
+  | 'post_commented'
+  | 'post_shared'
+  | 'message_sent'
+  | 'message_received'
+
+// LinkedIn profile status types
+export type LinkedInProfileStatus = 'not_connected' | 'pending' | 'connected' | 'following'
 
 // Helper types for Notes and Attachments
 export type EntityType = 'contact' | 'account' | 'deal' | 'lead'
@@ -811,3 +1127,23 @@ export type AttachmentInsert = Database['public']['Tables']['attachments']['Inse
 export type AttachmentUpdate = Database['public']['Tables']['attachments']['Update']
 
 export type StorageQuota = Database['public']['Tables']['storage_quotas']['Row']
+
+// LinkedIn types
+export type LinkedInProfile = Database['public']['Tables']['linkedin_profiles']['Row']
+export type LinkedInProfileInsert = Database['public']['Tables']['linkedin_profiles']['Insert']
+export type LinkedInProfileUpdate = Database['public']['Tables']['linkedin_profiles']['Update']
+
+export type LinkedInActivity = Database['public']['Tables']['linkedin_activities']['Row']
+export type LinkedInActivityInsert = Database['public']['Tables']['linkedin_activities']['Insert']
+
+export type LinkedInInMailTemplate = Database['public']['Tables']['linkedin_inmail_templates']['Row']
+export type LinkedInInMailTemplateInsert = Database['public']['Tables']['linkedin_inmail_templates']['Insert']
+export type LinkedInInMailTemplateUpdate = Database['public']['Tables']['linkedin_inmail_templates']['Update']
+
+export type LinkedInSavedLead = Database['public']['Tables']['linkedin_saved_leads']['Row']
+export type LinkedInSavedLeadInsert = Database['public']['Tables']['linkedin_saved_leads']['Insert']
+export type LinkedInSavedLeadUpdate = Database['public']['Tables']['linkedin_saved_leads']['Update']
+
+export type LinkedInIntegrationSettings = Database['public']['Tables']['linkedin_integration_settings']['Row']
+export type LinkedInIntegrationSettingsInsert = Database['public']['Tables']['linkedin_integration_settings']['Insert']
+export type LinkedInIntegrationSettingsUpdate = Database['public']['Tables']['linkedin_integration_settings']['Update']

@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useLinkedInProfile } from '@/lib/hooks/useLinkedIn'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ActivityTimeline, ActivityForm } from '@/components/activity'
 import { NotesPanel } from '@/components/notes'
 import { AttachmentsPanel } from '@/components/attachments'
+import { LinkedInProfilePanel, InMailDialog } from '@/components/linkedin'
 import { ArrowLeft, Phone, Mail, Building2, Briefcase, Tag } from 'lucide-react'
 
 interface Lead {
@@ -39,6 +41,13 @@ export function LeadDetailPage() {
   const { user } = useAuth()
   const [lead, setLead] = useState<Lead | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showInMailDialog, setShowInMailDialog] = useState(false)
+
+  // LinkedIn profile hook
+  const { profile: linkedInProfile } = useLinkedInProfile({
+    entityType: 'lead',
+    entityId: id || '',
+  })
 
   useEffect(() => {
     if (id && user?.tenantId) {
@@ -192,6 +201,15 @@ export function LeadDetailPage() {
         </div>
 
         <div className="space-y-6">
+          <LinkedInProfilePanel
+            entityType="lead"
+            entityId={lead.id}
+            contactName={`${lead.first_name} ${lead.last_name || ''}`.trim()}
+            contactEmail={lead.email || undefined}
+            contactCompany={lead.company || undefined}
+            contactTitle={lead.title || undefined}
+            onSendInMail={linkedInProfile ? () => setShowInMailDialog(true) : undefined}
+          />
           <ActivityForm entityType="lead" entityId={lead.id} />
           <ActivityTimeline
             entityType="lead"
@@ -201,6 +219,17 @@ export function LeadDetailPage() {
           />
         </div>
       </div>
+
+      {/* InMail Dialog */}
+      {linkedInProfile && (
+        <InMailDialog
+          open={showInMailDialog}
+          onOpenChange={setShowInMailDialog}
+          linkedinProfile={linkedInProfile}
+          contactName={`${lead.first_name} ${lead.last_name || ''}`.trim()}
+          contactCompany={lead.company || undefined}
+        />
+      )}
     </div>
   )
 }

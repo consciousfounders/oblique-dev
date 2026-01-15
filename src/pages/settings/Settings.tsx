@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useTheme } from '@/lib/hooks/useTheme'
+import { useLinkedInSettings } from '@/lib/hooks/useLinkedIn'
 import { supabase } from '@/lib/supabase'
 import { GoogleTokenService } from '@/lib/services/googleTokenService'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Sun, Moon, Monitor, Eye, EyeOff, Mail, Calendar, HardDrive, Check, X, RefreshCw } from 'lucide-react'
+import { Sun, Moon, Monitor, Eye, EyeOff, Mail, Calendar, HardDrive, Check, X, RefreshCw, Linkedin, Settings } from 'lucide-react'
 
 export function SettingsPage() {
   const { user, session, signOut, signInWithGoogle } = useAuth()
@@ -32,6 +34,9 @@ export function SettingsPage() {
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // LinkedIn integration
+  const { settings: linkedInSettings } = useLinkedInSettings()
 
   // Check Google connection status
   useEffect(() => {
@@ -291,6 +296,64 @@ export function SettingsPage() {
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm">
                   <HardDrive className="w-3.5 h-3.5" />
                   Drive
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* LinkedIn Sales Navigator */}
+          <div className="flex items-center justify-between p-4 rounded-lg border">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#0A66C2]">
+                <Linkedin className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="font-medium">LinkedIn Sales Navigator</p>
+                <p className="text-sm text-muted-foreground">
+                  {linkedInSettings ? 'Configured' : 'Not configured'}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {linkedInSettings ? (
+                <>
+                  <div className="flex items-center gap-1 px-2 py-1 rounded bg-green-500/10 text-green-600 dark:text-green-400">
+                    <Check className="w-3 h-3" />
+                    <span className="text-xs">Active</span>
+                  </div>
+                  <Link to="/linkedin">
+                    <Button variant="outline" size="sm">
+                      <Settings className="w-3 h-3 mr-1" />
+                      Configure
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <Link to="/linkedin">
+                  <Button>
+                    Set Up LinkedIn
+                  </Button>
+                </Link>
+              )}
+            </div>
+          </div>
+
+          {/* LinkedIn enabled features */}
+          {linkedInSettings && (
+            <div className="pl-4 border-l-2 border-muted space-y-2">
+              <p className="text-sm text-muted-foreground mb-3">Enabled features:</p>
+              <div className="flex flex-wrap gap-2">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm">
+                  Profile Lookup
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm">
+                  InMail
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm">
+                  Activity Tracking
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm">
+                  Saved Leads
                 </div>
               </div>
             </div>
