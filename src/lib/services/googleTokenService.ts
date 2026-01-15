@@ -17,14 +17,27 @@ export interface TokenError {
 type TokenErrorCallback = (error: TokenError) => void
 type TokenRefreshCallback = () => void
 
+type TokenStatusCallback = (status: TokenStatus) => void
+
+export interface TokenStatus {
+  isValid: boolean
+  expiresAt: number | null
+  expiresIn: number | null // milliseconds until expiration
+  isExpiringSoon: boolean
+  isRefreshing: boolean
+}
+
 export class GoogleTokenService {
   private static tokens: GoogleTokens | null = null
   private static refreshPromise: Promise<string> | null = null
   private static onTokenError: TokenErrorCallback | null = null
   private static onTokenRefresh: TokenRefreshCallback | null = null
+  private static onTokenStatus: TokenStatusCallback | null = null
   private static refreshAttempts = 0
   private static readonly MAX_REFRESH_ATTEMPTS = 3
   private static readonly REFRESH_RETRY_DELAY = 1000
+  private static readonly TOKEN_EXPIRY_BUFFER = 300000 // 5 minutes
+  private static readonly TOKEN_FRESH_BUFFER = 60000 // 1 minute
 
   static setTokenErrorCallback(callback: TokenErrorCallback | null) {
     this.onTokenError = callback
@@ -44,12 +57,36 @@ export class GoogleTokenService {
     if (this.onTokenRefresh) {
       this.onTokenRefresh()
     }
+    this.notifyStatus()
+  }
+
+  static setTokenStatusCallback(callback: TokenStatusCallback | null) {
+    this.onTokenStatus = callback
+  }
+
+  private static notifyStatus() {
+    if (this.onTokenStatus) {
+      this.onTokenStatus(this.getTokenStatus())
+    }
+  }
+
+  static getTokenStatus(): TokenStatus {
+    const now = Date.now()
+    const expiresAt = this.tokens?.expiresAt ?? null
+    const expiresIn = expiresAt ? expiresAt - now : null
+
+    return {
+      isValid: this.tokens !== null && expiresAt !== null && now < expiresAt,
+      expiresAt,
+      expiresIn,
+      isExpiringSoon: expiresIn !== null && expiresIn < this.TOKEN_EXPIRY_BUFFER,
+      isRefreshing: this.refreshPromise !== null,
+    }
   }
 
   static isTokenExpiringSoon(): boolean {
     if (!this.tokens) return true
-    // Token expires in less than 5 minutes
-    return Date.now() > this.tokens.expiresAt - 300000
+    return Date.now() > this.tokens.expiresAt - this.TOKEN_EXPIRY_BUFFER
   }
 
   static isTokenExpired(): boolean {
@@ -61,9 +98,14 @@ export class GoogleTokenService {
     return this.tokens?.expiresAt || null
   }
 
+  static getTimeUntilExpiry(): number | null {
+    if (!this.tokens?.expiresAt) return null
+    return Math.max(0, this.tokens.expiresAt - Date.now())
+  }
+
   static async getAccessToken(): Promise<string> {
-    // If we have a valid token (with 60 second buffer), return it
-    if (this.tokens && Date.now() < this.tokens.expiresAt - 60000) {
+    // If we have a valid token (with buffer), return it
+    if (this.tokens && Date.now() < this.tokens.expiresAt - this.TOKEN_FRESH_BUFFER) {
       return this.tokens.accessToken
     }
 
@@ -201,6 +243,7 @@ export class GoogleTokenService {
         expiresAt: Date.now() + 3600000,
       }
       this.refreshAttempts = 0
+      this.notifyStatus()
     }
   }
 
@@ -208,6 +251,7 @@ export class GoogleTokenService {
     this.tokens = null
     this.refreshPromise = null
     this.refreshAttempts = 0
+    this.notifyStatus()
   }
 
   static hasTokens(): boolean {
