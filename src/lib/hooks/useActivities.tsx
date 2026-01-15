@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/hooks/useAuth'
 
 export type Activity = Database['public']['Tables']['activities']['Row'] & {
   users?: { full_name: string | null } | null
+  entity_name?: string | null
 }
 
 export type ActivityType = 'email' | 'meeting' | 'call' | 'note' | 'deal_update' | 'task'
@@ -22,6 +23,7 @@ interface UseActivitiesOptions {
   entityId?: string
   activityTypes?: ActivityType[]
   pageSize?: number
+  includeEntityNames?: boolean
 }
 
 interface UseActivitiesReturn {
@@ -35,8 +37,57 @@ interface UseActivitiesReturn {
   refresh: () => Promise<void>
 }
 
+// Helper to fetch entity names for activities
+async function enrichActivitiesWithEntityNames(activities: Activity[]): Promise<Activity[]> {
+  if (activities.length === 0) return activities
+
+  // Group activities by entity type
+  const leadIds = activities.filter(a => a.entity_type === 'lead').map(a => a.entity_id)
+  const contactIds = activities.filter(a => a.entity_type === 'contact').map(a => a.entity_id)
+  const accountIds = activities.filter(a => a.entity_type === 'account').map(a => a.entity_id)
+  const dealIds = activities.filter(a => a.entity_type === 'deal').map(a => a.entity_id)
+
+  // Fetch entity names in parallel
+  const [leads, contacts, accounts, deals] = await Promise.all([
+    leadIds.length > 0
+      ? supabase.from('leads').select('id, first_name, last_name').in('id', leadIds)
+      : { data: [] },
+    contactIds.length > 0
+      ? supabase.from('contacts').select('id, first_name, last_name').in('id', contactIds)
+      : { data: [] },
+    accountIds.length > 0
+      ? supabase.from('accounts').select('id, name').in('id', accountIds)
+      : { data: [] },
+    dealIds.length > 0
+      ? supabase.from('deals').select('id, name').in('id', dealIds)
+      : { data: [] },
+  ])
+
+  // Create lookup maps
+  const entityNames: Record<string, string> = {}
+
+  leads.data?.forEach((l: { id: string; first_name: string; last_name: string | null }) => {
+    entityNames[l.id] = `${l.first_name}${l.last_name ? ' ' + l.last_name : ''}`
+  })
+  contacts.data?.forEach((c: { id: string; first_name: string; last_name: string | null }) => {
+    entityNames[c.id] = `${c.first_name}${c.last_name ? ' ' + c.last_name : ''}`
+  })
+  accounts.data?.forEach((a: { id: string; name: string }) => {
+    entityNames[a.id] = a.name
+  })
+  deals.data?.forEach((d: { id: string; name: string }) => {
+    entityNames[d.id] = d.name
+  })
+
+  // Enrich activities with entity names
+  return activities.map(activity => ({
+    ...activity,
+    entity_name: entityNames[activity.entity_id] || null,
+  }))
+}
+
 export function useActivities(options: UseActivitiesOptions = {}): UseActivitiesReturn {
-  const { entityType, entityId, activityTypes, pageSize = 20 } = options
+  const { entityType, entityId, activityTypes, pageSize = 20, includeEntityNames = false } = options
   const { user } = useAuth()
   const [activities, setActivities] = useState<Activity[]>([])
   const [loading, setLoading] = useState(true)
@@ -75,8 +126,13 @@ export function useActivities(options: UseActivitiesOptions = {}): UseActivities
 
       if (fetchError) throw fetchError
 
-      const newActivities = data || []
+      let newActivities = data || []
       setHasMore(newActivities.length === pageSize)
+
+      // Enrich with entity names if requested
+      if (includeEntityNames && newActivities.length > 0) {
+        newActivities = await enrichActivitiesWithEntityNames(newActivities)
+      }
 
       if (append) {
         setActivities(prev => [...prev, ...newActivities])
@@ -90,7 +146,7 @@ export function useActivities(options: UseActivitiesOptions = {}): UseActivities
       setLoading(false)
       setLoadingMore(false)
     }
-  }, [user?.tenantId, entityType, entityId, activityTypes, pageSize])
+  }, [user?.tenantId, entityType, entityId, activityTypes, pageSize, includeEntityNames])
 
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasMore) return
@@ -169,7 +225,13 @@ export function useActivities(options: UseActivitiesOptions = {}): UseActivities
             if (activityTypes && activityTypes.length > 0 && !activityTypes.includes(data.activity_type as ActivityType)) {
               return
             }
-            setActivities(prev => [data, ...prev])
+            // Enrich with entity name if needed
+            let enrichedData = data
+            if (includeEntityNames) {
+              const enriched = await enrichActivitiesWithEntityNames([data])
+              enrichedData = enriched[0]
+            }
+            setActivities(prev => [enrichedData, ...prev])
           }
         }
       )
@@ -195,7 +257,7 @@ export function useActivities(options: UseActivitiesOptions = {}): UseActivities
         subscriptionRef.current = null
       }
     }
-  }, [user?.tenantId, entityType, entityId, activityTypes])
+  }, [user?.tenantId, entityType, entityId, activityTypes, includeEntityNames])
 
   return {
     activities,

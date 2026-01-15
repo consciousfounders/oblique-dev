@@ -26,6 +26,7 @@ const BookingPage = lazy(() => import('@/pages/booking/Booking').then(m => ({ de
 const SuperAdminPage = lazy(() => import('@/pages/super-admin/SuperAdmin').then(m => ({ default: m.SuperAdminPage })))
 const SettingsPage = lazy(() => import('@/pages/settings/Settings').then(m => ({ default: m.SettingsPage })))
 const DeveloperPage = lazy(() => import('@/pages/developer/Developer').then(m => ({ default: m.DeveloperPage })))
+const ActivityPage = lazy(() => import('@/pages/activity/Activity').then(m => ({ default: m.ActivityPage })))
 
 function PageLoader() {
   return (
@@ -65,6 +66,7 @@ function App() {
             <Route path="/settings" element={<Suspense fallback={<PageLoader />}><SettingsPage /></Suspense>} />
             <Route path="/developer" element={<Suspense fallback={<PageLoader />}><DeveloperPage /></Suspense>} />
             <Route path="/super-admin" element={<Suspense fallback={<PageLoader />}><SuperAdminPage /></Suspense>} />
+            <Route path="/activity" element={<Suspense fallback={<PageLoader />}><ActivityPage /></Suspense>} />
           </Route>
         </Routes>
         <Toaster

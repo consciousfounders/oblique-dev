@@ -1,4 +1,5 @@
-import { useEffect, useRef, useCallback, useState } from 'react'
+import { useEffect, useRef, useCallback, useState, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { useActivities, type Activity, type ActivityType, ACTIVITY_TYPES } from '@/lib/hooks/useActivities'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -11,7 +12,12 @@ import {
   CheckSquare,
   Filter,
   X,
-  Loader2
+  Loader2,
+  UserCircle,
+  Users,
+  Building2,
+  Kanban,
+  ExternalLink,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -31,6 +37,20 @@ const ACTIVITY_COLORS: Record<string, string> = {
   note: 'bg-amber-500',
   deal_update: 'bg-pink-500',
   task: 'bg-cyan-500',
+}
+
+const ENTITY_ICONS: Record<string, React.ElementType> = {
+  lead: UserCircle,
+  contact: Users,
+  account: Building2,
+  deal: Kanban,
+}
+
+const ENTITY_LABELS: Record<string, string> = {
+  lead: 'Lead',
+  contact: 'Contact',
+  account: 'Account',
+  deal: 'Deal',
 }
 
 function formatRelativeTime(dateStr: string): string {
@@ -53,13 +73,41 @@ function formatRelativeTime(dateStr: string): string {
   })
 }
 
-interface ActivityItemProps {
-  activity: Activity
+function formatDateGroup(dateStr: string): string {
+  const date = new Date(dateStr)
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const activityDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  const diffDays = Math.floor((today.getTime() - activityDate.getTime()) / 86400000)
+
+  if (diffDays === 0) return 'Today'
+  if (diffDays === 1) return 'Yesterday'
+  if (diffDays < 7) return date.toLocaleDateString('en-US', { weekday: 'long' })
+
+  return date.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+  })
 }
 
-function ActivityItem({ activity }: ActivityItemProps) {
+function getDateKey(dateStr: string): string {
+  const date = new Date(dateStr)
+  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
+}
+
+interface ActivityItemProps {
+  activity: Activity
+  showEntity?: boolean
+  isLast?: boolean
+}
+
+function ActivityItem({ activity, showEntity = false, isLast = false }: ActivityItemProps) {
   const Icon = ACTIVITY_ICONS[activity.activity_type] || FileText
   const colorClass = ACTIVITY_COLORS[activity.activity_type] || 'bg-gray-500'
+  const EntityIcon = ENTITY_ICONS[activity.entity_type] || FileText
+  const entityLabel = ENTITY_LABELS[activity.entity_type] || activity.entity_type
+  const entityPath = `/${activity.entity_type}s/${activity.entity_id}`
 
   return (
     <div className="flex gap-3 pb-4 last:pb-0">
@@ -70,11 +118,11 @@ function ActivityItem({ activity }: ActivityItemProps) {
         )}>
           <Icon className="w-4 h-4" />
         </div>
-        <div className="w-px h-full bg-border absolute top-8" />
+        {!isLast && <div className="w-px h-full bg-border absolute top-8" />}
       </div>
       <div className="flex-1 min-w-0 pt-0.5">
         <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             {activity.subject && (
               <p className="font-medium text-sm truncate">{activity.subject}</p>
             )}
@@ -93,12 +141,41 @@ function ActivityItem({ activity }: ActivityItemProps) {
             {formatRelativeTime(activity.created_at)}
           </span>
         </div>
-        {activity.users?.full_name && (
-          <p className="text-xs text-muted-foreground mt-1">
-            by {activity.users.full_name}
-          </p>
-        )}
+        <div className="flex items-center gap-2 mt-1 flex-wrap">
+          {activity.users?.full_name && (
+            <span className="text-xs text-muted-foreground">
+              by {activity.users.full_name}
+            </span>
+          )}
+          {showEntity && (
+            <Link
+              to={entityPath}
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors group"
+            >
+              <EntityIcon className="w-3 h-3" />
+              <span>{entityLabel}:</span>
+              <span className="font-medium group-hover:underline">
+                {activity.entity_name || 'View'}
+              </span>
+              <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </Link>
+          )}
+        </div>
       </div>
+    </div>
+  )
+}
+
+interface DateGroupHeaderProps {
+  label: string
+}
+
+function DateGroupHeader({ label }: DateGroupHeaderProps) {
+  return (
+    <div className="flex items-center gap-2 py-3">
+      <div className="h-px flex-1 bg-border" />
+      <span className="text-xs font-medium text-muted-foreground px-2">{label}</span>
+      <div className="h-px flex-1 bg-border" />
     </div>
   )
 }
@@ -190,6 +267,8 @@ interface ActivityTimelineProps {
   compact?: boolean
   maxHeight?: string
   emptyMessage?: string
+  showEntityLinks?: boolean
+  groupByDate?: boolean
 }
 
 export function ActivityTimeline({
@@ -200,8 +279,13 @@ export function ActivityTimeline({
   compact = false,
   maxHeight = '600px',
   emptyMessage = 'No activities yet',
+  showEntityLinks = false,
+  groupByDate = false,
 }: ActivityTimelineProps) {
   const [selectedTypes, setSelectedTypes] = useState<ActivityType[]>([])
+  const isGlobalView = !entityType && !entityId
+  const shouldShowEntity = showEntityLinks || isGlobalView
+
   const {
     activities,
     loading,
@@ -213,9 +297,34 @@ export function ActivityTimeline({
     entityType,
     entityId,
     activityTypes: selectedTypes.length > 0 ? selectedTypes : undefined,
+    includeEntityNames: shouldShowEntity,
   })
 
   const observerTarget = useRef<HTMLDivElement>(null)
+
+  // Group activities by date if enabled
+  const groupedActivities = useMemo(() => {
+    if (!groupByDate) return null
+
+    const groups: { key: string; label: string; activities: Activity[] }[] = []
+    let currentKey = ''
+
+    activities.forEach(activity => {
+      const key = getDateKey(activity.created_at)
+      if (key !== currentKey) {
+        currentKey = key
+        groups.push({
+          key,
+          label: formatDateGroup(activity.created_at),
+          activities: [activity]
+        })
+      } else {
+        groups[groups.length - 1].activities.push(activity)
+      }
+    })
+
+    return groups
+  }, [activities, groupByDate])
 
   // Infinite scroll using IntersectionObserver
   const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
@@ -239,6 +348,72 @@ export function ActivityTimeline({
     return () => observer.disconnect()
   }, [handleObserver])
 
+  const renderActivities = () => {
+    if (loading) {
+      return (
+        <div className="flex justify-center py-8">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        </div>
+      )
+    }
+
+    if (error) {
+      return <p className="text-sm text-destructive py-4">{error}</p>
+    }
+
+    if (activities.length === 0) {
+      return <p className="text-sm text-muted-foreground py-4">{emptyMessage}</p>
+    }
+
+    if (groupByDate && groupedActivities) {
+      return (
+        <div>
+          {groupedActivities.map((group, groupIndex) => (
+            <div key={group.key}>
+              <DateGroupHeader label={group.label} />
+              {group.activities.map((activity, activityIndex) => (
+                <ActivityItem
+                  key={activity.id}
+                  activity={activity}
+                  showEntity={shouldShowEntity}
+                  isLast={
+                    groupIndex === groupedActivities.length - 1 &&
+                    activityIndex === group.activities.length - 1
+                  }
+                />
+              ))}
+            </div>
+          ))}
+          <div ref={observerTarget} className="h-1" />
+          {loadingMore && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    return (
+      <div className="space-y-0">
+        {activities.map((activity, index) => (
+          <ActivityItem
+            key={activity.id}
+            activity={activity}
+            showEntity={shouldShowEntity}
+            isLast={index === activities.length - 1}
+          />
+        ))}
+        <div ref={observerTarget} className="h-1" />
+        {loadingMore && (
+          <div className="flex justify-center py-4">
+            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+          </div>
+        )}
+      </div>
+    )
+  }
+
   if (compact) {
     return (
       <div className="space-y-3">
@@ -247,31 +422,8 @@ export function ActivityTimeline({
             <ActivityFilter selectedTypes={selectedTypes} onTypesChange={setSelectedTypes} />
           </div>
         )}
-
         <div className="overflow-y-auto" style={{ maxHeight }}>
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : error ? (
-            <p className="text-sm text-destructive py-4">{error}</p>
-          ) : activities.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4">{emptyMessage}</p>
-          ) : (
-            <div className="space-y-0">
-              {activities.map((activity) => (
-                <ActivityItem key={activity.id} activity={activity} />
-              ))}
-
-              <div ref={observerTarget} className="h-1" />
-
-              {loadingMore && (
-                <div className="flex justify-center py-4">
-                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                </div>
-              )}
-            </div>
-          )}
+          {renderActivities()}
         </div>
       </div>
     )
@@ -287,29 +439,7 @@ export function ActivityTimeline({
       </CardHeader>
       <CardContent>
         <div className="overflow-y-auto" style={{ maxHeight }}>
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : error ? (
-            <p className="text-sm text-destructive py-4">{error}</p>
-          ) : activities.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4">{emptyMessage}</p>
-          ) : (
-            <div className="space-y-0">
-              {activities.map((activity) => (
-                <ActivityItem key={activity.id} activity={activity} />
-              ))}
-
-              <div ref={observerTarget} className="h-1" />
-
-              {loadingMore && (
-                <div className="flex justify-center py-4">
-                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                </div>
-              )}
-            </div>
-          )}
+          {renderActivities()}
         </div>
       </CardContent>
     </Card>

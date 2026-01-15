@@ -45,6 +45,7 @@ export function DashboardPage() {
         <ActivityTimeline
           title="Recent Activity"
           showFilters={true}
+          groupByDate={true}
           maxHeight="400px"
           emptyMessage="No recent activity"
         />

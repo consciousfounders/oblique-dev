@@ -17,12 +17,14 @@ import {
   HardDrive,
   Clock,
   Code,
+  Activity,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/activity', label: 'Activity', icon: Activity },
   { href: '/leads', label: 'Leads', icon: UserCircle },
   { href: '/contacts', label: 'Contacts', icon: Users },
   { href: '/accounts', label: 'Accounts', icon: Building2 },
