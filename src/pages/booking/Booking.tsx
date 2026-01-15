@@ -25,7 +25,9 @@ import {
   CalendarDays,
   Share2,
   RefreshCw,
+  Timer,
 } from 'lucide-react'
+import { DEFAULT_EVENT_TYPES, type EventTypePreset } from '@/lib/services/calcomService'
 import {
   Dialog,
   DialogContent,
@@ -42,7 +44,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
-type TabType = 'bookings' | 'availability' | 'links' | 'settings'
+type TabType = 'bookings' | 'event-types' | 'availability' | 'links' | 'settings'
 
 const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
@@ -352,9 +354,10 @@ export function BookingPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-border">
+      <div className="flex gap-1 border-b border-border overflow-x-auto">
         {[
           { id: 'bookings' as const, label: 'Upcoming Bookings', icon: CalendarDays },
+          { id: 'event-types' as const, label: 'Event Types', icon: Timer },
           { id: 'availability' as const, label: 'Availability', icon: Clock },
           { id: 'links' as const, label: 'Booking Links', icon: Share2 },
           { id: 'settings' as const, label: 'Settings', icon: Settings },
@@ -510,6 +513,75 @@ export function BookingPage() {
               })}
             </div>
           )}
+        </div>
+      )}
+
+      {activeTab === 'event-types' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Event Types</h2>
+            <Button variant="outline" size="sm" asChild>
+              <a href="https://cal.com/event-types" target="_blank" rel="noopener noreferrer">
+                Manage in Cal.com
+                <ExternalLink className="w-3 h-3 ml-2" />
+              </a>
+            </Button>
+          </div>
+
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-sm text-muted-foreground mb-4">
+                Event types define the different meeting durations you offer. Create these in Cal.com,
+                then use the slugs below to create booking links in your CRM.
+              </p>
+            </CardContent>
+          </Card>
+
+          <h3 className="text-sm font-medium text-muted-foreground">Recommended Event Types</h3>
+          <div className="grid gap-3 md:grid-cols-3">
+            {DEFAULT_EVENT_TYPES.map((eventType: EventTypePreset) => (
+              <Card key={eventType.id}>
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Timer className="w-5 h-5 text-primary" />
+                    </div>
+                    <span className="text-2xl font-bold text-primary">{eventType.duration}m</span>
+                  </div>
+                  <h4 className="font-semibold mb-1">{eventType.name}</h4>
+                  <p className="text-sm text-muted-foreground mb-3">{eventType.description}</p>
+                  <div className="flex items-center justify-between">
+                    <code className="text-xs bg-muted px-2 py-1 rounded">{savedLink}/{eventType.slug}</code>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${savedLink}/${eventType.slug}`)
+                      }}
+                    >
+                      <Copy className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <Card className="border-dashed">
+            <CardContent className="p-4 text-center">
+              <Timer className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+              <h4 className="font-medium mb-1">Create Custom Event Types</h4>
+              <p className="text-sm text-muted-foreground mb-3">
+                Need different durations or custom event types? Create them directly in Cal.com.
+              </p>
+              <Button variant="outline" size="sm" asChild>
+                <a href="https://cal.com/event-types/new" target="_blank" rel="noopener noreferrer">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Event Type
+                </a>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       )}
 

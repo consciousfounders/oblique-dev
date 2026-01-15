@@ -1,6 +1,9 @@
 import Cal, { getCalApi } from '@calcom/embed-react'
 import { useEffect } from 'react'
 
+// Default Oblique brand color (matches primary color from theme)
+const OBLIQUE_BRAND_COLOR = '#0ea5e9'
+
 interface BookingWidgetProps {
   calLink: string
   name?: string
@@ -8,6 +11,7 @@ interface BookingWidgetProps {
   theme?: 'light' | 'dark' | 'auto'
   hideEventTypeDetails?: boolean
   layout?: 'month_view' | 'week_view' | 'column_view'
+  brandColor?: string
 }
 
 export function BookingWidget({
@@ -17,13 +21,14 @@ export function BookingWidget({
   theme = 'auto',
   hideEventTypeDetails = false,
   layout = 'month_view',
+  brandColor = OBLIQUE_BRAND_COLOR,
 }: BookingWidgetProps) {
   useEffect(() => {
     ;(async function () {
       const cal = await getCalApi()
       cal('ui', {
         theme,
-        styles: { branding: { brandColor: '#000000' } },
+        styles: { branding: { brandColor } },
         hideEventTypeDetails,
         layout,
       })
@@ -35,7 +40,7 @@ export function BookingWidget({
         })
       }
     })()
-  }, [calLink, theme, hideEventTypeDetails, layout, name, email])
+  }, [calLink, theme, hideEventTypeDetails, layout, name, email, brandColor])
 
   const config: Record<string, string> = { theme, layout }
   if (name) config.name = name
@@ -54,9 +59,13 @@ export function BookingWidget({
 export function BookingButton({
   calLink,
   text = 'Book a Meeting',
+  buttonColor = OBLIQUE_BRAND_COLOR,
+  buttonTextColor = '#ffffff',
 }: {
   calLink: string
   text?: string
+  buttonColor?: string
+  buttonTextColor?: string
 }) {
   useEffect(() => {
     ;(async function () {
@@ -64,11 +73,11 @@ export function BookingButton({
       cal('floatingButton', {
         calLink,
         buttonText: text,
-        buttonColor: '#000000',
-        buttonTextColor: '#ffffff',
+        buttonColor,
+        buttonTextColor,
       })
     })()
-  }, [calLink, text])
+  }, [calLink, text, buttonColor, buttonTextColor])
 
   return null
 }

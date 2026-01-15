@@ -27,6 +27,7 @@ const SuperAdminPage = lazy(() => import('@/pages/super-admin/SuperAdmin').then(
 const SettingsPage = lazy(() => import('@/pages/settings/Settings').then(m => ({ default: m.SettingsPage })))
 const DeveloperPage = lazy(() => import('@/pages/developer/Developer').then(m => ({ default: m.DeveloperPage })))
 const ActivityPage = lazy(() => import('@/pages/activity/Activity').then(m => ({ default: m.ActivityPage })))
+const PublicBookingPage = lazy(() => import('@/pages/booking/PublicBooking').then(m => ({ default: m.PublicBookingPage })))
 
 function PageLoader() {
   return (
@@ -47,6 +48,7 @@ function App() {
           {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/book/:slug" element={<Suspense fallback={<PageLoader />}><PublicBookingPage /></Suspense>} />
 
           {/* Protected routes */}
           <Route element={<AppLayout />}>
