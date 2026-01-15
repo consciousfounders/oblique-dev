@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs'
-import { Key, Webhook, Code, FileText } from 'lucide-react'
+import { Key, Webhook, Code, FileText, AppWindow } from 'lucide-react'
 import { ApiKeysSection } from './ApiKeys'
 import { WebhooksSection } from './Webhooks'
+import { OAuthAppsSection } from './OAuthApps'
 import { ApiExplorer } from './ApiExplorer'
 import { ApiDocs } from './ApiDocs'
 
-type TabValue = 'api-keys' | 'webhooks' | 'explorer' | 'docs'
+type TabValue = 'api-keys' | 'webhooks' | 'oauth-apps' | 'explorer' | 'docs'
 
 export function DeveloperPage() {
   const [activeTab, setActiveTab] = useState<TabValue>('api-keys')
@@ -37,6 +38,13 @@ export function DeveloperPage() {
             Webhooks
           </TabsTrigger>
           <TabsTrigger
+            value="oauth-apps"
+            className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors data-[state=active]:bg-background data-[state=active]:shadow-sm"
+          >
+            <AppWindow className="w-4 h-4" />
+            OAuth Apps
+          </TabsTrigger>
+          <TabsTrigger
             value="explorer"
             className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors data-[state=active]:bg-background data-[state=active]:shadow-sm"
           >
@@ -58,6 +66,9 @@ export function DeveloperPage() {
           </TabsContent>
           <TabsContent value="webhooks" className="focus:outline-none">
             <WebhooksSection />
+          </TabsContent>
+          <TabsContent value="oauth-apps" className="focus:outline-none">
+            <OAuthAppsSection />
           </TabsContent>
           <TabsContent value="explorer" className="focus:outline-none">
             <ApiExplorer />
