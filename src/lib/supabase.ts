@@ -407,6 +407,201 @@ export type Database = {
           created_at?: string
         }
       }
+      bookings: {
+        Row: {
+          id: string
+          tenant_id: string
+          user_id: string | null
+          cal_booking_id: string | null
+          cal_booking_uid: string | null
+          title: string
+          description: string | null
+          start_time: string
+          end_time: string
+          timezone: string | null
+          attendee_name: string | null
+          attendee_email: string | null
+          attendee_phone: string | null
+          event_type: string | null
+          event_type_slug: string | null
+          location_type: string | null
+          location_value: string | null
+          meeting_url: string | null
+          status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'rescheduled'
+          contact_id: string | null
+          lead_id: string | null
+          deal_id: string | null
+          cancelled_at: string | null
+          cancellation_reason: string | null
+          rescheduled_from_id: string | null
+          rescheduled_to_id: string | null
+          metadata: Record<string, unknown> | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          user_id?: string | null
+          cal_booking_id?: string | null
+          cal_booking_uid?: string | null
+          title: string
+          description?: string | null
+          start_time: string
+          end_time: string
+          timezone?: string | null
+          attendee_name?: string | null
+          attendee_email?: string | null
+          attendee_phone?: string | null
+          event_type?: string | null
+          event_type_slug?: string | null
+          location_type?: string | null
+          location_value?: string | null
+          meeting_url?: string | null
+          status?: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'rescheduled'
+          contact_id?: string | null
+          lead_id?: string | null
+          deal_id?: string | null
+          cancelled_at?: string | null
+          cancellation_reason?: string | null
+          rescheduled_from_id?: string | null
+          rescheduled_to_id?: string | null
+          metadata?: Record<string, unknown> | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          user_id?: string | null
+          cal_booking_id?: string | null
+          cal_booking_uid?: string | null
+          title?: string
+          description?: string | null
+          start_time?: string
+          end_time?: string
+          timezone?: string | null
+          attendee_name?: string | null
+          attendee_email?: string | null
+          attendee_phone?: string | null
+          event_type?: string | null
+          event_type_slug?: string | null
+          location_type?: string | null
+          location_value?: string | null
+          meeting_url?: string | null
+          status?: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'rescheduled'
+          contact_id?: string | null
+          lead_id?: string | null
+          deal_id?: string | null
+          cancelled_at?: string | null
+          cancellation_reason?: string | null
+          rescheduled_from_id?: string | null
+          rescheduled_to_id?: string | null
+          metadata?: Record<string, unknown> | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      availability_rules: {
+        Row: {
+          id: string
+          tenant_id: string
+          user_id: string
+          name: string
+          day_of_week: number | null
+          start_time: string
+          end_time: string
+          timezone: string | null
+          is_active: boolean
+          priority: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          user_id: string
+          name: string
+          day_of_week?: number | null
+          start_time: string
+          end_time: string
+          timezone?: string | null
+          is_active?: boolean
+          priority?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          user_id?: string
+          name?: string
+          day_of_week?: number | null
+          start_time?: string
+          end_time?: string
+          timezone?: string | null
+          is_active?: boolean
+          priority?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      booking_links: {
+        Row: {
+          id: string
+          tenant_id: string
+          user_id: string
+          slug: string
+          name: string
+          description: string | null
+          cal_event_type: string
+          default_name: string | null
+          default_email: string | null
+          linked_entity_type: string | null
+          linked_entity_id: string | null
+          is_active: boolean
+          view_count: number
+          booking_count: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          user_id: string
+          slug: string
+          name: string
+          description?: string | null
+          cal_event_type: string
+          default_name?: string | null
+          default_email?: string | null
+          linked_entity_type?: string | null
+          linked_entity_id?: string | null
+          is_active?: boolean
+          view_count?: number
+          booking_count?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          user_id?: string
+          slug?: string
+          name?: string
+          description?: string | null
+          cal_event_type?: string
+          default_name?: string | null
+          default_email?: string | null
+          linked_entity_type?: string | null
+          linked_entity_id?: string | null
+          is_active?: boolean
+          view_count?: number
+          booking_count?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
       webhooks: {
         Row: {
           id: string
