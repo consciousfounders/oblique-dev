@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from '@/lib/hooks/useAuth'
+import { ThemeProvider } from '@/lib/hooks/useTheme'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { LoginPage } from '@/pages/auth/Login'
 import { AuthCallback } from '@/pages/auth/Callback'
@@ -14,6 +15,7 @@ import { SettingsPage } from '@/pages/settings/Settings'
 function App() {
   return (
     <BrowserRouter>
+      <ThemeProvider>
       <AuthProvider>
         <Routes>
           {/* Public routes */}
@@ -32,6 +34,7 @@ function App() {
           </Route>
         </Routes>
       </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   )
 }

@@ -4,19 +4,23 @@ import { Navigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Eye, EyeOff, ArrowLeft } from 'lucide-react'
+
+type AuthView = 'signin' | 'signup' | 'forgot'
 
 export function LoginPage() {
-  const { user, loading, signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth()
-  const [isSignUp, setIsSignUp] = useState(false)
+  const { user, loading, signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword } = useAuth()
+  const [view, setView] = useState<AuthView>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
     )
@@ -33,7 +37,7 @@ export function LoginPage() {
     setSubmitting(true)
 
     try {
-      if (isSignUp) {
+      if (view === 'signup') {
         const { error } = await signUpWithEmail(email, password)
         if (error) {
           setError(error.message)
@@ -42,26 +46,106 @@ export function LoginPage() {
           setEmail('')
           setPassword('')
         }
-      } else {
+      } else if (view === 'signin') {
         const { error } = await signInWithEmail(email, password)
         if (error) {
           setError(error.message)
         }
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred')
     } finally {
       setSubmitting(false)
     }
   }
 
+  async function handleForgotPassword(e: React.FormEvent) {
+    e.preventDefault()
+    setError(null)
+    setMessage(null)
+    setSubmitting(true)
+
+    try {
+      const { error } = await resetPassword(email)
+      if (error) {
+        setError(error.message)
+      } else {
+        setMessage('Check your email for a password reset link!')
+      }
+    } catch {
+      setError('An unexpected error occurred')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  function switchView(newView: AuthView) {
+    setView(newView)
+    setError(null)
+    setMessage(null)
+  }
+
+  // Forgot password view
+  if (view === 'forgot') {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Reset Password</CardTitle>
+            <CardDescription>
+              Enter your email and we'll send you a reset link
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <form onSubmit={handleForgotPassword} className="space-y-3">
+              <Input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoFocus
+              />
+
+              {error && (
+                <p className="text-sm text-destructive">{error}</p>
+              )}
+
+              {message && (
+                <p className="text-sm text-primary">{message}</p>
+              )}
+
+              <Button type="submit" className="w-full" size="lg" disabled={submitting}>
+                {submitting ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground" />
+                ) : (
+                  'Send Reset Link'
+                )}
+              </Button>
+            </form>
+
+            <button
+              type="button"
+              onClick={() => switchView('signin')}
+              className="flex items-center justify-center w-full text-sm text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="w-4 h-4 mr-1" />
+              Back to sign in
+            </button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Sign in / Sign up view
   return (
     <div className="flex items-center justify-center min-h-screen bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Welcome to Oblique</CardTitle>
           <CardDescription>
-            {isSignUp ? 'Create an account to get started' : 'Sign in to manage your sales pipeline'}
+            {view === 'signup' ? 'Create an account to get started' : 'Sign in to manage your sales pipeline'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -97,7 +181,7 @@ export function LoginPage() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or continue with email</span>
+              <span className="bg-card px-2 text-muted-foreground">Or continue with email</span>
             </div>
           </div>
 
@@ -109,14 +193,41 @@ export function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-            <Input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-            />
+            <div className="relative">
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+
+            {view === 'signin' && (
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={() => switchView('forgot')}
+                  className="text-sm text-muted-foreground hover:text-primary"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
 
             {error && (
               <p className="text-sm text-destructive">{error}</p>
@@ -128,8 +239,8 @@ export function LoginPage() {
 
             <Button type="submit" className="w-full" size="lg" disabled={submitting}>
               {submitting ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-              ) : isSignUp ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground" />
+              ) : view === 'signup' ? (
                 'Create Account'
               ) : (
                 'Sign In'
@@ -138,17 +249,13 @@ export function LoginPage() {
           </form>
 
           <p className="text-center text-sm text-muted-foreground">
-            {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+            {view === 'signup' ? 'Already have an account?' : "Don't have an account?"}{' '}
             <button
               type="button"
-              onClick={() => {
-                setIsSignUp(!isSignUp)
-                setError(null)
-                setMessage(null)
-              }}
+              onClick={() => switchView(view === 'signup' ? 'signin' : 'signup')}
               className="text-primary hover:underline font-medium"
             >
-              {isSignUp ? 'Sign in' : 'Sign up'}
+              {view === 'signup' ? 'Sign in' : 'Sign up'}
             </button>
           </p>
         </CardContent>
