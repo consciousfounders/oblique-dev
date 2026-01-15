@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ActivityTimeline } from '@/components/activity'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { Users, Building2, UserCircle, DollarSign } from 'lucide-react'
 
@@ -41,14 +42,12 @@ export function DashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">No recent activity</p>
-          </CardContent>
-        </Card>
+        <ActivityTimeline
+          title="Recent Activity"
+          showFilters={true}
+          maxHeight="400px"
+          emptyMessage="No recent activity"
+        />
 
         <Card>
           <CardHeader>

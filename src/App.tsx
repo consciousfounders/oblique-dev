@@ -11,9 +11,13 @@ import { AuthCallback } from '@/pages/auth/Callback'
 // Lazy load pages for better initial load performance
 const DashboardPage = lazy(() => import('@/pages/dashboard/Dashboard').then(m => ({ default: m.DashboardPage })))
 const LeadsPage = lazy(() => import('@/pages/leads/Leads').then(m => ({ default: m.LeadsPage })))
+const LeadDetailPage = lazy(() => import('@/pages/leads/LeadDetail').then(m => ({ default: m.LeadDetailPage })))
 const ContactsPage = lazy(() => import('@/pages/contacts/Contacts').then(m => ({ default: m.ContactsPage })))
+const ContactDetailPage = lazy(() => import('@/pages/contacts/ContactDetail').then(m => ({ default: m.ContactDetailPage })))
 const AccountsPage = lazy(() => import('@/pages/accounts/Accounts').then(m => ({ default: m.AccountsPage })))
+const AccountDetailPage = lazy(() => import('@/pages/accounts/AccountDetail').then(m => ({ default: m.AccountDetailPage })))
 const DealsPage = lazy(() => import('@/pages/deals/Deals').then(m => ({ default: m.DealsPage })))
+const DealDetailPage = lazy(() => import('@/pages/deals/DealDetail').then(m => ({ default: m.DealDetailPage })))
 const EmailPage = lazy(() => import('@/pages/email/Email').then(m => ({ default: m.EmailPage })))
 const CalendarPage = lazy(() => import('@/pages/calendar/Calendar').then(m => ({ default: m.CalendarPage })))
 const DrivePage = lazy(() => import('@/pages/drive/Drive').then(m => ({ default: m.DrivePage })))
@@ -45,9 +49,13 @@ function App() {
           <Route element={<AppLayout />}>
             <Route path="/" element={<Suspense fallback={<PageLoader />}><DashboardPage /></Suspense>} />
             <Route path="/leads" element={<Suspense fallback={<PageLoader />}><LeadsPage /></Suspense>} />
+            <Route path="/leads/:id" element={<Suspense fallback={<PageLoader />}><LeadDetailPage /></Suspense>} />
             <Route path="/contacts" element={<Suspense fallback={<PageLoader />}><ContactsPage /></Suspense>} />
+            <Route path="/contacts/:id" element={<Suspense fallback={<PageLoader />}><ContactDetailPage /></Suspense>} />
             <Route path="/accounts" element={<Suspense fallback={<PageLoader />}><AccountsPage /></Suspense>} />
+            <Route path="/accounts/:id" element={<Suspense fallback={<PageLoader />}><AccountDetailPage /></Suspense>} />
             <Route path="/deals" element={<Suspense fallback={<PageLoader />}><DealsPage /></Suspense>} />
+            <Route path="/deals/:id" element={<Suspense fallback={<PageLoader />}><DealDetailPage /></Suspense>} />
             <Route path="/email" element={<Suspense fallback={<PageLoader />}><EmailPage /></Suspense>} />
             <Route path="/calendar" element={<Suspense fallback={<PageLoader />}><CalendarPage /></Suspense>} />
             <Route path="/drive" element={<Suspense fallback={<PageLoader />}><DrivePage /></Suspense>} />
