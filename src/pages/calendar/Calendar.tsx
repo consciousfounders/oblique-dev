@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useMemo } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { useGoogleApi } from '@/lib/hooks/useGoogleApi'
-import { CalendarService, type ParsedCalendarEvent } from '@/lib/services/calendarService'
+import { useCalendarEventsForRange, useCreateEvent } from '@/lib/hooks/useCalendar'
 import { GoogleTokenService } from '@/lib/services/googleTokenService'
+import { type ParsedCalendarEvent } from '@/lib/services/calendarService'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,20 +20,11 @@ import {
   RotateCcw,
 } from 'lucide-react'
 
-type ViewMode = 'month' | 'week' | 'day'
-
 export function CalendarPage() {
   const { session, signInWithGoogle } = useAuth()
-  const { executeWithRetry } = useGoogleApi()
-  const [events, setEvents] = useState<ParsedCalendarEvent[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [hasGoogleAuth, setHasGoogleAuth] = useState(false)
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [_viewMode, _setViewMode] = useState<ViewMode>('month') // Reserved for future view switching
   const [selectedEvent, setSelectedEvent] = useState<ParsedCalendarEvent | null>(null)
   const [showCreate, setShowCreate] = useState(false)
-  const [lastFailedAction, setLastFailedAction] = useState<(() => Promise<void>) | null>(null)
 
   // Create event state
   const [newTitle, setNewTitle] = useState('')
@@ -41,67 +32,48 @@ export function CalendarPage() {
   const [newStartTime, setNewStartTime] = useState('09:00')
   const [newEndTime, setNewEndTime] = useState('10:00')
   const [newDescription, setNewDescription] = useState('')
-  const [creating, setCreating] = useState(false)
 
-  const fetchEvents = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    setLastFailedAction(null)
-    try {
-      const start = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
-      const end = new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 0)
+  // Initialize Google Token Service
+  const hasGoogleAuth = !!session?.provider_token
+  if (hasGoogleAuth && session) {
+    GoogleTokenService.initialize(session)
+  }
 
-      const fetchedEvents = await executeWithRetry(() =>
-        CalendarService.getEventsForDateRange(start, end)
-      )
-      setEvents(fetchedEvents)
-    } catch (err) {
-      console.error('Failed to fetch events:', err)
-      setError(err instanceof Error ? err.message : 'Failed to fetch events')
-      setLastFailedAction(() => fetchEvents)
-    } finally {
-      setLoading(false)
-    }
-  }, [currentDate, executeWithRetry])
+  // Calculate date range for the current view (current month + next month)
+  const { start: dateRangeStart, end: dateRangeEnd } = useMemo(() => {
+    const start = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+    const end = new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 0)
+    return { start, end }
+  }, [currentDate])
 
-  useEffect(() => {
-    if (session === undefined) return // Still loading auth state
+  // Use React Query for data fetching with caching
+  const {
+    data: events = [],
+    isLoading,
+    isFetching,
+    refetch,
+    error: eventsError,
+  } = useCalendarEventsForRange(dateRangeStart, dateRangeEnd, hasGoogleAuth)
 
-    if (session?.provider_token) {
-      GoogleTokenService.initialize(session)
-      setHasGoogleAuth(true)
-      fetchEvents()
-    } else {
-      setHasGoogleAuth(false)
-      setLoading(false)
-    }
-  }, [session])
+  // Create event mutation
+  const createEvent = useCreateEvent()
 
-  useEffect(() => {
-    if (hasGoogleAuth) {
-      fetchEvents()
-    }
-  }, [currentDate, hasGoogleAuth])
+  const error = eventsError?.message || createEvent.error?.message || null
 
   async function handleCreateEvent(e: React.FormEvent) {
     e.preventDefault()
     if (!newTitle || !newDate) return
 
-    setCreating(true)
-    setError(null)
-    setLastFailedAction(null)
     try {
       const startDate = new Date(`${newDate}T${newStartTime}`)
       const endDate = new Date(`${newDate}T${newEndTime}`)
 
-      await executeWithRetry(() =>
-        CalendarService.createEvent({
-          title: newTitle,
-          description: newDescription,
-          start: startDate,
-          end: endDate,
-        })
-      )
+      await createEvent.mutateAsync({
+        title: newTitle,
+        description: newDescription || undefined,
+        start: startDate,
+        end: endDate,
+      })
 
       setShowCreate(false)
       setNewTitle('')
@@ -109,19 +81,8 @@ export function CalendarPage() {
       setNewStartTime('09:00')
       setNewEndTime('10:00')
       setNewDescription('')
-      fetchEvents()
     } catch (err) {
       console.error('Failed to create event:', err)
-      setError(err instanceof Error ? err.message : 'Failed to create event')
-      setLastFailedAction(() => () => handleCreateEvent(e))
-    } finally {
-      setCreating(false)
-    }
-  }
-
-  async function handleRetry() {
-    if (lastFailedAction) {
-      await lastFailedAction()
     }
   }
 
@@ -212,8 +173,8 @@ export function CalendarPage() {
           </Button>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={fetchEvents} disabled={loading}>
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading || isFetching}>
+            <RefreshCw className={`w-4 h-4 ${isLoading || isFetching ? 'animate-spin' : ''}`} />
           </Button>
           <Button onClick={() => setShowCreate(true)}>
             <Plus className="w-4 h-4 mr-2" />
@@ -225,12 +186,10 @@ export function CalendarPage() {
       {error && (
         <div className="p-3 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-sm flex items-center justify-between">
           <span>{error}</span>
-          {lastFailedAction && (
-            <Button variant="ghost" size="sm" onClick={handleRetry} className="ml-2 text-destructive hover:text-destructive">
-              <RotateCcw className="w-4 h-4 mr-1" />
-              Retry
-            </Button>
-          )}
+          <Button variant="ghost" size="sm" onClick={() => refetch()} className="ml-2 text-destructive hover:text-destructive">
+            <RotateCcw className="w-4 h-4 mr-1" />
+            Retry
+          </Button>
         </div>
       )}
 
@@ -247,53 +206,59 @@ export function CalendarPage() {
           </div>
 
           {/* Calendar days */}
-          <div className="grid grid-cols-7">
-            {calendarDays.map(({ date, isCurrentMonth }, index) => {
-              const dayEvents = getEventsForDay(date)
-              const isToday =
-                date.getDate() === today.getDate() &&
-                date.getMonth() === today.getMonth() &&
-                date.getFullYear() === today.getFullYear()
+          {isLoading ? (
+            <div className="flex items-center justify-center py-24">
+              <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-7">
+              {calendarDays.map(({ date, isCurrentMonth }, index) => {
+                const dayEvents = getEventsForDay(date)
+                const isToday =
+                  date.getDate() === today.getDate() &&
+                  date.getMonth() === today.getMonth() &&
+                  date.getFullYear() === today.getFullYear()
 
-              return (
-                <div
-                  key={index}
-                  className={`min-h-[100px] p-1 border-b border-r ${
-                    !isCurrentMonth ? 'bg-muted/30' : ''
-                  }`}
-                >
+                return (
                   <div
-                    className={`text-sm p-1 ${
-                      isToday
-                        ? 'bg-primary text-primary-foreground rounded-full w-7 h-7 flex items-center justify-center'
-                        : isCurrentMonth
-                        ? ''
-                        : 'text-muted-foreground'
+                    key={index}
+                    className={`min-h-[100px] p-1 border-b border-r ${
+                      !isCurrentMonth ? 'bg-muted/30' : ''
                     }`}
                   >
-                    {date.getDate()}
+                    <div
+                      className={`text-sm p-1 ${
+                        isToday
+                          ? 'bg-primary text-primary-foreground rounded-full w-7 h-7 flex items-center justify-center'
+                          : isCurrentMonth
+                          ? ''
+                          : 'text-muted-foreground'
+                      }`}
+                    >
+                      {date.getDate()}
+                    </div>
+                    <div className="space-y-0.5 mt-1">
+                      {dayEvents.slice(0, 3).map((event) => (
+                        <button
+                          key={event.id}
+                          onClick={() => setSelectedEvent(event)}
+                          className="w-full text-left text-xs p-1 rounded bg-primary/10 text-primary hover:bg-primary/20 truncate"
+                        >
+                          {event.allDay ? '' : event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' '}
+                          {event.title}
+                        </button>
+                      ))}
+                      {dayEvents.length > 3 && (
+                        <p className="text-xs text-muted-foreground pl-1">
+                          +{dayEvents.length - 3} more
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div className="space-y-0.5 mt-1">
-                    {dayEvents.slice(0, 3).map((event) => (
-                      <button
-                        key={event.id}
-                        onClick={() => setSelectedEvent(event)}
-                        className="w-full text-left text-xs p-1 rounded bg-primary/10 text-primary hover:bg-primary/20 truncate"
-                      >
-                        {event.allDay ? '' : event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' '}
-                        {event.title}
-                      </button>
-                    ))}
-                    {dayEvents.length > 3 && (
-                      <p className="text-xs text-muted-foreground pl-1">
-                        +{dayEvents.length - 3} more
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+                )
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -417,12 +382,17 @@ export function CalendarPage() {
                     onChange={(e) => setNewDescription(e.target.value)}
                   />
                 </div>
+                {createEvent.error && (
+                  <div className="p-3 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-sm">
+                    {createEvent.error.message}
+                  </div>
+                )}
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setShowCreate(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={creating}>
-                    {creating ? 'Creating...' : 'Create Event'}
+                  <Button type="submit" disabled={createEvent.isPending}>
+                    {createEvent.isPending ? 'Creating...' : 'Create Event'}
                   </Button>
                 </div>
               </form>

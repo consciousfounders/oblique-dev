@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { useGoogleApi } from '@/lib/hooks/useGoogleApi'
-import { DriveService, type ParsedDriveFile, MIME_TYPES } from '@/lib/services/driveService'
+import { useDriveFiles, useCreateFolder, useUploadFile, useToggleStar } from '@/lib/hooks/useDrive'
 import { GoogleTokenService } from '@/lib/services/googleTokenService'
+import { type ParsedDriveFile, MIME_TYPES } from '@/lib/services/driveService'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { VirtualList } from '@/components/ui/virtual-list'
 import {
   HardDrive,
   Folder,
@@ -29,99 +30,60 @@ import {
 
 export function DrivePage() {
   const { session, signInWithGoogle } = useAuth()
-  const { executeWithRetry } = useGoogleApi()
-  const [files, setFiles] = useState<ParsedDriveFile[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [hasGoogleAuth, setHasGoogleAuth] = useState(false)
+  const [searchInput, setSearchInput] = useState('')
   const [search, setSearch] = useState('')
   const [currentFolder, setCurrentFolder] = useState<string | null>(null)
   const [folderPath, setFolderPath] = useState<Array<{ id: string; name: string }>>([])
   const [showNewFolder, setShowNewFolder] = useState(false)
   const [newFolderName, setNewFolderName] = useState('')
-  const [creating, setCreating] = useState(false)
-  const [uploading, setUploading] = useState(false)
-  const [lastFailedAction, setLastFailedAction] = useState<(() => Promise<void>) | null>(null)
 
-  const fetchFiles = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    setLastFailedAction(null)
-    try {
-      const { files: fetchedFiles } = await executeWithRetry(() =>
-        DriveService.listFiles({
-          folderId: currentFolder || undefined,
-        })
-      )
-      setFiles(fetchedFiles)
-    } catch (err) {
-      console.error('Failed to fetch files:', err)
-      setError(err instanceof Error ? err.message : 'Failed to fetch files')
-      setLastFailedAction(() => fetchFiles)
-    } finally {
-      setLoading(false)
-    }
-  }, [currentFolder, executeWithRetry])
+  // Initialize Google Token Service
+  const hasGoogleAuth = !!session?.provider_token
+  if (hasGoogleAuth && session) {
+    GoogleTokenService.initialize(session)
+  }
 
-  useEffect(() => {
-    if (session === undefined) return // Still loading auth state
+  // Use React Query hooks for data fetching with pagination
+  const {
+    files,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+    error: filesError,
+  } = useDriveFiles({
+    folderId: currentFolder || undefined,
+    search: search || undefined,
+    pageSize: 50,
+    enabled: hasGoogleAuth,
+  })
 
-    if (session?.provider_token) {
-      GoogleTokenService.initialize(session)
-      setHasGoogleAuth(true)
-      fetchFiles()
-    } else {
-      setHasGoogleAuth(false)
-      setLoading(false)
-    }
-  }, [session])
+  // Mutations
+  const createFolder = useCreateFolder()
+  const uploadFile = useUploadFile()
+  const toggleStar = useToggleStar()
 
-  useEffect(() => {
-    if (hasGoogleAuth) {
-      fetchFiles()
-    }
-  }, [currentFolder, hasGoogleAuth])
+  const error = filesError?.message || createFolder.error?.message || uploadFile.error?.message || null
 
-  async function handleSearch(e: React.FormEvent) {
+  function handleSearch(e: React.FormEvent) {
     e.preventDefault()
-    if (!search.trim()) {
-      fetchFiles()
-      return
-    }
-
-    setLoading(true)
-    setError(null)
-    setLastFailedAction(null)
-    try {
-      const results = await executeWithRetry(() => DriveService.search(search))
-      setFiles(results)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Search failed')
-      setLastFailedAction(() => () => handleSearch(e))
-    } finally {
-      setLoading(false)
-    }
+    setSearch(searchInput)
   }
 
   async function handleCreateFolder(e: React.FormEvent) {
     e.preventDefault()
     if (!newFolderName.trim()) return
 
-    setCreating(true)
-    setError(null)
-    setLastFailedAction(null)
     try {
-      await executeWithRetry(() =>
-        DriveService.createFolder(newFolderName, currentFolder || undefined)
-      )
+      await createFolder.mutateAsync({
+        name: newFolderName,
+        parentId: currentFolder || undefined,
+      })
       setNewFolderName('')
       setShowNewFolder(false)
-      fetchFiles()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create folder')
-      setLastFailedAction(() => () => handleCreateFolder(e))
-    } finally {
-      setCreating(false)
+      console.error('Failed to create folder:', err)
     }
   }
 
@@ -129,27 +91,15 @@ export function DrivePage() {
     const file = e.target.files?.[0]
     if (!file) return
 
-    setUploading(true)
-    setError(null)
-    setLastFailedAction(null)
     try {
-      await executeWithRetry(() =>
-        DriveService.uploadFile(file, {
-          parentId: currentFolder || undefined,
-        })
-      )
-      fetchFiles()
+      await uploadFile.mutateAsync({
+        file,
+        parentId: currentFolder || undefined,
+      })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to upload file')
+      console.error('Failed to upload file:', err)
     } finally {
-      setUploading(false)
       e.target.value = ''
-    }
-  }
-
-  async function handleRetry() {
-    if (lastFailedAction) {
-      await lastFailedAction()
     }
   }
 
@@ -157,6 +107,7 @@ export function DrivePage() {
     setFolderPath([...folderPath, { id: file.id, name: file.name }])
     setCurrentFolder(file.id)
     setSearch('')
+    setSearchInput('')
   }
 
   function navigateBack() {
@@ -195,6 +146,63 @@ export function DrivePage() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
   }
 
+  // Render file item for virtual list
+  const renderFileItem = useCallback(
+    (file: ParsedDriveFile) => {
+      const Icon = getFileIcon(file.mimeType)
+      return (
+        <div className="flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors border-b">
+          {file.isFolder ? (
+            <button
+              onClick={() => navigateToFolder(file)}
+              className="flex items-center gap-3 flex-1 min-w-0"
+            >
+              <Icon className="w-5 h-5 text-primary" />
+              <span className="truncate">{file.name}</span>
+            </button>
+          ) : (
+            <a
+              href={file.webViewLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 flex-1 min-w-0"
+            >
+              <Icon className="w-5 h-5 text-muted-foreground" />
+              <span className="truncate">{file.name}</span>
+            </a>
+          )}
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span className="hidden sm:block">{formatSize(file.size)}</span>
+            <span className="hidden md:block">
+              {file.modifiedAt.toLocaleDateString()}
+            </span>
+            <button
+              onClick={() => toggleStar.mutate({ fileId: file.id, starred: !file.isStarred })}
+              className="hover:text-foreground"
+            >
+              <Star
+                className={`w-4 h-4 ${
+                  file.isStarred ? 'text-yellow-500 fill-yellow-500' : ''
+                }`}
+              />
+            </button>
+            {!file.isFolder && (
+              <a
+                href={file.webViewLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-foreground"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            )}
+          </div>
+        </div>
+      )
+    },
+    [toggleStar]
+  )
+
   // Not connected to Google
   if (!hasGoogleAuth) {
     return (
@@ -221,8 +229,8 @@ export function DrivePage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Drive</h1>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={fetchFiles} disabled={loading}>
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading}>
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
           </Button>
           <Button variant="outline" onClick={() => setShowNewFolder(true)}>
             <FolderPlus className="w-4 h-4 mr-2" />
@@ -231,12 +239,12 @@ export function DrivePage() {
           <Button asChild>
             <label className="cursor-pointer">
               <Upload className="w-4 h-4 mr-2" />
-              {uploading ? 'Uploading...' : 'Upload'}
+              {uploadFile.isPending ? 'Uploading...' : 'Upload'}
               <input
                 type="file"
                 className="hidden"
                 onChange={handleUpload}
-                disabled={uploading}
+                disabled={uploadFile.isPending}
               />
             </label>
           </Button>
@@ -270,8 +278,8 @@ export function DrivePage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Search files..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             className="pl-9"
           />
         </div>
@@ -291,8 +299,8 @@ export function DrivePage() {
                 onChange={(e) => setNewFolderName(e.target.value)}
                 autoFocus
               />
-              <Button type="submit" disabled={creating}>
-                {creating ? 'Creating...' : 'Create'}
+              <Button type="submit" disabled={createFolder.isPending}>
+                {createFolder.isPending ? 'Creating...' : 'Create'}
               </Button>
               <Button type="button" variant="outline" onClick={() => setShowNewFolder(false)}>
                 Cancel
@@ -305,88 +313,44 @@ export function DrivePage() {
       {error && (
         <div className="p-3 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-sm flex items-center justify-between">
           <span>{error}</span>
-          {lastFailedAction && (
-            <Button variant="ghost" size="sm" onClick={handleRetry} className="ml-2 text-destructive hover:text-destructive">
-              <RotateCcw className="w-4 h-4 mr-1" />
-              Retry
-            </Button>
-          )}
+          <Button variant="ghost" size="sm" onClick={() => refetch()} className="ml-2 text-destructive hover:text-destructive">
+            <RotateCcw className="w-4 h-4 mr-1" />
+            Retry
+          </Button>
         </div>
       )}
 
-      {/* File List */}
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
-        </div>
-      ) : files.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          <Folder className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p>No files found</p>
-        </div>
-      ) : (
-        <Card>
-          <CardContent className="p-0">
-            <div className="divide-y">
-              {currentFolder && (
-                <button
-                  onClick={navigateBack}
-                  className="w-full flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors"
-                >
-                  <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-                  <span>Back</span>
-                </button>
-              )}
-              {files.map((file) => {
-                const Icon = getFileIcon(file.mimeType)
-                return (
-                  <div
-                    key={file.id}
-                    className="flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors"
-                  >
-                    {file.isFolder ? (
-                      <button
-                        onClick={() => navigateToFolder(file)}
-                        className="flex items-center gap-3 flex-1 min-w-0"
-                      >
-                        <Icon className="w-5 h-5 text-primary" />
-                        <span className="truncate">{file.name}</span>
-                      </button>
-                    ) : (
-                      <a
-                        href={file.webViewLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 flex-1 min-w-0"
-                      >
-                        <Icon className="w-5 h-5 text-muted-foreground" />
-                        <span className="truncate">{file.name}</span>
-                      </a>
-                    )}
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="hidden sm:block">{formatSize(file.size)}</span>
-                      <span className="hidden md:block">
-                        {file.modifiedAt.toLocaleDateString()}
-                      </span>
-                      {file.isStarred && <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />}
-                      {!file.isFolder && (
-                        <a
-                          href={file.webViewLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="hover:text-foreground"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* File List with Virtual Scrolling */}
+      <Card>
+        <CardContent className="p-0">
+          {currentFolder && (
+            <button
+              onClick={navigateBack}
+              className="w-full flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors border-b"
+            >
+              <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+              <span>Back</span>
+            </button>
+          )}
+          <VirtualList
+            items={files}
+            estimatedItemHeight={52}
+            getItemKey={(file) => file.id}
+            renderItem={renderFileItem}
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            fetchNextPage={fetchNextPage}
+            isLoading={isLoading}
+            maxHeight="calc(100vh - 340px)"
+            emptyState={
+              <div className="text-center py-12 text-muted-foreground">
+                <Folder className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>No files found</p>
+              </div>
+            }
+          />
+        </CardContent>
+      </Card>
     </div>
   )
 }

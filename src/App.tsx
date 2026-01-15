@@ -4,6 +4,7 @@ import { Toaster } from 'sonner'
 import { AuthProvider } from '@/lib/hooks/useAuth'
 import { ThemeProvider } from '@/lib/hooks/useTheme'
 import { GoogleApiProvider } from '@/lib/hooks/useGoogleApi'
+import { QueryProvider } from '@/lib/hooks/useQueryClient'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { LoginPage } from '@/pages/auth/Login'
 import { AuthCallback } from '@/pages/auth/Callback'
@@ -37,6 +38,7 @@ function PageLoader() {
 function App() {
   return (
     <BrowserRouter>
+      <QueryProvider>
       <ThemeProvider>
       <AuthProvider>
       <GoogleApiProvider>
@@ -76,6 +78,7 @@ function App() {
       </GoogleApiProvider>
       </AuthProvider>
       </ThemeProvider>
+      </QueryProvider>
     </BrowserRouter>
   )
 }

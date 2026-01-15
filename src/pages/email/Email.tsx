@@ -1,107 +1,105 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { useGoogleApi } from '@/lib/hooks/useGoogleApi'
-import { GmailService, type EmailThread } from '@/lib/services/gmailService'
+import { useGmailThreads, useGmailThread, useSendEmail, usePrefetchThread } from '@/lib/hooks/useGmail'
 import { GoogleTokenService } from '@/lib/services/googleTokenService'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { VirtualList } from '@/components/ui/virtual-list'
 import { Mail, Search, RefreshCw, Send, ArrowLeft, Paperclip, RotateCcw } from 'lucide-react'
+import type { EmailThread } from '@/lib/services/gmailService'
 
 export function EmailPage() {
   const { session, signInWithGoogle } = useAuth()
-  const { executeWithRetry } = useGoogleApi()
-  const [threads, setThreads] = useState<EmailThread[]>([])
-  const [selectedThread, setSelectedThread] = useState<EmailThread | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
+  const [searchInput, setSearchInput] = useState('')
   const [showCompose, setShowCompose] = useState(false)
-  const [hasGoogleAuth, setHasGoogleAuth] = useState(false)
-  const [lastFailedAction, setLastFailedAction] = useState<(() => Promise<void>) | null>(null)
+
+  // Initialize Google Token Service
+  const hasGoogleAuth = !!session?.provider_token
+  if (hasGoogleAuth && session) {
+    GoogleTokenService.initialize(session)
+  }
+
+  // Use React Query hooks for data fetching with pagination
+  const {
+    threads,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+    error: threadsError,
+  } = useGmailThreads({
+    search: search || undefined,
+    pageSize: 20,
+    enabled: hasGoogleAuth,
+  })
+
+  // Fetch selected thread details
+  const {
+    data: selectedThread,
+    isLoading: loadingThread,
+    error: threadError,
+  } = useGmailThread(selectedThreadId)
+
+  // Prefetch thread on hover for faster UX
+  const prefetchThread = usePrefetchThread()
+
+  const error = threadsError?.message || threadError?.message || null
 
   // Compose state
   const [composeTo, setComposeTo] = useState('')
   const [composeSubject, setComposeSubject] = useState('')
   const [composeBody, setComposeBody] = useState('')
-  const [sending, setSending] = useState(false)
 
-  const fetchEmails = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    setLastFailedAction(null)
-    try {
-      const { threads: fetchedThreads } = await executeWithRetry(() =>
-        GmailService.listThreads({
-          maxResults: 30,
-          q: search || undefined,
-        })
-      )
-      setThreads(fetchedThreads)
-    } catch (err) {
-      console.error('Failed to fetch emails:', err)
-      setError(err instanceof Error ? err.message : 'Failed to fetch emails')
-      setLastFailedAction(() => fetchEmails)
-    } finally {
-      setLoading(false)
-    }
-  }, [search, executeWithRetry])
+  // Send email mutation
+  const sendEmail = useSendEmail()
 
-  useEffect(() => {
-    // Check immediately - don't wait
-    if (session === undefined) return // Still loading auth state
-
-    if (session?.provider_token) {
-      GoogleTokenService.initialize(session)
-      setHasGoogleAuth(true)
-      fetchEmails()
-    } else {
-      setHasGoogleAuth(false)
-      setLoading(false)
-    }
-  }, [session])
-
-  async function handleSearch(e: React.FormEvent) {
+  function handleSearch(e: React.FormEvent) {
     e.preventDefault()
-    fetchEmails()
+    setSearch(searchInput)
   }
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault()
     if (!composeTo || !composeSubject) return
 
-    setSending(true)
-    setError(null)
-    setLastFailedAction(null)
     try {
-      await executeWithRetry(() =>
-        GmailService.sendEmail({
-          to: composeTo.split(',').map((s) => s.trim()),
-          subject: composeSubject,
-          body: composeBody,
-        })
-      )
+      await sendEmail.mutateAsync({
+        to: composeTo.split(',').map((s) => s.trim()),
+        subject: composeSubject,
+        body: composeBody,
+      })
       setShowCompose(false)
       setComposeTo('')
       setComposeSubject('')
       setComposeBody('')
-      fetchEmails()
     } catch (err) {
       console.error('Failed to send email:', err)
-      setError(err instanceof Error ? err.message : 'Failed to send email')
-      setLastFailedAction(() => () => handleSend(e))
-    } finally {
-      setSending(false)
     }
   }
 
-  async function handleRetry() {
-    if (lastFailedAction) {
-      await lastFailedAction()
+  async function handleReply(e: React.FormEvent) {
+    e.preventDefault()
+    if (!composeBody || !selectedThread) return
+
+    try {
+      const lastMessage = selectedThread.messages[selectedThread.messages.length - 1]
+      await sendEmail.mutateAsync({
+        to: [lastMessage.fromEmail],
+        subject: `Re: ${selectedThread.subject}`,
+        body: composeBody,
+        threadId: selectedThread.id,
+      })
+      setComposeBody('')
+    } catch (err) {
+      console.error('Failed to reply:', err)
     }
   }
 
-  function formatDate(date: Date): string {
+  const formatDate = useCallback((date: Date): string => {
     const now = new Date()
     const diff = now.getTime() - date.getTime()
     const days = Math.floor(diff / (1000 * 60 * 60 * 24))
@@ -113,7 +111,46 @@ export function EmailPage() {
     } else {
       return date.toLocaleDateString([], { month: 'short', day: 'numeric' })
     }
-  }
+  }, [])
+
+  // Render thread item for virtual list
+  const renderThreadItem = useCallback(
+    (thread: EmailThread) => (
+      <button
+        onMouseEnter={() => prefetchThread(thread.id)}
+        onClick={() => setSelectedThreadId(thread.id)}
+        className={`w-full text-left p-3 rounded-lg border transition-colors hover:bg-muted/50 mb-1 ${
+          thread.isUnread ? 'bg-primary/5 border-primary/20' : 'bg-card'
+        }`}
+      >
+        <div className="flex items-start gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className={`truncate ${thread.isUnread ? 'font-semibold' : ''}`}>
+                {thread.participants[0] || 'Unknown'}
+              </span>
+              {thread.messageCount > 1 && (
+                <span className="text-xs text-muted-foreground">({thread.messageCount})</span>
+              )}
+            </div>
+            <p className={`truncate ${thread.isUnread ? 'font-medium' : ''}`}>
+              {thread.subject}
+            </p>
+            <p className="text-sm text-muted-foreground truncate">{thread.snippet}</p>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
+              {formatDate(thread.lastMessageDate)}
+            </span>
+            {thread.messages.some((m) => m.hasAttachments) && (
+              <Paperclip className="w-3 h-3 text-muted-foreground" />
+            )}
+          </div>
+        </div>
+      </button>
+    ),
+    [formatDate, prefetchThread]
+  )
 
   // Not connected to Google
   if (!hasGoogleAuth) {
@@ -173,12 +210,17 @@ export function EmailPage() {
                   onChange={(e) => setComposeBody(e.target.value)}
                 />
               </div>
+              {sendEmail.error && (
+                <div className="p-3 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-sm">
+                  {sendEmail.error.message}
+                </div>
+              )}
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setShowCompose(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={sending}>
-                  {sending ? 'Sending...' : 'Send'}
+                <Button type="submit" disabled={sendEmail.isPending}>
+                  {sendEmail.isPending ? 'Sending...' : 'Send'}
                   <Send className="w-4 h-4 ml-2" />
                 </Button>
               </div>
@@ -190,17 +232,38 @@ export function EmailPage() {
   }
 
   // Thread view
-  if (selectedThread) {
+  if (selectedThreadId) {
+    if (loadingThread) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+        </div>
+      )
+    }
+
+    if (!selectedThread) {
+      return (
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => setSelectedThreadId(null)}>
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+            <h1 className="text-xl font-semibold">Thread not found</h1>
+          </div>
+        </div>
+      )
+    }
+
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => setSelectedThread(null)}>
+          <Button variant="ghost" size="icon" onClick={() => setSelectedThreadId(null)}>
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <h1 className="text-xl font-semibold truncate">{selectedThread.subject}</h1>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[calc(100vh-300px)] overflow-y-auto">
           {selectedThread.messages.map((message) => (
             <Card key={message.id}>
               <CardContent className="pt-4">
@@ -229,46 +292,21 @@ export function EmailPage() {
 
         <Card>
           <CardContent className="pt-4">
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault()
-                if (!composeBody) return
-                setSending(true)
-                setError(null)
-                try {
-                  const lastMessage = selectedThread.messages[selectedThread.messages.length - 1]
-                  await executeWithRetry(() =>
-                    GmailService.sendEmail({
-                      to: [lastMessage.fromEmail],
-                      subject: `Re: ${selectedThread.subject}`,
-                      body: composeBody,
-                      threadId: selectedThread.id,
-                    })
-                  )
-                  setComposeBody('')
-                  // Refresh thread
-                  const updated = await executeWithRetry(() =>
-                    GmailService.getThread(selectedThread.id)
-                  )
-                  setSelectedThread(updated)
-                } catch (err) {
-                  console.error('Failed to reply:', err)
-                  setError(err instanceof Error ? err.message : 'Failed to send reply')
-                } finally {
-                  setSending(false)
-                }
-              }}
-              className="space-y-3"
-            >
+            <form onSubmit={handleReply} className="space-y-3">
               <textarea
                 className="w-full min-h-[100px] p-3 rounded-md border bg-background resize-none focus:outline-none focus:ring-2 focus:ring-ring"
                 placeholder="Write a reply..."
                 value={composeBody}
                 onChange={(e) => setComposeBody(e.target.value)}
               />
+              {sendEmail.error && (
+                <div className="p-3 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-sm">
+                  {sendEmail.error.message}
+                </div>
+              )}
               <div className="flex justify-end">
-                <Button type="submit" disabled={sending || !composeBody}>
-                  {sending ? 'Sending...' : 'Reply'}
+                <Button type="submit" disabled={sendEmail.isPending || !composeBody}>
+                  {sendEmail.isPending ? 'Sending...' : 'Reply'}
                 </Button>
               </div>
             </form>
@@ -278,14 +316,14 @@ export function EmailPage() {
     )
   }
 
-  // Inbox list
+  // Inbox list with virtual scrolling
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Email</h1>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={fetchEmails} disabled={loading}>
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading}>
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
           </Button>
           <Button onClick={() => setShowCompose(true)}>
             <Send className="w-4 h-4 mr-2" />
@@ -299,8 +337,8 @@ export function EmailPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Search emails..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             className="pl-9"
           />
         </div>
@@ -312,62 +350,30 @@ export function EmailPage() {
       {error && (
         <div className="p-3 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-sm flex items-center justify-between">
           <span>{error}</span>
-          {lastFailedAction && (
-            <Button variant="ghost" size="sm" onClick={handleRetry} className="ml-2 text-destructive hover:text-destructive">
-              <RotateCcw className="w-4 h-4 mr-1" />
-              Retry
-            </Button>
-          )}
+          <Button variant="ghost" size="sm" onClick={() => refetch()} className="ml-2 text-destructive hover:text-destructive">
+            <RotateCcw className="w-4 h-4 mr-1" />
+            Retry
+          </Button>
         </div>
       )}
 
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
-        </div>
-      ) : threads.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          <Mail className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p>No emails found</p>
-        </div>
-      ) : (
-        <div className="space-y-1">
-          {threads.map((thread) => (
-            <button
-              key={thread.id}
-              onClick={() => setSelectedThread(thread)}
-              className={`w-full text-left p-3 rounded-lg border transition-colors hover:bg-muted/50 ${
-                thread.isUnread ? 'bg-primary/5 border-primary/20' : 'bg-card'
-              }`}
-            >
-              <div className="flex items-start gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className={`truncate ${thread.isUnread ? 'font-semibold' : ''}`}>
-                      {thread.participants[0] || 'Unknown'}
-                    </span>
-                    {thread.messageCount > 1 && (
-                      <span className="text-xs text-muted-foreground">({thread.messageCount})</span>
-                    )}
-                  </div>
-                  <p className={`truncate ${thread.isUnread ? 'font-medium' : ''}`}>
-                    {thread.subject}
-                  </p>
-                  <p className="text-sm text-muted-foreground truncate">{thread.snippet}</p>
-                </div>
-                <div className="flex flex-col items-end gap-1">
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    {formatDate(thread.lastMessageDate)}
-                  </span>
-                  {thread.messages.some((m) => m.hasAttachments) && (
-                    <Paperclip className="w-3 h-3 text-muted-foreground" />
-                  )}
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
+      <VirtualList
+        items={threads}
+        estimatedItemHeight={88}
+        getItemKey={(thread) => thread.id}
+        renderItem={renderThreadItem}
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        fetchNextPage={fetchNextPage}
+        isLoading={isLoading}
+        maxHeight="calc(100vh - 280px)"
+        emptyState={
+          <div className="text-center py-12 text-muted-foreground">
+            <Mail className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <p>No emails found</p>
+          </div>
+        }
+      />
     </div>
   )
 }
