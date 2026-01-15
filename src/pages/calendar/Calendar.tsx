@@ -1,22 +1,17 @@
 import { useState, useMemo } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { useCalendarEventsForRange, useCreateEvent } from '@/lib/hooks/useCalendar'
+import { useCalendarEventsForRange } from '@/lib/hooks/useCalendar'
 import { GoogleTokenService } from '@/lib/services/googleTokenService'
 import { type ParsedCalendarEvent } from '@/lib/services/calendarService'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { CalendarEventDialog } from '@/components/calendar/CalendarEventDialog'
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
   ChevronRight,
   Plus,
   RefreshCw,
-  Clock,
-  MapPin,
-  Users,
-  Video,
-  X,
   RotateCcw,
 } from 'lucide-react'
 
@@ -24,14 +19,8 @@ export function CalendarPage() {
   const { session, signInWithGoogle } = useAuth()
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedEvent, setSelectedEvent] = useState<ParsedCalendarEvent | null>(null)
-  const [showCreate, setShowCreate] = useState(false)
-
-  // Create event state
-  const [newTitle, setNewTitle] = useState('')
-  const [newDate, setNewDate] = useState('')
-  const [newStartTime, setNewStartTime] = useState('09:00')
-  const [newEndTime, setNewEndTime] = useState('10:00')
-  const [newDescription, setNewDescription] = useState('')
+  const [showEventDialog, setShowEventDialog] = useState(false)
+  const [selectedDateForCreate, setSelectedDateForCreate] = useState<Date | undefined>()
 
   // Initialize Google Token Service
   const hasGoogleAuth = !!session?.provider_token
@@ -55,35 +44,18 @@ export function CalendarPage() {
     error: eventsError,
   } = useCalendarEventsForRange(dateRangeStart, dateRangeEnd, hasGoogleAuth)
 
-  // Create event mutation
-  const createEvent = useCreateEvent()
+  const error = eventsError?.message || null
 
-  const error = eventsError?.message || createEvent.error?.message || null
+  function handleCreateEvent(date?: Date) {
+    setSelectedEvent(null)
+    setSelectedDateForCreate(date)
+    setShowEventDialog(true)
+  }
 
-  async function handleCreateEvent(e: React.FormEvent) {
-    e.preventDefault()
-    if (!newTitle || !newDate) return
-
-    try {
-      const startDate = new Date(`${newDate}T${newStartTime}`)
-      const endDate = new Date(`${newDate}T${newEndTime}`)
-
-      await createEvent.mutateAsync({
-        title: newTitle,
-        description: newDescription || undefined,
-        start: startDate,
-        end: endDate,
-      })
-
-      setShowCreate(false)
-      setNewTitle('')
-      setNewDate('')
-      setNewStartTime('09:00')
-      setNewEndTime('10:00')
-      setNewDescription('')
-    } catch (err) {
-      console.error('Failed to create event:', err)
-    }
+  function handleEditEvent(event: ParsedCalendarEvent) {
+    setSelectedEvent(event)
+    setSelectedDateForCreate(undefined)
+    setShowEventDialog(true)
   }
 
   // Calendar grid helpers
@@ -176,7 +148,7 @@ export function CalendarPage() {
           <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading || isFetching}>
             <RefreshCw className={`w-4 h-4 ${isLoading || isFetching ? 'animate-spin' : ''}`} />
           </Button>
-          <Button onClick={() => setShowCreate(true)}>
+          <Button onClick={() => handleCreateEvent()}>
             <Plus className="w-4 h-4 mr-2" />
             New Event
           </Button>
@@ -222,9 +194,10 @@ export function CalendarPage() {
                 return (
                   <div
                     key={index}
-                    className={`min-h-[100px] p-1 border-b border-r ${
+                    className={`min-h-[100px] p-1 border-b border-r cursor-pointer hover:bg-muted/20 transition-colors ${
                       !isCurrentMonth ? 'bg-muted/30' : ''
                     }`}
+                    onClick={() => handleCreateEvent(date)}
                   >
                     <div
                       className={`text-sm p-1 ${
@@ -241,7 +214,10 @@ export function CalendarPage() {
                       {dayEvents.slice(0, 3).map((event) => (
                         <button
                           key={event.id}
-                          onClick={() => setSelectedEvent(event)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleEditEvent(event)
+                          }}
                           className="w-full text-left text-xs p-1 rounded bg-primary/10 text-primary hover:bg-primary/20 truncate"
                         >
                           {event.allDay ? '' : event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' '}
@@ -262,144 +238,13 @@ export function CalendarPage() {
         </CardContent>
       </Card>
 
-      {/* Event Detail Modal */}
-      {selectedEvent && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-md">
-            <CardHeader className="flex flex-row items-start justify-between">
-              <CardTitle>{selectedEvent.title}</CardTitle>
-              <Button variant="ghost" size="icon" onClick={() => setSelectedEvent(null)}>
-                <X className="w-4 h-4" />
-              </Button>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center gap-2 text-sm">
-                <Clock className="w-4 h-4 text-muted-foreground" />
-                <span>
-                  {selectedEvent.allDay
-                    ? 'All day'
-                    : `${selectedEvent.start.toLocaleString()} - ${selectedEvent.end.toLocaleTimeString()}`}
-                </span>
-              </div>
-              {selectedEvent.location && (
-                <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="w-4 h-4 text-muted-foreground" />
-                  <span>{selectedEvent.location}</span>
-                </div>
-              )}
-              {selectedEvent.meetingUrl && (
-                <div className="flex items-center gap-2 text-sm">
-                  <Video className="w-4 h-4 text-muted-foreground" />
-                  <a
-                    href={selectedEvent.meetingUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    Join Meeting
-                  </a>
-                </div>
-              )}
-              {selectedEvent.attendees.length > 0 && (
-                <div className="flex items-start gap-2 text-sm">
-                  <Users className="w-4 h-4 text-muted-foreground mt-0.5" />
-                  <div>
-                    {selectedEvent.attendees.map((a) => (
-                      <div key={a.email}>{a.name}</div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {selectedEvent.description && (
-                <p className="text-sm text-muted-foreground">{selectedEvent.description}</p>
-              )}
-              <div className="pt-2">
-                <a
-                  href={selectedEvent.googleLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Open in Google Calendar
-                </a>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Create Event Modal */}
-      {showCreate && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-md">
-            <CardHeader className="flex flex-row items-start justify-between">
-              <CardTitle>New Event</CardTitle>
-              <Button variant="ghost" size="icon" onClick={() => setShowCreate(false)}>
-                <X className="w-4 h-4" />
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleCreateEvent} className="space-y-4">
-                <div>
-                  <Input
-                    placeholder="Event title"
-                    value={newTitle}
-                    onChange={(e) => setNewTitle(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <Input
-                    type="date"
-                    value={newDate}
-                    onChange={(e) => setNewDate(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="text-sm text-muted-foreground">Start</label>
-                    <Input
-                      type="time"
-                      value={newStartTime}
-                      onChange={(e) => setNewStartTime(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm text-muted-foreground">End</label>
-                    <Input
-                      type="time"
-                      value={newEndTime}
-                      onChange={(e) => setNewEndTime(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <textarea
-                    className="w-full min-h-[80px] p-3 rounded-md border bg-background resize-none focus:outline-none focus:ring-2 focus:ring-ring"
-                    placeholder="Description (optional)"
-                    value={newDescription}
-                    onChange={(e) => setNewDescription(e.target.value)}
-                  />
-                </div>
-                {createEvent.error && (
-                  <div className="p-3 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-sm">
-                    {createEvent.error.message}
-                  </div>
-                )}
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setShowCreate(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={createEvent.isPending}>
-                    {createEvent.isPending ? 'Creating...' : 'Create Event'}
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      {/* Calendar Event Dialog - for both create and edit */}
+      <CalendarEventDialog
+        open={showEventDialog}
+        onOpenChange={setShowEventDialog}
+        event={selectedEvent}
+        selectedDate={selectedDateForCreate}
+      />
     </div>
   )
 }
