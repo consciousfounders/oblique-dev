@@ -12,6 +12,9 @@ import {
   Shield,
   Menu,
   X,
+  Mail,
+  Calendar,
+  HardDrive,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -22,6 +25,9 @@ const navItems = [
   { href: '/contacts', label: 'Contacts', icon: Users },
   { href: '/accounts', label: 'Accounts', icon: Building2 },
   { href: '/deals', label: 'Deals', icon: Kanban },
+  { href: '/email', label: 'Email', icon: Mail },
+  { href: '/calendar', label: 'Calendar', icon: Calendar },
+  { href: '/drive', label: 'Drive', icon: HardDrive },
 ]
 
 export function Sidebar() {

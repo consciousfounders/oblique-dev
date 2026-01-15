@@ -9,6 +9,9 @@ import { LeadsPage } from '@/pages/leads/Leads'
 import { ContactsPage } from '@/pages/contacts/Contacts'
 import { AccountsPage } from '@/pages/accounts/Accounts'
 import { DealsPage } from '@/pages/deals/Deals'
+import { EmailPage } from '@/pages/email/Email'
+import { CalendarPage } from '@/pages/calendar/Calendar'
+import { DrivePage } from '@/pages/drive/Drive'
 import { SuperAdminPage } from '@/pages/super-admin/SuperAdmin'
 import { SettingsPage } from '@/pages/settings/Settings'
 
@@ -29,6 +32,9 @@ function App() {
             <Route path="/contacts" element={<ContactsPage />} />
             <Route path="/accounts" element={<AccountsPage />} />
             <Route path="/deals" element={<DealsPage />} />
+            <Route path="/email" element={<EmailPage />} />
+            <Route path="/calendar" element={<CalendarPage />} />
+            <Route path="/drive" element={<DrivePage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/super-admin" element={<SuperAdminPage />} />
           </Route>
