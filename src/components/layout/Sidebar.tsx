@@ -14,7 +14,7 @@ import {
   X,
   Mail,
   Calendar,
-  HardDrive,
+  FolderOpen,
   Clock,
   Code,
   Activity,
@@ -32,7 +32,7 @@ const navItems = [
   { href: '/deals', label: 'Deals', icon: Kanban },
   { href: '/email', label: 'Email', icon: Mail },
   { href: '/calendar', label: 'Calendar', icon: Calendar },
-  { href: '/drive', label: 'Drive', icon: HardDrive },
+  { href: '/drive', label: 'Drive', icon: FolderOpen },
   { href: '/booking', label: 'Booking', icon: Clock },
   { href: '/linkedin', label: 'LinkedIn', icon: Linkedin },
 ]
