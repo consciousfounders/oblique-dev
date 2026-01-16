@@ -70,7 +70,11 @@ const navItems = [
   { href: '/campaigns', label: 'Campaigns', icon: Megaphone, permission: 'campaigns.view' },
 ]
 
-export function Sidebar() {
+interface SidebarProps {
+  onQuickSearch?: () => void
+}
+
+export function Sidebar({ onQuickSearch: _onQuickSearch }: SidebarProps) {
   const location = useLocation()
   const { user, signOut } = useAuth()
   const { hasPermission, isAdmin } = usePermissions()
