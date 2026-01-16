@@ -224,6 +224,12 @@ export type Database = {
           expected_close_date: string | null
           closed_at: string | null
           won: boolean | null
+          description: string | null
+          lead_source: string | null
+          deal_type: DealType
+          next_step: string | null
+          competitors: string[] | null
+          probability: number | null
           created_at: string
           updated_at: string
         }
@@ -239,6 +245,12 @@ export type Database = {
           expected_close_date?: string | null
           closed_at?: string | null
           won?: boolean | null
+          description?: string | null
+          lead_source?: string | null
+          deal_type?: DealType
+          next_step?: string | null
+          competitors?: string[] | null
+          probability?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -254,6 +266,12 @@ export type Database = {
           expected_close_date?: string | null
           closed_at?: string | null
           won?: boolean | null
+          description?: string | null
+          lead_source?: string | null
+          deal_type?: DealType
+          next_step?: string | null
+          competitors?: string[] | null
+          probability?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -1575,6 +1593,9 @@ export type TerritoryCriteriaUpdate = Database['public']['Tables']['territory_cr
 export type TerritoryAccount = Database['public']['Tables']['territory_accounts']['Row']
 export type TerritoryAccountInsert = Database['public']['Tables']['territory_accounts']['Insert']
 export type TerritoryAccountUpdate = Database['public']['Tables']['territory_accounts']['Update']
+
+// Deal types
+export type DealType = 'new_business' | 'renewal' | 'upsell' | 'cross_sell'
 
 // Assignment rule types
 export type AssignmentRuleType = 'round_robin' | 'load_balanced' | 'skill_based'
