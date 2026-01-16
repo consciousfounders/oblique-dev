@@ -9,7 +9,8 @@ import { ActivityTimeline, ActivityForm } from '@/components/activity'
 import { NotesPanel } from '@/components/notes'
 import { AttachmentsPanel } from '@/components/attachments'
 import { LinkedInProfilePanel, InMailDialog } from '@/components/linkedin'
-import { ArrowLeft, Phone, Mail, Building2, Briefcase, Tag } from 'lucide-react'
+import { LeadScoringPanel, LeadQualificationPanel, LeadScoreBadge } from '@/components/leads'
+import { ArrowLeft, Phone, Mail, Building2, Briefcase, Tag, Factory, Users, DollarSign } from 'lucide-react'
 
 interface Lead {
   id: string
@@ -24,6 +25,18 @@ interface Lead {
   converted_contact_id: string | null
   converted_account_id: string | null
   converted_at: string | null
+  // Scoring fields
+  score: number | null
+  score_label: string | null
+  demographic_score: number | null
+  behavioral_score: number | null
+  engagement_score: number | null
+  fit_score: number | null
+  qualification_status: string | null
+  qualification_checklist: Record<string, boolean> | null
+  industry: string | null
+  company_size: string | null
+  annual_revenue: string | null
   created_at: string
   updated_at: string
 }
@@ -121,9 +134,12 @@ export function LeadDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-2xl">
-                {lead.first_name} {lead.last_name}
-              </CardTitle>
+              <div className="flex items-center gap-3">
+                <CardTitle className="text-2xl">
+                  {lead.first_name} {lead.last_name}
+                </CardTitle>
+                <LeadScoreBadge score={lead.score} label={lead.score_label} />
+              </div>
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColors[lead.status] || statusColors.new}`}>
                 {lead.status}
               </span>
@@ -161,6 +177,24 @@ export function LeadDetailPage() {
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Tag className="w-4 h-4" />
                   <span>Source: {lead.source}</span>
+                </div>
+              )}
+              {lead.industry && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Factory className="w-4 h-4" />
+                  <span>Industry: {lead.industry}</span>
+                </div>
+              )}
+              {lead.company_size && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Users className="w-4 h-4" />
+                  <span>Company Size: {lead.company_size}</span>
+                </div>
+              )}
+              {lead.annual_revenue && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <DollarSign className="w-4 h-4" />
+                  <span>Annual Revenue: {lead.annual_revenue}</span>
                 </div>
               )}
 
@@ -201,6 +235,20 @@ export function LeadDetailPage() {
         </div>
 
         <div className="space-y-6">
+          <LeadScoringPanel
+            leadId={lead.id}
+            onScoreUpdate={(score, label) => {
+              setLead(prev => prev ? { ...prev, score, score_label: label } : null)
+            }}
+          />
+          <LeadQualificationPanel
+            leadId={lead.id}
+            initialChecklist={lead.qualification_checklist}
+            initialStatus={lead.qualification_status}
+            onStatusChange={(status, checklist) => {
+              setLead(prev => prev ? { ...prev, qualification_status: status, qualification_checklist: checklist } : null)
+            }}
+          />
           <LinkedInProfilePanel
             entityType="lead"
             entityId={lead.id}

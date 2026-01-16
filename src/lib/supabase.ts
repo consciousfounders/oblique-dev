@@ -218,6 +218,23 @@ export type Database = {
           converted_contact_id: string | null
           converted_account_id: string | null
           converted_at: string | null
+          // Lead scoring fields
+          score: number | null
+          score_label: 'cold' | 'warm' | 'hot' | 'qualified' | null
+          demographic_score: number | null
+          behavioral_score: number | null
+          engagement_score: number | null
+          fit_score: number | null
+          score_breakdown: Record<string, number> | null
+          last_score_update: string | null
+          last_activity_at: string | null
+          activity_count: number
+          // Qualification fields
+          qualification_status: 'not_started' | 'in_progress' | 'qualified' | 'disqualified' | null
+          qualification_checklist: Record<string, boolean> | null
+          industry: string | null
+          company_size: string | null
+          annual_revenue: string | null
           created_at: string
           updated_at: string
         }
@@ -238,6 +255,23 @@ export type Database = {
           converted_contact_id?: string | null
           converted_account_id?: string | null
           converted_at?: string | null
+          // Lead scoring fields
+          score?: number | null
+          score_label?: 'cold' | 'warm' | 'hot' | 'qualified' | null
+          demographic_score?: number | null
+          behavioral_score?: number | null
+          engagement_score?: number | null
+          fit_score?: number | null
+          score_breakdown?: Record<string, number> | null
+          last_score_update?: string | null
+          last_activity_at?: string | null
+          activity_count?: number
+          // Qualification fields
+          qualification_status?: 'not_started' | 'in_progress' | 'qualified' | 'disqualified' | null
+          qualification_checklist?: Record<string, boolean> | null
+          industry?: string | null
+          company_size?: string | null
+          annual_revenue?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -258,8 +292,160 @@ export type Database = {
           converted_contact_id?: string | null
           converted_account_id?: string | null
           converted_at?: string | null
+          // Lead scoring fields
+          score?: number | null
+          score_label?: 'cold' | 'warm' | 'hot' | 'qualified' | null
+          demographic_score?: number | null
+          behavioral_score?: number | null
+          engagement_score?: number | null
+          fit_score?: number | null
+          score_breakdown?: Record<string, number> | null
+          last_score_update?: string | null
+          last_activity_at?: string | null
+          activity_count?: number
+          // Qualification fields
+          qualification_status?: 'not_started' | 'in_progress' | 'qualified' | 'disqualified' | null
+          qualification_checklist?: Record<string, boolean> | null
+          industry?: string | null
+          company_size?: string | null
+          annual_revenue?: string | null
           created_at?: string
           updated_at?: string
+        }
+      }
+      lead_scoring_rules: {
+        Row: {
+          id: string
+          tenant_id: string
+          name: string
+          description: string | null
+          category: 'demographic' | 'behavioral' | 'engagement' | 'fit'
+          field_name: string
+          operator: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'greater_than' | 'less_than' | 'in' | 'not_in' | 'exists' | 'not_exists'
+          field_value: string | null
+          field_values: string[] | null
+          points: number
+          is_active: boolean
+          priority: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          name: string
+          description?: string | null
+          category: 'demographic' | 'behavioral' | 'engagement' | 'fit'
+          field_name: string
+          operator: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'greater_than' | 'less_than' | 'in' | 'not_in' | 'exists' | 'not_exists'
+          field_value?: string | null
+          field_values?: string[] | null
+          points: number
+          is_active?: boolean
+          priority?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          name?: string
+          description?: string | null
+          category?: 'demographic' | 'behavioral' | 'engagement' | 'fit'
+          field_name?: string
+          operator?: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'greater_than' | 'less_than' | 'in' | 'not_in' | 'exists' | 'not_exists'
+          field_value?: string | null
+          field_values?: string[] | null
+          points?: number
+          is_active?: boolean
+          priority?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      lead_scoring_settings: {
+        Row: {
+          id: string
+          tenant_id: string
+          cold_threshold: number
+          warm_threshold: number
+          hot_threshold: number
+          qualified_threshold: number
+          auto_convert_enabled: boolean
+          auto_convert_threshold: number
+          score_decay_enabled: boolean
+          score_decay_days: number
+          score_decay_percentage: number
+          qualification_framework: 'bant' | 'meddic' | 'custom'
+          qualification_criteria: Record<string, unknown> | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          cold_threshold?: number
+          warm_threshold?: number
+          hot_threshold?: number
+          qualified_threshold?: number
+          auto_convert_enabled?: boolean
+          auto_convert_threshold?: number
+          score_decay_enabled?: boolean
+          score_decay_days?: number
+          score_decay_percentage?: number
+          qualification_framework?: 'bant' | 'meddic' | 'custom'
+          qualification_criteria?: Record<string, unknown> | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          cold_threshold?: number
+          warm_threshold?: number
+          hot_threshold?: number
+          qualified_threshold?: number
+          auto_convert_enabled?: boolean
+          auto_convert_threshold?: number
+          score_decay_enabled?: boolean
+          score_decay_days?: number
+          score_decay_percentage?: number
+          qualification_framework?: 'bant' | 'meddic' | 'custom'
+          qualification_criteria?: Record<string, unknown> | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      lead_score_history: {
+        Row: {
+          id: string
+          tenant_id: string
+          lead_id: string
+          previous_score: number | null
+          new_score: number
+          change_reason: string | null
+          triggered_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          lead_id: string
+          previous_score?: number | null
+          new_score: number
+          change_reason?: string | null
+          triggered_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          lead_id?: string
+          previous_score?: number | null
+          new_score?: number
+          change_reason?: string | null
+          triggered_by?: string | null
+          created_at?: string
         }
       }
       deals: {
@@ -2834,3 +3020,26 @@ export type ForecastEntryUpdate = Database['public']['Tables']['forecast_entries
 export type ForecastDealSnapshot = Database['public']['Tables']['forecast_deal_snapshots']['Row']
 export type ForecastDealSnapshotInsert = Database['public']['Tables']['forecast_deal_snapshots']['Insert']
 export type ForecastDealSnapshotUpdate = Database['public']['Tables']['forecast_deal_snapshots']['Update']
+
+// Lead Scoring types
+export type LeadScoreLabel = 'cold' | 'warm' | 'hot' | 'qualified'
+export type LeadQualificationStatus = 'not_started' | 'in_progress' | 'qualified' | 'disqualified'
+export type ScoringRuleCategory = 'demographic' | 'behavioral' | 'engagement' | 'fit'
+export type ScoringRuleOperator = 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'greater_than' | 'less_than' | 'in' | 'not_in' | 'exists' | 'not_exists'
+export type QualificationFramework = 'bant' | 'meddic' | 'custom'
+
+export type Lead = Database['public']['Tables']['leads']['Row']
+export type LeadInsert = Database['public']['Tables']['leads']['Insert']
+export type LeadUpdate = Database['public']['Tables']['leads']['Update']
+
+export type LeadScoringRule = Database['public']['Tables']['lead_scoring_rules']['Row']
+export type LeadScoringRuleInsert = Database['public']['Tables']['lead_scoring_rules']['Insert']
+export type LeadScoringRuleUpdate = Database['public']['Tables']['lead_scoring_rules']['Update']
+
+export type LeadScoringSettings = Database['public']['Tables']['lead_scoring_settings']['Row']
+export type LeadScoringSettingsInsert = Database['public']['Tables']['lead_scoring_settings']['Insert']
+export type LeadScoringSettingsUpdate = Database['public']['Tables']['lead_scoring_settings']['Update']
+
+export type LeadScoreHistory = Database['public']['Tables']['lead_score_history']['Row']
+export type LeadScoreHistoryInsert = Database['public']['Tables']['lead_score_history']['Insert']
+export type LeadScoreHistoryUpdate = Database['public']['Tables']['lead_score_history']['Update']
