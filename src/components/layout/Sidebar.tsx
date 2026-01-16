@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { usePermissions } from '@/lib/hooks/usePermissions'
 import {
   LayoutDashboard,
   Users,
@@ -36,33 +37,35 @@ import { Button } from '@/components/ui/button'
 import { NotificationBell } from '@/components/notifications/NotificationBell'
 import { useCommandPalette } from '@/lib/hooks/useCommandPalette'
 
+// Navigation items with optional permission requirements
 const navItems = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/activity', label: 'Activity', icon: Activity },
-  { href: '/leads', label: 'Leads', icon: UserCircle },
-  { href: '/contacts', label: 'Contacts', icon: Users },
-  { href: '/accounts', label: 'Accounts', icon: Building2 },
-  { href: '/deals', label: 'Deals', icon: Kanban },
-  { href: '/forecasting', label: 'Forecasting', icon: TrendingUp },
-  { href: '/products', label: 'Products', icon: Package },
-  { href: '/price-books', label: 'Price Books', icon: BookOpen },
-  { href: '/quotes', label: 'Quotes', icon: FileCheck },
-  { href: '/teams', label: 'Teams', icon: UsersRound },
-  { href: '/territories', label: 'Territories', icon: MapPin },
-  { href: '/assignment-rules', label: 'Assign Rules', icon: GitBranch },
+  { href: '/', label: 'Dashboard', icon: LayoutDashboard, permission: 'dashboard.view' },
+  { href: '/activity', label: 'Activity', icon: Activity, permission: 'activities.view' },
+  { href: '/leads', label: 'Leads', icon: UserCircle, permission: 'leads.view' },
+  { href: '/contacts', label: 'Contacts', icon: Users, permission: 'contacts.view' },
+  { href: '/accounts', label: 'Accounts', icon: Building2, permission: 'accounts.view' },
+  { href: '/deals', label: 'Deals', icon: Kanban, permission: 'deals.view' },
+  { href: '/forecasting', label: 'Forecasting', icon: TrendingUp, permission: 'forecasting.view' },
+  { href: '/products', label: 'Products', icon: Package, permission: 'products.view' },
+  { href: '/price-books', label: 'Price Books', icon: BookOpen, permission: 'products.view' },
+  { href: '/quotes', label: 'Quotes', icon: FileCheck, permission: 'quotes.view' },
+  { href: '/teams', label: 'Teams', icon: UsersRound, permission: 'teams.view' },
+  { href: '/territories', label: 'Territories', icon: MapPin, permission: 'territories.view' },
+  { href: '/assignment-rules', label: 'Assign Rules', icon: GitBranch, permission: 'assignment_rules.view' },
   { href: '/email', label: 'Email', icon: Mail },
   { href: '/calendar', label: 'Calendar', icon: Calendar },
   { href: '/drive', label: 'Drive', icon: FolderOpen },
   { href: '/booking', label: 'Booking', icon: Clock },
   { href: '/linkedin', label: 'LinkedIn', icon: Linkedin },
-  { href: '/data-management', label: 'Data', icon: Database },
-  { href: '/forms', label: 'Web Forms', icon: FileText },
-  { href: '/campaigns', label: 'Campaigns', icon: Megaphone },
+  { href: '/data-management', label: 'Data', icon: Database, permission: 'data.import' },
+  { href: '/forms', label: 'Web Forms', icon: FileText, permission: 'forms.view' },
+  { href: '/campaigns', label: 'Campaigns', icon: Megaphone, permission: 'campaigns.view' },
 ]
 
 export function Sidebar() {
   const location = useLocation()
   const { user, signOut } = useAuth()
+  const { hasPermission, isAdmin } = usePermissions()
   const [mobileOpen, setMobileOpen] = useState(false)
 
   // Use try-catch since useCommandPalette might not be available if Sidebar is rendered outside CommandPaletteProvider
@@ -98,27 +101,36 @@ export function Sidebar() {
       )}
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-1">
-        {navItems.map((item) => {
-          const Icon = item.icon
-          const isActive = location.pathname === item.href
-          return (
-            <Link
-              key={item.href}
-              to={item.href}
-              onClick={() => setMobileOpen(false)}
-              className={cn(
-                'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
-                isActive
-                  ? 'bg-sidebar-accent text-sidebar-primary'
-                  : 'text-sidebar-foreground hover:bg-sidebar-accent'
-              )}
-            >
-              <Icon className="w-5 h-5" />
-              {item.label}
-            </Link>
-          )
-        })}
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        {navItems
+          .filter((item) => {
+            // Items without permission are always shown
+            if (!item.permission) return true
+            // Super admins and admins see everything
+            if (user?.isSuperAdmin || isAdmin) return true
+            // Check specific permission
+            return hasPermission(item.permission)
+          })
+          .map((item) => {
+            const Icon = item.icon
+            const isActive = location.pathname === item.href
+            return (
+              <Link
+                key={item.href}
+                to={item.href}
+                onClick={() => setMobileOpen(false)}
+                className={cn(
+                  'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                  isActive
+                    ? 'bg-sidebar-accent text-sidebar-primary'
+                    : 'text-sidebar-foreground hover:bg-sidebar-accent'
+                )}
+              >
+                <Icon className="w-5 h-5" />
+                {item.label}
+              </Link>
+            )
+          })}
 
         {/* Super Admin Link */}
         {user?.isSuperAdmin && (
@@ -153,19 +165,21 @@ export function Sidebar() {
           <Settings className="w-5 h-5" />
           Settings
         </Link>
-        <Link
-          to="/developer"
-          onClick={() => setMobileOpen(false)}
-          className={cn(
-            'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
-            location.pathname.startsWith('/developer')
-              ? 'bg-sidebar-accent text-sidebar-primary'
-              : 'text-sidebar-foreground hover:bg-sidebar-accent'
-          )}
-        >
-          <Code className="w-5 h-5" />
-          Developer
-        </Link>
+        {(hasPermission('developer.view') || user?.isSuperAdmin || isAdmin) && (
+          <Link
+            to="/developer"
+            onClick={() => setMobileOpen(false)}
+            className={cn(
+              'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
+              location.pathname.startsWith('/developer')
+                ? 'bg-sidebar-accent text-sidebar-primary'
+                : 'text-sidebar-foreground hover:bg-sidebar-accent'
+            )}
+          >
+            <Code className="w-5 h-5" />
+            Developer
+          </Link>
+        )}
         <button
           onClick={signOut}
           className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent w-full transition-colors"

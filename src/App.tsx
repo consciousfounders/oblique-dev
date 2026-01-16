@@ -5,6 +5,7 @@ import { AuthProvider } from '@/lib/hooks/useAuth'
 import { ThemeProvider } from '@/lib/hooks/useTheme'
 import { GoogleApiProvider } from '@/lib/hooks/useGoogleApi'
 import { QueryProvider } from '@/lib/hooks/useQueryClient'
+import { PermissionsProvider } from '@/lib/hooks/usePermissions'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { LoginPage } from '@/pages/auth/Login'
 import { AuthCallback } from '@/pages/auth/Callback'
@@ -28,6 +29,7 @@ const SettingsPage = lazy(() => import('@/pages/settings/Settings').then(m => ({
 const NotificationSettingsPage = lazy(() => import('@/pages/settings/NotificationSettings').then(m => ({ default: m.NotificationSettingsPage })))
 const EnrichmentSettingsPage = lazy(() => import('@/pages/settings/EnrichmentSettings').then(m => ({ default: m.EnrichmentSettingsPage })))
 const CustomFieldSettingsPage = lazy(() => import('@/pages/settings/CustomFieldSettings').then(m => ({ default: m.CustomFieldSettingsPage })))
+const UserManagementPage = lazy(() => import('@/pages/settings/UserManagement').then(m => ({ default: m.UserManagementPage })))
 const DeveloperPage = lazy(() => import('@/pages/developer/Developer').then(m => ({ default: m.DeveloperPage })))
 const ActivityPage = lazy(() => import('@/pages/activity/Activity').then(m => ({ default: m.ActivityPage })))
 const LinkedInPage = lazy(() => import('@/pages/linkedin/LinkedIn').then(m => ({ default: m.LinkedInPage })))
@@ -65,6 +67,7 @@ function App() {
       <QueryProvider>
       <ThemeProvider>
       <AuthProvider>
+      <PermissionsProvider>
       <GoogleApiProvider>
         <Routes>
           {/* Public routes */}
@@ -92,6 +95,7 @@ function App() {
             <Route path="/settings/notifications" element={<Suspense fallback={<PageLoader />}><NotificationSettingsPage /></Suspense>} />
             <Route path="/settings/enrichment" element={<Suspense fallback={<PageLoader />}><EnrichmentSettingsPage /></Suspense>} />
             <Route path="/settings/custom-fields" element={<Suspense fallback={<PageLoader />}><CustomFieldSettingsPage /></Suspense>} />
+            <Route path="/settings/users" element={<Suspense fallback={<PageLoader />}><UserManagementPage /></Suspense>} />
             <Route path="/developer" element={<Suspense fallback={<PageLoader />}><DeveloperPage /></Suspense>} />
             <Route path="/super-admin" element={<Suspense fallback={<PageLoader />}><SuperAdminPage /></Suspense>} />
             <Route path="/activity" element={<Suspense fallback={<PageLoader />}><ActivityPage /></Suspense>} />
@@ -124,6 +128,7 @@ function App() {
           closeButton
         />
       </GoogleApiProvider>
+      </PermissionsProvider>
       </AuthProvider>
       </ThemeProvider>
       </QueryProvider>

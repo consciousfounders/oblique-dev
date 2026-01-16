@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Territory, TerritoryCriteriaType } from '@/lib/supabase'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { usePermissions } from '@/lib/hooks/usePermissions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -79,6 +80,8 @@ const FIELD_OPTIONS: Record<TerritoryCriteriaType, { value: string; label: strin
 
 export function TerritoriesPage() {
   const { user } = useAuth()
+  const { hasPermission } = usePermissions()
+  const canManageTerritories = hasPermission('territories.create') || hasPermission('territories.update')
   const [territories, setTerritories] = useState<TerritoryWithDetails[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -400,7 +403,7 @@ export function TerritoriesPage() {
           <h1 className="text-2xl font-bold">Territories</h1>
           <p className="text-muted-foreground">{territories.length} total territories</p>
         </div>
-        {user?.role === 'admin' && (
+        {canManageTerritories && (
           <Button onClick={() => setShowCreate(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Create Territory
@@ -625,7 +628,7 @@ export function TerritoriesPage() {
                             <span className="capitalize">{c.criteria_type}</span>: {c.field_name}{' '}
                             <span className="text-muted-foreground">{c.operator}</span> "{c.field_value}"
                           </span>
-                          {user?.role === 'admin' && (
+                          {canManageTerritories && (
                             <Button
                               variant="ghost"
                               size="sm"
@@ -639,7 +642,7 @@ export function TerritoriesPage() {
                     </div>
                   )}
 
-                  {user?.role === 'admin' && (
+                  {canManageTerritories && (
                     <div className="border-t pt-4 space-y-3">
                       <p className="text-sm font-medium">Add Criteria</p>
                       <div className="grid grid-cols-2 gap-2">
@@ -717,7 +720,7 @@ export function TerritoriesPage() {
                       {namedAccounts.map((na) => (
                         <div key={na.id} className="flex items-center justify-between p-2 bg-muted/50 rounded">
                           <span className="text-sm">{na.accounts?.name}</span>
-                          {user?.role === 'admin' && (
+                          {canManageTerritories && (
                             <Button
                               variant="ghost"
                               size="sm"
@@ -731,7 +734,7 @@ export function TerritoriesPage() {
                     </div>
                   )}
 
-                  {user?.role === 'admin' && availableAccountsForTerritory.length > 0 && (
+                  {canManageTerritories && availableAccountsForTerritory.length > 0 && (
                     <div className="border-t pt-4">
                       <select
                         className="w-full px-3 py-2 text-sm border rounded-md bg-background"
@@ -752,7 +755,7 @@ export function TerritoriesPage() {
                 </CardContent>
               </Card>
 
-              {user?.role === 'admin' && (
+              {canManageTerritories && (
                 <DialogFooter>
                   <Button
                     variant="destructive"

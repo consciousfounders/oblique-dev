@@ -8,11 +8,13 @@ import { GoogleTokenService } from '@/lib/services/googleTokenService'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Sun, Moon, Monitor, Eye, EyeOff, Mail, Calendar, HardDrive, Check, X, RefreshCw, Linkedin, Settings, Bell, ChevronRight, Zap, Sliders } from 'lucide-react'
+import { Sun, Moon, Monitor, Eye, EyeOff, Mail, Calendar, HardDrive, Check, X, RefreshCw, Linkedin, Settings, Bell, ChevronRight, Zap, Sliders, UserCog } from 'lucide-react'
+import { usePermissions } from '@/lib/hooks/usePermissions'
 
 export function SettingsPage() {
   const { user, session, signOut, signInWithGoogle } = useAuth()
   const { theme, setTheme } = useTheme()
+  const { hasPermission, isAdmin } = usePermissions()
   const [mounted, setMounted] = useState(false)
 
   const [fullName, setFullName] = useState(user?.fullName || '')
@@ -209,6 +211,27 @@ export function SettingsPage() {
           </Link>
         </CardContent>
       </Card>
+
+      {/* User Management - Admin only */}
+      {(hasPermission('users.view') || isAdmin) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserCog className="w-5 h-5 text-indigo-500" />
+              User Management
+            </CardTitle>
+            <CardDescription>Manage user roles and team assignments</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link to="/settings/users">
+              <Button variant="outline" className="w-full justify-between">
+                <span>Manage users</span>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Custom Fields */}
       <Card>

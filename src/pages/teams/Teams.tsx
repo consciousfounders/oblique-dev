@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Team, TeamLevel } from '@/lib/supabase'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { usePermissions } from '@/lib/hooks/usePermissions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -37,6 +38,8 @@ const TEAM_LEVELS: { value: TeamLevel; label: string; icon: typeof Building2 }[]
 
 export function TeamsPage() {
   const { user } = useAuth()
+  const { hasPermission } = usePermissions()
+  const canManageTeams = hasPermission('teams.create') || hasPermission('teams.update')
   const [teams, setTeams] = useState<TeamWithDetails[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -270,7 +273,7 @@ export function TeamsPage() {
           <h1 className="text-2xl font-bold">Teams</h1>
           <p className="text-muted-foreground">{teams.length} total teams</p>
         </div>
-        {user?.role === 'admin' && (
+        {canManageTeams && (
           <Button onClick={() => setShowCreate(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Create Team
@@ -480,7 +483,7 @@ export function TeamsPage() {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-medium">Team Members ({teamMembers.length})</h3>
-                  {user?.role === 'admin' && nonMemberUsers.length > 0 && (
+                  {canManageTeams && nonMemberUsers.length > 0 && (
                     <select
                       className="px-3 py-1 text-sm border rounded-md bg-background"
                       value=""
@@ -529,7 +532,7 @@ export function TeamsPage() {
                             </p>
                           </div>
                         </div>
-                        {user?.role === 'admin' && (
+                        {canManageTeams && (
                           <div className="flex gap-2">
                             <Button
                               variant="ghost"
@@ -554,7 +557,7 @@ export function TeamsPage() {
                 )}
               </div>
 
-              {user?.role === 'admin' && (
+              {canManageTeams && (
                 <DialogFooter>
                   <Button
                     variant="destructive"

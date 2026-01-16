@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { AssignmentRule, AssignmentRuleType } from '@/lib/supabase'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { usePermissions } from '@/lib/hooks/usePermissions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -72,6 +73,8 @@ const ENTITY_TYPES = [
 
 export function AssignmentRulesPage() {
   const { user } = useAuth()
+  const { hasPermission } = usePermissions()
+  const canManageRules = hasPermission('assignment_rules.create') || hasPermission('assignment_rules.update')
   const [rules, setRules] = useState<AssignmentRuleWithDetails[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -367,7 +370,7 @@ export function AssignmentRulesPage() {
           <h1 className="text-2xl font-bold">Assignment Rules</h1>
           <p className="text-muted-foreground">{rules.length} total rules</p>
         </div>
-        {user?.role === 'admin' && (
+        {canManageRules && (
           <Button onClick={() => setShowCreate(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Create Rule
@@ -602,7 +605,7 @@ export function AssignmentRulesPage() {
                 )}
               </div>
 
-              {user?.role === 'admin' && (
+              {canManageRules && (
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
@@ -653,7 +656,7 @@ export function AssignmentRulesPage() {
                               )}
                             </div>
                           </div>
-                          {user?.role === 'admin' && (
+                          {canManageRules && (
                             <Button
                               variant="ghost"
                               size="sm"
@@ -667,7 +670,7 @@ export function AssignmentRulesPage() {
                     </div>
                   )}
 
-                  {user?.role === 'admin' && nonMemberUsers.length > 0 && (
+                  {canManageRules && nonMemberUsers.length > 0 && (
                     <div className="border-t pt-4 space-y-3">
                       <p className="text-sm font-medium">Add Member</p>
                       <div className="grid grid-cols-2 gap-2">
@@ -709,7 +712,7 @@ export function AssignmentRulesPage() {
                 </CardContent>
               </Card>
 
-              {user?.role === 'admin' && (
+              {canManageRules && (
                 <DialogFooter>
                   <Button variant="destructive" onClick={() => deleteRule(selectedRule.id)}>
                     Delete Rule

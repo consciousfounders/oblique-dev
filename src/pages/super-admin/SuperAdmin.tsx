@@ -266,9 +266,10 @@ export function SuperAdminPage() {
                   onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
                 >
                   <option value="admin">Admin</option>
+                  <option value="sales_manager">Sales Manager</option>
+                  <option value="ae">Account Executive (AE)</option>
+                  <option value="am">Account Manager (AM)</option>
                   <option value="sdr">SDR</option>
-                  <option value="ae">AE</option>
-                  <option value="am">AM</option>
                 </select>
                 <div className="flex gap-2">
                   <Button type="submit" size="sm">Create</Button>

@@ -2,12 +2,15 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { supabase } from '@/lib/supabase'
 import type { User, Session } from '@supabase/supabase-js'
 
+// User role type - matches database enum
+export type UserRole = 'admin' | 'sales_manager' | 'sdr' | 'ae' | 'am'
+
 interface AuthUser {
   id: string
   email: string
   fullName: string | null
   tenantId: string | null
-  role: 'admin' | 'sdr' | 'ae' | 'am' | null
+  role: UserRole | null
   isSuperAdmin: boolean
 }
 

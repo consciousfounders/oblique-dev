@@ -44,7 +44,7 @@ export type Database = {
           tenant_id: string
           email: string
           full_name: string | null
-          role: 'admin' | 'sdr' | 'ae' | 'am'
+          role: 'admin' | 'sales_manager' | 'sdr' | 'ae' | 'am'
           team_id: string | null
           created_at: string
           updated_at: string
@@ -54,7 +54,7 @@ export type Database = {
           tenant_id: string
           email: string
           full_name?: string | null
-          role?: 'admin' | 'sdr' | 'ae' | 'am'
+          role?: 'admin' | 'sales_manager' | 'sdr' | 'ae' | 'am'
           team_id?: string | null
           created_at?: string
           updated_at?: string
@@ -64,10 +64,30 @@ export type Database = {
           tenant_id?: string
           email?: string
           full_name?: string | null
-          role?: 'admin' | 'sdr' | 'ae' | 'am'
+          role?: 'admin' | 'sales_manager' | 'sdr' | 'ae' | 'am'
           team_id?: string | null
           created_at?: string
           updated_at?: string
+        }
+      }
+      role_permissions: {
+        Row: {
+          id: string
+          role: 'admin' | 'sales_manager' | 'sdr' | 'ae' | 'am'
+          permission: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          role: 'admin' | 'sales_manager' | 'sdr' | 'ae' | 'am'
+          permission: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          role?: 'admin' | 'sales_manager' | 'sdr' | 'ae' | 'am'
+          permission?: string
+          created_at?: string
         }
       }
       accounts: {
