@@ -19,6 +19,7 @@ import {
   Code,
   Activity,
   Linkedin,
+  Database,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -36,6 +37,7 @@ const navItems = [
   { href: '/drive', label: 'Drive', icon: FolderOpen },
   { href: '/booking', label: 'Booking', icon: Clock },
   { href: '/linkedin', label: 'LinkedIn', icon: Linkedin },
+  { href: '/data-management', label: 'Data', icon: Database },
 ]
 
 export function Sidebar() {

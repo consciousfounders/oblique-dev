@@ -30,6 +30,7 @@ const DeveloperPage = lazy(() => import('@/pages/developer/Developer').then(m =>
 const ActivityPage = lazy(() => import('@/pages/activity/Activity').then(m => ({ default: m.ActivityPage })))
 const LinkedInPage = lazy(() => import('@/pages/linkedin/LinkedIn').then(m => ({ default: m.LinkedInPage })))
 const PublicBookingPage = lazy(() => import('@/pages/booking/PublicBooking').then(m => ({ default: m.PublicBookingPage })))
+const DataManagementPage = lazy(() => import('@/pages/data-management/DataManagement').then(m => ({ default: m.DataManagementPage })))
 
 function PageLoader() {
   return (
@@ -73,6 +74,7 @@ function App() {
             <Route path="/super-admin" element={<Suspense fallback={<PageLoader />}><SuperAdminPage /></Suspense>} />
             <Route path="/activity" element={<Suspense fallback={<PageLoader />}><ActivityPage /></Suspense>} />
             <Route path="/linkedin" element={<Suspense fallback={<PageLoader />}><LinkedInPage /></Suspense>} />
+            <Route path="/data-management" element={<Suspense fallback={<PageLoader />}><DataManagementPage /></Suspense>} />
           </Route>
         </Routes>
         <Toaster
