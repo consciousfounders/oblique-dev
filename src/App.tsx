@@ -34,6 +34,7 @@ const UserManagementPage = lazy(() => import('@/pages/settings/UserManagement').
 const PipelineSettingsPage = lazy(() => import('@/pages/settings/PipelineSettings').then(m => ({ default: m.PipelineSettings })))
 const DeveloperPage = lazy(() => import('@/pages/developer/Developer').then(m => ({ default: m.DeveloperPage })))
 const ActivityPage = lazy(() => import('@/pages/activity/Activity').then(m => ({ default: m.ActivityPage })))
+const TasksPage = lazy(() => import('@/pages/tasks/Tasks').then(m => ({ default: m.TasksPage })))
 const LinkedInPage = lazy(() => import('@/pages/linkedin/LinkedIn').then(m => ({ default: m.LinkedInPage })))
 const PublicBookingPage = lazy(() => import('@/pages/booking/PublicBooking').then(m => ({ default: m.PublicBookingPage })))
 const DataManagementPage = lazy(() => import('@/pages/data-management/DataManagement').then(m => ({ default: m.DataManagementPage })))
@@ -110,6 +111,7 @@ function App() {
             <Route path="/developer" element={<Suspense fallback={<PageLoader />}><DeveloperPage /></Suspense>} />
             <Route path="/super-admin" element={<Suspense fallback={<PageLoader />}><SuperAdminPage /></Suspense>} />
             <Route path="/activity" element={<Suspense fallback={<PageLoader />}><ActivityPage /></Suspense>} />
+            <Route path="/tasks" element={<Suspense fallback={<PageLoader />}><TasksPage /></Suspense>} />
             <Route path="/linkedin" element={<Suspense fallback={<PageLoader />}><LinkedInPage /></Suspense>} />
             <Route path="/data-management" element={<Suspense fallback={<PageLoader />}><DataManagementPage /></Suspense>} />
             <Route path="/teams" element={<Suspense fallback={<PageLoader />}><TeamsPage /></Suspense>} />

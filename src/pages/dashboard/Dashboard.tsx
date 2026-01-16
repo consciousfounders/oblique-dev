@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ActivityTimeline } from '@/components/activity'
+import { TodaysTasksWidget } from '@/components/tasks'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { Users, Building2, UserCircle, DollarSign } from 'lucide-react'
 
@@ -50,14 +51,7 @@ export function DashboardPage() {
           emptyMessage="No recent activity"
         />
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Upcoming Tasks</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">No upcoming tasks</p>
-          </CardContent>
-        </Card>
+        <TodaysTasksWidget />
       </div>
     </div>
   )

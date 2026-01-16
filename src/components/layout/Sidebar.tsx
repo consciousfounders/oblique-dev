@@ -34,6 +34,7 @@ import {
   BarChart3,
   PieChart,
   Workflow,
+  CheckSquare,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -43,6 +44,7 @@ import { useCommandPalette } from '@/lib/hooks/useCommandPalette'
 // Navigation items with optional permission requirements
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard, permission: 'dashboard.view' },
+  { href: '/tasks', label: 'Tasks', icon: CheckSquare, permission: 'tasks.view' },
   { href: '/activity', label: 'Activity', icon: Activity, permission: 'activities.view' },
   { href: '/leads', label: 'Leads', icon: UserCircle, permission: 'leads.view' },
   { href: '/contacts', label: 'Contacts', icon: Users, permission: 'contacts.view' },

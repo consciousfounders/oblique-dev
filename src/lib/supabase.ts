@@ -12,6 +12,23 @@ export const supabase = createClient(
   supabaseAnonKey || ''
 )
 
+// Task types (defined before Database type)
+export type TaskType = 'call' | 'email' | 'meeting' | 'todo' | 'follow_up'
+export type TaskPriority = 'low' | 'medium' | 'high'
+export type TaskStatus = 'not_started' | 'in_progress' | 'completed' | 'deferred'
+
+export interface MeetingAttendee {
+  user_id?: string
+  email: string
+  name: string
+}
+
+export interface RecurrencePattern {
+  frequency: 'daily' | 'weekly' | 'monthly'
+  interval: number
+  end_date?: string
+}
+
 // Report and Dashboard types (defined before Database type)
 export type ReportType = 'standard' | 'custom'
 export type ReportObjectType = 'leads' | 'contacts' | 'accounts' | 'deals' | 'activities' | 'campaigns' | 'users'
@@ -715,6 +732,92 @@ export type Database = {
           subject?: string | null
           description?: string | null
           created_at?: string
+        }
+      }
+      tasks: {
+        Row: {
+          id: string
+          tenant_id: string
+          subject: string
+          description: string | null
+          task_type: 'call' | 'email' | 'meeting' | 'todo' | 'follow_up'
+          priority: 'low' | 'medium' | 'high'
+          status: 'not_started' | 'in_progress' | 'completed' | 'deferred'
+          due_date: string | null
+          due_time: string | null
+          completed_at: string | null
+          entity_type: string | null
+          entity_id: string | null
+          owner_id: string | null
+          assigned_to: string | null
+          call_duration: number | null
+          call_outcome: string | null
+          meeting_location: string | null
+          meeting_attendees: MeetingAttendee[] | null
+          reminder_enabled: boolean
+          reminder_minutes_before: number
+          reminder_sent_at: string | null
+          is_recurring: boolean
+          recurrence_pattern: RecurrencePattern | null
+          parent_task_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          subject: string
+          description?: string | null
+          task_type?: 'call' | 'email' | 'meeting' | 'todo' | 'follow_up'
+          priority?: 'low' | 'medium' | 'high'
+          status?: 'not_started' | 'in_progress' | 'completed' | 'deferred'
+          due_date?: string | null
+          due_time?: string | null
+          completed_at?: string | null
+          entity_type?: string | null
+          entity_id?: string | null
+          owner_id?: string | null
+          assigned_to?: string | null
+          call_duration?: number | null
+          call_outcome?: string | null
+          meeting_location?: string | null
+          meeting_attendees?: MeetingAttendee[] | null
+          reminder_enabled?: boolean
+          reminder_minutes_before?: number
+          reminder_sent_at?: string | null
+          is_recurring?: boolean
+          recurrence_pattern?: RecurrencePattern | null
+          parent_task_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          subject?: string
+          description?: string | null
+          task_type?: 'call' | 'email' | 'meeting' | 'todo' | 'follow_up'
+          priority?: 'low' | 'medium' | 'high'
+          status?: 'not_started' | 'in_progress' | 'completed' | 'deferred'
+          due_date?: string | null
+          due_time?: string | null
+          completed_at?: string | null
+          entity_type?: string | null
+          entity_id?: string | null
+          owner_id?: string | null
+          assigned_to?: string | null
+          call_duration?: number | null
+          call_outcome?: string | null
+          meeting_location?: string | null
+          meeting_attendees?: MeetingAttendee[] | null
+          reminder_enabled?: boolean
+          reminder_minutes_before?: number
+          reminder_sent_at?: string | null
+          is_recurring?: boolean
+          recurrence_pattern?: RecurrencePattern | null
+          parent_task_id?: string | null
+          created_at?: string
+          updated_at?: string
         }
       }
       api_keys: {
@@ -3731,3 +3834,42 @@ export interface ReportResult {
   summary?: Record<string, number>
   executionTimeMs: number
 }
+
+// Task types
+export type Task = Database['public']['Tables']['tasks']['Row'] & {
+  users?: { full_name: string | null } | null
+  assigned_user?: { full_name: string | null } | null
+  entity_name?: string | null
+}
+export type TaskInsert = Database['public']['Tables']['tasks']['Insert']
+export type TaskUpdate = Database['public']['Tables']['tasks']['Update']
+
+// Task constants
+export const TASK_TYPES: { value: TaskType; label: string }[] = [
+  { value: 'call', label: 'Call' },
+  { value: 'email', label: 'Email' },
+  { value: 'meeting', label: 'Meeting' },
+  { value: 'todo', label: 'To-Do' },
+  { value: 'follow_up', label: 'Follow-up' },
+]
+
+export const TASK_PRIORITIES: { value: TaskPriority; label: string }[] = [
+  { value: 'high', label: 'High' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'low', label: 'Low' },
+]
+
+export const TASK_STATUSES: { value: TaskStatus; label: string }[] = [
+  { value: 'not_started', label: 'Not Started' },
+  { value: 'in_progress', label: 'In Progress' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'deferred', label: 'Deferred' },
+]
+
+export const CALL_OUTCOMES: { value: string; label: string }[] = [
+  { value: 'connected', label: 'Connected' },
+  { value: 'voicemail', label: 'Voicemail' },
+  { value: 'no_answer', label: 'No Answer' },
+  { value: 'busy', label: 'Busy' },
+  { value: 'wrong_number', label: 'Wrong Number' },
+]
