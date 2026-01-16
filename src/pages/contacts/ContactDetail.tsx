@@ -9,16 +9,21 @@ import { ActivityTimeline, ActivityForm } from '@/components/activity'
 import { NotesPanel } from '@/components/notes'
 import { AttachmentsPanel } from '@/components/attachments'
 import { LinkedInProfilePanel, InMailDialog } from '@/components/linkedin'
-import { ArrowLeft, Phone, Mail, Building2, Briefcase } from 'lucide-react'
+import { ArrowLeft, Phone, Mail, Building2, Briefcase, Smartphone, FileText, Tag } from 'lucide-react'
 
 interface Contact {
   id: string
   first_name: string
   last_name: string | null
   email: string | null
+  secondary_email: string | null
   phone: string | null
+  mobile_phone: string | null
   title: string | null
+  department: string | null
   account_id: string | null
+  lead_source: string | null
+  notes: string | null
   accounts: { id: string; name: string } | null
   created_at: string
   updated_at: string
@@ -109,17 +114,34 @@ export function ContactDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl">
-                {contact.first_name} {contact.last_name}
-              </CardTitle>
+              <div className="flex items-start justify-between">
+                <div>
+                  <CardTitle className="text-2xl">
+                    {contact.first_name} {contact.last_name}
+                  </CardTitle>
+                  {contact.lead_source && (
+                    <span className="inline-flex items-center gap-1 mt-2 px-2 py-1 bg-primary/10 text-primary text-xs rounded">
+                      <Tag className="w-3 h-3" />
+                      {contact.lead_source}
+                    </span>
+                  )}
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              {contact.title && (
+              {/* Job Info */}
+              {(contact.title || contact.department) && (
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Briefcase className="w-4 h-4" />
-                  <span>{contact.title}</span>
+                  <span>
+                    {contact.title}
+                    {contact.title && contact.department && ' - '}
+                    {contact.department}
+                  </span>
                 </div>
               )}
+
+              {/* Account */}
               {contact.accounts && (
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Building2 className="w-4 h-4" />
@@ -131,24 +153,67 @@ export function ContactDetailPage() {
                   </Link>
                 </div>
               )}
+
+              {/* Primary Email */}
               {contact.email && (
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Mail className="w-4 h-4" />
                   <a href={`mailto:${contact.email}`} className="hover:text-primary transition-colors">
                     {contact.email}
                   </a>
+                  <span className="text-xs bg-muted px-1.5 py-0.5 rounded">Primary</span>
                 </div>
               )}
+
+              {/* Secondary Email */}
+              {contact.secondary_email && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Mail className="w-4 h-4" />
+                  <a href={`mailto:${contact.secondary_email}`} className="hover:text-primary transition-colors">
+                    {contact.secondary_email}
+                  </a>
+                  <span className="text-xs bg-muted px-1.5 py-0.5 rounded">Secondary</span>
+                </div>
+              )}
+
+              {/* Work Phone */}
               {contact.phone && (
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Phone className="w-4 h-4" />
                   <a href={`tel:${contact.phone}`} className="hover:text-primary transition-colors">
                     {contact.phone}
                   </a>
+                  <span className="text-xs bg-muted px-1.5 py-0.5 rounded">Work</span>
                 </div>
               )}
+
+              {/* Mobile Phone */}
+              {contact.mobile_phone && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Smartphone className="w-4 h-4" />
+                  <a href={`tel:${contact.mobile_phone}`} className="hover:text-primary transition-colors">
+                    {contact.mobile_phone}
+                  </a>
+                  <span className="text-xs bg-muted px-1.5 py-0.5 rounded">Mobile</span>
+                </div>
+              )}
+
+              {/* Contact Notes */}
+              {contact.notes && (
+                <div className="pt-4 border-t">
+                  <div className="flex items-center gap-2 text-sm font-medium mb-2">
+                    <FileText className="w-4 h-4" />
+                    Notes
+                  </div>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">{contact.notes}</p>
+                </div>
+              )}
+
               <div className="pt-4 border-t text-xs text-muted-foreground">
                 Created {new Date(contact.created_at).toLocaleDateString()}
+                {contact.updated_at !== contact.created_at && (
+                  <> · Updated {new Date(contact.updated_at).toLocaleDateString()}</>
+                )}
               </div>
             </CardContent>
           </Card>
