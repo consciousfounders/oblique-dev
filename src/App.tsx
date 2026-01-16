@@ -47,6 +47,7 @@ const PriceBooksPage = lazy(() => import('@/pages/price-books/PriceBooks').then(
 const PriceBookDetailPage = lazy(() => import('@/pages/price-books/PriceBookDetail').then(m => ({ default: m.PriceBookDetailPage })))
 const QuotesPage = lazy(() => import('@/pages/quotes/Quotes').then(m => ({ default: m.QuotesPage })))
 const QuoteDetailPage = lazy(() => import('@/pages/quotes/QuoteDetail').then(m => ({ default: m.QuoteDetailPage })))
+const ForecastingPage = lazy(() => import('@/pages/forecasting/Forecasting').then(m => ({ default: m.ForecastingPage })))
 
 function PageLoader() {
   return (
@@ -107,6 +108,7 @@ function App() {
             <Route path="/price-books/:id" element={<Suspense fallback={<PageLoader />}><PriceBookDetailPage /></Suspense>} />
             <Route path="/quotes" element={<Suspense fallback={<PageLoader />}><QuotesPage /></Suspense>} />
             <Route path="/quotes/:id" element={<Suspense fallback={<PageLoader />}><QuoteDetailPage /></Suspense>} />
+            <Route path="/forecasting" element={<Suspense fallback={<PageLoader />}><ForecastingPage /></Suspense>} />
           </Route>
         </Routes>
         <Toaster

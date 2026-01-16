@@ -2454,6 +2454,162 @@ export type Database = {
           updated_at?: string
         }
       }
+      quotas: {
+        Row: {
+          id: string
+          tenant_id: string
+          user_id: string
+          period_type: 'monthly' | 'quarterly' | 'yearly'
+          period_start: string
+          period_end: string
+          quota_amount: number
+          territory_id: string | null
+          team_id: string | null
+          product_category: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          user_id: string
+          period_type: 'monthly' | 'quarterly' | 'yearly'
+          period_start: string
+          period_end: string
+          quota_amount: number
+          territory_id?: string | null
+          team_id?: string | null
+          product_category?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          user_id?: string
+          period_type?: 'monthly' | 'quarterly' | 'yearly'
+          period_start?: string
+          period_end?: string
+          quota_amount?: number
+          territory_id?: string | null
+          team_id?: string | null
+          product_category?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      forecast_entries: {
+        Row: {
+          id: string
+          tenant_id: string
+          user_id: string
+          period_type: 'monthly' | 'quarterly' | 'yearly'
+          period_start: string
+          period_end: string
+          forecast_type: 'pipeline' | 'commit' | 'best_case' | 'ai_predicted'
+          amount: number
+          deal_count: number
+          weighted_amount: number | null
+          manager_override_amount: number | null
+          manager_override_by: string | null
+          manager_override_note: string | null
+          manager_override_at: string | null
+          territory_id: string | null
+          team_id: string | null
+          product_category: string | null
+          snapshot_date: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          user_id: string
+          period_type: 'monthly' | 'quarterly' | 'yearly'
+          period_start: string
+          period_end: string
+          forecast_type: 'pipeline' | 'commit' | 'best_case' | 'ai_predicted'
+          amount: number
+          deal_count?: number
+          weighted_amount?: number | null
+          manager_override_amount?: number | null
+          manager_override_by?: string | null
+          manager_override_note?: string | null
+          manager_override_at?: string | null
+          territory_id?: string | null
+          team_id?: string | null
+          product_category?: string | null
+          snapshot_date?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          user_id?: string
+          period_type?: 'monthly' | 'quarterly' | 'yearly'
+          period_start?: string
+          period_end?: string
+          forecast_type?: 'pipeline' | 'commit' | 'best_case' | 'ai_predicted'
+          amount?: number
+          deal_count?: number
+          weighted_amount?: number | null
+          manager_override_amount?: number | null
+          manager_override_by?: string | null
+          manager_override_note?: string | null
+          manager_override_at?: string | null
+          territory_id?: string | null
+          team_id?: string | null
+          product_category?: string | null
+          snapshot_date?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      forecast_deal_snapshots: {
+        Row: {
+          id: string
+          forecast_entry_id: string
+          deal_id: string
+          deal_name: string
+          deal_value: number
+          deal_probability: number
+          weighted_value: number
+          stage_name: string
+          expected_close_date: string | null
+          forecast_category: 'pipeline' | 'commit' | 'best_case' | 'omitted'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          forecast_entry_id: string
+          deal_id: string
+          deal_name: string
+          deal_value: number
+          deal_probability: number
+          weighted_value: number
+          stage_name: string
+          expected_close_date?: string | null
+          forecast_category?: 'pipeline' | 'commit' | 'best_case' | 'omitted'
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          forecast_entry_id?: string
+          deal_id?: string
+          deal_name?: string
+          deal_value?: number
+          deal_probability?: number
+          weighted_value?: number
+          stage_name?: string
+          expected_close_date?: string | null
+          forecast_category?: 'pipeline' | 'commit' | 'best_case' | 'omitted'
+          created_at?: string
+        }
+      }
     }
   }
 }
@@ -2661,3 +2817,20 @@ export type QuoteUpdate = Database['public']['Tables']['quotes']['Update']
 export type QuoteLineItem = Database['public']['Tables']['quote_line_items']['Row']
 export type QuoteLineItemInsert = Database['public']['Tables']['quote_line_items']['Insert']
 export type QuoteLineItemUpdate = Database['public']['Tables']['quote_line_items']['Update']
+
+// Forecasting types
+export type QuotaPeriodType = 'monthly' | 'quarterly' | 'yearly'
+export type ForecastType = 'pipeline' | 'commit' | 'best_case' | 'ai_predicted'
+export type ForecastCategory = 'pipeline' | 'commit' | 'best_case' | 'omitted'
+
+export type Quota = Database['public']['Tables']['quotas']['Row']
+export type QuotaInsert = Database['public']['Tables']['quotas']['Insert']
+export type QuotaUpdate = Database['public']['Tables']['quotas']['Update']
+
+export type ForecastEntry = Database['public']['Tables']['forecast_entries']['Row']
+export type ForecastEntryInsert = Database['public']['Tables']['forecast_entries']['Insert']
+export type ForecastEntryUpdate = Database['public']['Tables']['forecast_entries']['Update']
+
+export type ForecastDealSnapshot = Database['public']['Tables']['forecast_deal_snapshots']['Row']
+export type ForecastDealSnapshotInsert = Database['public']['Tables']['forecast_deal_snapshots']['Insert']
+export type ForecastDealSnapshotUpdate = Database['public']['Tables']['forecast_deal_snapshots']['Update']

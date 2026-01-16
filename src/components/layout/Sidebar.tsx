@@ -28,6 +28,7 @@ import {
   Package,
   BookOpen,
   FileCheck,
+  TrendingUp,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -40,6 +41,7 @@ const navItems = [
   { href: '/contacts', label: 'Contacts', icon: Users },
   { href: '/accounts', label: 'Accounts', icon: Building2 },
   { href: '/deals', label: 'Deals', icon: Kanban },
+  { href: '/forecasting', label: 'Forecasting', icon: TrendingUp },
   { href: '/products', label: 'Products', icon: Package },
   { href: '/price-books', label: 'Price Books', icon: BookOpen },
   { href: '/quotes', label: 'Quotes', icon: FileCheck },
