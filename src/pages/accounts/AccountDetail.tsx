@@ -10,6 +10,7 @@ import { NotesPanel } from '@/components/notes'
 import { AttachmentsPanel } from '@/components/attachments'
 import { UserCombobox } from '@/components/deals'
 import { AccountCombobox } from '@/components/accounts/AccountCombobox'
+import { CompanyEnrichmentPanel } from '@/components/enrichment'
 import {
   ArrowLeft,
   Globe,
@@ -830,6 +831,11 @@ export function AccountDetailPage() {
         </div>
 
         <div className="space-y-6">
+          <CompanyEnrichmentPanel
+            accountId={account.id}
+            accountName={account.name}
+            accountDomain={account.domain || undefined}
+          />
           <ActivityForm entityType="account" entityId={account.id} />
           <ActivityTimeline
             entityType="account"

@@ -8,7 +8,7 @@ import { GoogleTokenService } from '@/lib/services/googleTokenService'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Sun, Moon, Monitor, Eye, EyeOff, Mail, Calendar, HardDrive, Check, X, RefreshCw, Linkedin, Settings, Bell, ChevronRight } from 'lucide-react'
+import { Sun, Moon, Monitor, Eye, EyeOff, Mail, Calendar, HardDrive, Check, X, RefreshCw, Linkedin, Settings, Bell, ChevronRight, Zap } from 'lucide-react'
 
 export function SettingsPage() {
   const { user, session, signOut, signInWithGoogle } = useAuth()
@@ -185,6 +185,25 @@ export function SettingsPage() {
           <Link to="/settings/notifications">
             <Button variant="outline" className="w-full justify-between">
               <span>Notification preferences</span>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
+
+      {/* Data Enrichment */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Zap className="w-5 h-5 text-purple-500" />
+            Data Enrichment
+          </CardTitle>
+          <CardDescription>Configure enrichment providers and automation</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Link to="/settings/enrichment">
+            <Button variant="outline" className="w-full justify-between">
+              <span>Enrichment settings</span>
               <ChevronRight className="w-4 h-4" />
             </Button>
           </Link>

@@ -9,6 +9,7 @@ import { ActivityTimeline, ActivityForm } from '@/components/activity'
 import { NotesPanel } from '@/components/notes'
 import { AttachmentsPanel } from '@/components/attachments'
 import { LinkedInProfilePanel, InMailDialog } from '@/components/linkedin'
+import { ContactEnrichmentPanel } from '@/components/enrichment'
 import { ArrowLeft, Phone, Mail, Building2, Briefcase, Smartphone, FileText, Tag } from 'lucide-react'
 
 interface Contact {
@@ -223,6 +224,12 @@ export function ContactDetailPage() {
         </div>
 
         <div className="space-y-6">
+          <ContactEnrichmentPanel
+            entityType="contact"
+            entityId={contact.id}
+            contactName={`${contact.first_name} ${contact.last_name || ''}`.trim()}
+            contactEmail={contact.email || undefined}
+          />
           <LinkedInProfilePanel
             entityType="contact"
             entityId={contact.id}
