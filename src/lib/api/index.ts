@@ -52,3 +52,68 @@ export {
 
 // OpenAPI Spec Generation
 export { generateOpenAPISpec, getOpenAPISpecJSON, getOpenAPISpecYAML } from './openapi'
+
+// API Router
+export {
+  ApiRouter,
+  apiRouter,
+  parseApiPath,
+  createApiRequest,
+  API_BASE_PATH,
+  type ApiRequestContext,
+  type ApiResponseBody,
+  type RouteResult,
+  type ParsedRequest,
+} from './router'
+
+// API Service
+export {
+  ApiService,
+  apiService,
+  ApiError,
+  ApiAnalyticsService,
+  apiAnalyticsService,
+  formatEndpoint,
+  getStatusText,
+  isSuccessStatus,
+  type ApiServiceConfig,
+  type ApiRequestOptions,
+} from './service'
+
+// API Versioning
+export {
+  API_VERSIONS,
+  CURRENT_API_VERSION,
+  DEPRECATED_VERSIONS,
+  SUNSET_VERSIONS,
+  VERSION_INFO,
+  parseVersion,
+  isValidVersion,
+  isDeprecatedVersion,
+  isSunsetVersion,
+  getVersionInfo,
+  getAllVersionInfo,
+  getVersionHeaders,
+  checkVersionCompatibility,
+  getVersionsResponse,
+  buildVersionedPath,
+  extractPathWithoutVersion,
+  type ApiVersion,
+  type VersionInfo,
+  type VersionCompatibility,
+  type VersionsResponse,
+} from './versioning'
+
+// SDK Generators
+export {
+  generateSDKCode,
+  createClient as createSDKClient,
+} from './sdk/javascript'
+export {
+  generatePythonSDK,
+  generatePythonWebhookHandler,
+} from './sdk/python'
+export {
+  downloadSDK,
+  getSDKSnippets,
+} from './sdk'
