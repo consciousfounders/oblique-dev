@@ -63,6 +63,11 @@ const ReportViewerPage = lazy(() => import('@/pages/reports/ReportViewerPage'))
 const DashboardsPage = lazy(() => import('@/pages/dashboards/Dashboards'))
 const DashboardViewerPage = lazy(() => import('@/pages/dashboards/DashboardViewerPage'))
 
+// Workflow Automation
+const WorkflowsPage = lazy(() => import('@/pages/workflows/Workflows'))
+const WorkflowBuilderPage = lazy(() => import('@/pages/workflows/WorkflowBuilderPage'))
+const WorkflowHistoryPage = lazy(() => import('@/pages/workflows/WorkflowHistoryPage'))
+
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-64">
@@ -141,6 +146,12 @@ function App() {
             <Route path="/dashboards" element={<Suspense fallback={<PageLoader />}><DashboardsPage /></Suspense>} />
             <Route path="/dashboards/:id" element={<Suspense fallback={<PageLoader />}><DashboardViewerPage /></Suspense>} />
             <Route path="/dashboards/:id/edit" element={<Suspense fallback={<PageLoader />}><DashboardViewerPage /></Suspense>} />
+
+            {/* Workflows */}
+            <Route path="/workflows" element={<Suspense fallback={<PageLoader />}><WorkflowsPage /></Suspense>} />
+            <Route path="/workflows/new" element={<Suspense fallback={<PageLoader />}><WorkflowBuilderPage /></Suspense>} />
+            <Route path="/workflows/:id" element={<Suspense fallback={<PageLoader />}><WorkflowBuilderPage /></Suspense>} />
+            <Route path="/workflows/:id/history" element={<Suspense fallback={<PageLoader />}><WorkflowHistoryPage /></Suspense>} />
           </Route>
         </Routes>
         <Toaster

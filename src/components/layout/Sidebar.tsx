@@ -35,6 +35,7 @@ import {
   PieChart,
   Workflow,
   CheckSquare,
+  Zap,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -68,6 +69,7 @@ const navItems = [
   { href: '/data-management', label: 'Data', icon: Database, permission: 'data.import' },
   { href: '/forms', label: 'Web Forms', icon: FileText, permission: 'forms.view' },
   { href: '/campaigns', label: 'Campaigns', icon: Megaphone, permission: 'campaigns.view' },
+  { href: '/workflows', label: 'Workflows', icon: Zap, permission: 'workflows.view' },
 ]
 
 interface SidebarProps {

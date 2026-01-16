@@ -3455,8 +3455,318 @@ export type Database = {
           updated_at?: string
         }
       }
+      // Workflow Automation tables
+      workflows: {
+        Row: {
+          id: string
+          tenant_id: string
+          name: string
+          description: string | null
+          trigger_type: WorkflowTriggerType
+          trigger_config: WorkflowTriggerConfig
+          entity_type: string
+          is_active: boolean
+          run_once_per_record: boolean
+          position: number
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          name: string
+          description?: string | null
+          trigger_type: WorkflowTriggerType
+          trigger_config?: WorkflowTriggerConfig
+          entity_type: string
+          is_active?: boolean
+          run_once_per_record?: boolean
+          position?: number
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          name?: string
+          description?: string | null
+          trigger_type?: WorkflowTriggerType
+          trigger_config?: WorkflowTriggerConfig
+          entity_type?: string
+          is_active?: boolean
+          run_once_per_record?: boolean
+          position?: number
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      workflow_conditions: {
+        Row: {
+          id: string
+          workflow_id: string
+          condition_group: number
+          field_name: string
+          operator: WorkflowConditionOperator
+          field_value: string | null
+          field_values: string[] | null
+          logical_operator: 'AND' | 'OR'
+          position: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          workflow_id: string
+          condition_group?: number
+          field_name: string
+          operator: WorkflowConditionOperator
+          field_value?: string | null
+          field_values?: string[] | null
+          logical_operator?: 'AND' | 'OR'
+          position?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          workflow_id?: string
+          condition_group?: number
+          field_name?: string
+          operator?: WorkflowConditionOperator
+          field_value?: string | null
+          field_values?: string[] | null
+          logical_operator?: 'AND' | 'OR'
+          position?: number
+          created_at?: string
+        }
+      }
+      workflow_actions: {
+        Row: {
+          id: string
+          workflow_id: string
+          action_type: WorkflowActionType
+          action_config: WorkflowActionConfig
+          position: number
+          delay_minutes: number
+          stop_on_error: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          workflow_id: string
+          action_type: WorkflowActionType
+          action_config?: WorkflowActionConfig
+          position?: number
+          delay_minutes?: number
+          stop_on_error?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          workflow_id?: string
+          action_type?: WorkflowActionType
+          action_config?: WorkflowActionConfig
+          position?: number
+          delay_minutes?: number
+          stop_on_error?: boolean
+          created_at?: string
+        }
+      }
+      workflow_executions: {
+        Row: {
+          id: string
+          workflow_id: string
+          tenant_id: string
+          entity_type: string
+          entity_id: string
+          trigger_event: string
+          trigger_data: Record<string, unknown> | null
+          status: WorkflowExecutionStatus
+          started_at: string | null
+          completed_at: string | null
+          error_message: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          workflow_id: string
+          tenant_id: string
+          entity_type: string
+          entity_id: string
+          trigger_event: string
+          trigger_data?: Record<string, unknown> | null
+          status?: WorkflowExecutionStatus
+          started_at?: string | null
+          completed_at?: string | null
+          error_message?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          workflow_id?: string
+          tenant_id?: string
+          entity_type?: string
+          entity_id?: string
+          trigger_event?: string
+          trigger_data?: Record<string, unknown> | null
+          status?: WorkflowExecutionStatus
+          started_at?: string | null
+          completed_at?: string | null
+          error_message?: string | null
+          created_at?: string
+        }
+      }
+      workflow_action_logs: {
+        Row: {
+          id: string
+          execution_id: string
+          action_id: string | null
+          action_type: WorkflowActionType
+          status: WorkflowExecutionStatus
+          input_data: Record<string, unknown> | null
+          output_data: Record<string, unknown> | null
+          error_message: string | null
+          started_at: string | null
+          completed_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          execution_id: string
+          action_id?: string | null
+          action_type: WorkflowActionType
+          status?: WorkflowExecutionStatus
+          input_data?: Record<string, unknown> | null
+          output_data?: Record<string, unknown> | null
+          error_message?: string | null
+          started_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          execution_id?: string
+          action_id?: string | null
+          action_type?: WorkflowActionType
+          status?: WorkflowExecutionStatus
+          input_data?: Record<string, unknown> | null
+          output_data?: Record<string, unknown> | null
+          error_message?: string | null
+          started_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+        }
+      }
+      workflow_record_runs: {
+        Row: {
+          id: string
+          workflow_id: string
+          entity_type: string
+          entity_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          workflow_id: string
+          entity_type: string
+          entity_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          workflow_id?: string
+          entity_type?: string
+          entity_id?: string
+          created_at?: string
+        }
+      }
     }
   }
+}
+
+// Workflow types (defined early for use in Database type)
+export type WorkflowTriggerType =
+  | 'record_created'
+  | 'record_updated'
+  | 'field_changed'
+  | 'stage_changed'
+  | 'date_based'
+  | 'manual'
+  | 'webhook'
+
+export type WorkflowActionType =
+  | 'create_task'
+  | 'send_email'
+  | 'update_field'
+  | 'assign_owner'
+  | 'send_notification'
+  | 'webhook_call'
+  | 'create_record'
+
+export type WorkflowExecutionStatus = 'pending' | 'running' | 'completed' | 'failed' | 'skipped'
+
+export type WorkflowConditionOperator =
+  | 'equals'
+  | 'not_equals'
+  | 'contains'
+  | 'not_contains'
+  | 'greater_than'
+  | 'less_than'
+  | 'is_null'
+  | 'is_not_null'
+  | 'in'
+  | 'not_in'
+
+export type WorkflowEntityType = 'lead' | 'contact' | 'deal' | 'account'
+
+export interface WorkflowTriggerConfig {
+  entity_type?: string
+  field_name?: string
+  from_value?: string
+  to_value?: string
+  pipeline_id?: string
+  from_stage?: string
+  to_stage?: string
+  date_field?: string
+  offset_days?: number
+  offset_direction?: 'before' | 'after'
+  secret_key?: string
+}
+
+export interface WorkflowActionConfig {
+  // create_task
+  subject?: string
+  description?: string
+  task_type?: string
+  priority?: string
+  due_days?: number
+  assign_to?: string
+  // send_email
+  template_id?: string
+  email_subject?: string
+  body?: string
+  to_field?: string
+  // update_field
+  field_name?: string
+  field_value?: string
+  // assign_owner
+  user_id?: string
+  team_id?: string
+  assignment_rule?: 'round_robin' | 'load_balanced'
+  // send_notification
+  title?: string
+  message?: string
+  user_ids?: string[]
+  notify_owner?: boolean
+  // webhook_call
+  url?: string
+  method?: 'GET' | 'POST' | 'PUT'
+  headers?: Record<string, string>
+  body_template?: string
+  // create_record
+  record_entity_type?: string
+  field_mappings?: Record<string, string>
 }
 
 // Custom field types
@@ -3873,3 +4183,84 @@ export const CALL_OUTCOMES: { value: string; label: string }[] = [
   { value: 'busy', label: 'Busy' },
   { value: 'wrong_number', label: 'Wrong Number' },
 ]
+
+// Workflow types
+export type Workflow = Database['public']['Tables']['workflows']['Row']
+export type WorkflowInsert = Database['public']['Tables']['workflows']['Insert']
+export type WorkflowUpdate = Database['public']['Tables']['workflows']['Update']
+
+export type WorkflowCondition = Database['public']['Tables']['workflow_conditions']['Row']
+export type WorkflowConditionInsert = Database['public']['Tables']['workflow_conditions']['Insert']
+export type WorkflowConditionUpdate = Database['public']['Tables']['workflow_conditions']['Update']
+
+export type WorkflowAction = Database['public']['Tables']['workflow_actions']['Row']
+export type WorkflowActionInsert = Database['public']['Tables']['workflow_actions']['Insert']
+export type WorkflowActionUpdate = Database['public']['Tables']['workflow_actions']['Update']
+
+export type WorkflowExecution = Database['public']['Tables']['workflow_executions']['Row']
+export type WorkflowExecutionInsert = Database['public']['Tables']['workflow_executions']['Insert']
+export type WorkflowExecutionUpdate = Database['public']['Tables']['workflow_executions']['Update']
+
+export type WorkflowActionLog = Database['public']['Tables']['workflow_action_logs']['Row']
+export type WorkflowActionLogInsert = Database['public']['Tables']['workflow_action_logs']['Insert']
+export type WorkflowActionLogUpdate = Database['public']['Tables']['workflow_action_logs']['Update']
+
+export type WorkflowRecordRun = Database['public']['Tables']['workflow_record_runs']['Row']
+export type WorkflowRecordRunInsert = Database['public']['Tables']['workflow_record_runs']['Insert']
+export type WorkflowRecordRunUpdate = Database['public']['Tables']['workflow_record_runs']['Update']
+
+// Workflow with related data
+export interface WorkflowWithDetails extends Workflow {
+  conditions?: WorkflowCondition[]
+  actions?: WorkflowAction[]
+  created_by_user?: { full_name: string | null } | null
+}
+
+// Workflow constants
+export const WORKFLOW_TRIGGER_TYPES: { value: WorkflowTriggerType; label: string; description: string }[] = [
+  { value: 'record_created', label: 'Record Created', description: 'When a new record is created' },
+  { value: 'record_updated', label: 'Record Updated', description: 'When a record is updated' },
+  { value: 'field_changed', label: 'Field Changed', description: 'When a specific field value changes' },
+  { value: 'stage_changed', label: 'Stage Changed', description: 'When a deal stage changes' },
+  { value: 'date_based', label: 'Date Based', description: 'X days before/after a date field' },
+  { value: 'manual', label: 'Manual Trigger', description: 'Manually triggered by user' },
+  { value: 'webhook', label: 'Webhook', description: 'Triggered by external webhook' },
+]
+
+export const WORKFLOW_ACTION_TYPES: { value: WorkflowActionType; label: string; description: string }[] = [
+  { value: 'create_task', label: 'Create Task', description: 'Create a new task' },
+  { value: 'send_email', label: 'Send Email', description: 'Send an email' },
+  { value: 'update_field', label: 'Update Field', description: 'Update a field value' },
+  { value: 'assign_owner', label: 'Assign Owner', description: 'Assign to user or team' },
+  { value: 'send_notification', label: 'Send Notification', description: 'Send in-app notification' },
+  { value: 'webhook_call', label: 'Webhook Call', description: 'Call external webhook' },
+  { value: 'create_record', label: 'Create Record', description: 'Create a related record' },
+]
+
+export const WORKFLOW_CONDITION_OPERATORS: { value: WorkflowConditionOperator; label: string }[] = [
+  { value: 'equals', label: 'Equals' },
+  { value: 'not_equals', label: 'Not Equals' },
+  { value: 'contains', label: 'Contains' },
+  { value: 'not_contains', label: 'Does Not Contain' },
+  { value: 'greater_than', label: 'Greater Than' },
+  { value: 'less_than', label: 'Less Than' },
+  { value: 'is_null', label: 'Is Empty' },
+  { value: 'is_not_null', label: 'Is Not Empty' },
+  { value: 'in', label: 'Is One Of' },
+  { value: 'not_in', label: 'Is Not One Of' },
+]
+
+export const WORKFLOW_ENTITY_TYPES: { value: WorkflowEntityType; label: string }[] = [
+  { value: 'lead', label: 'Lead' },
+  { value: 'contact', label: 'Contact' },
+  { value: 'deal', label: 'Deal' },
+  { value: 'account', label: 'Account' },
+]
+
+export const WORKFLOW_EXECUTION_STATUS_COLORS: Record<WorkflowExecutionStatus, { bg: string; text: string }> = {
+  pending: { bg: 'bg-yellow-100 dark:bg-yellow-900/30', text: 'text-yellow-700 dark:text-yellow-300' },
+  running: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-300' },
+  completed: { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-300' },
+  failed: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-700 dark:text-red-300' },
+  skipped: { bg: 'bg-gray-100 dark:bg-gray-900/30', text: 'text-gray-700 dark:text-gray-300' },
+}

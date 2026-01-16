@@ -5,16 +5,20 @@ export interface SwitchProps {
   onCheckedChange?: (checked: boolean) => void
   disabled?: boolean
   className?: string
+  id?: string
+  'aria-label'?: string
 }
 
 const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
-  ({ checked = false, onCheckedChange, disabled, className }, ref) => {
+  ({ checked = false, onCheckedChange, disabled, className, id, 'aria-label': ariaLabel }, ref) => {
     return (
       <button
         ref={ref}
         type="button"
         role="switch"
+        id={id}
         aria-checked={checked}
+        aria-label={ariaLabel}
         disabled={disabled}
         onClick={() => onCheckedChange?.(!checked)}
         className={`
