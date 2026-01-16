@@ -23,6 +23,7 @@ import {
   UsersRound,
   MapPin,
   GitBranch,
+  FileText,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -44,6 +45,7 @@ const navItems = [
   { href: '/booking', label: 'Booking', icon: Clock },
   { href: '/linkedin', label: 'LinkedIn', icon: Linkedin },
   { href: '/data-management', label: 'Data', icon: Database },
+  { href: '/forms', label: 'Web Forms', icon: FileText },
 ]
 
 export function Sidebar() {

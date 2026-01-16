@@ -1533,6 +1533,376 @@ export type Database = {
           updated_at?: string
         }
       }
+      web_forms: {
+        Row: {
+          id: string
+          tenant_id: string
+          name: string
+          description: string | null
+          slug: string
+          status: 'draft' | 'active' | 'paused' | 'archived'
+          submit_button_text: string
+          success_message: string
+          redirect_url: string | null
+          primary_color: string | null
+          background_color: string | null
+          text_color: string | null
+          font_family: string | null
+          border_radius: string | null
+          custom_css: string | null
+          display_type: 'embedded' | 'popup' | 'slide_in' | 'full_page'
+          show_branding: boolean
+          popup_trigger: string | null
+          popup_delay_seconds: number | null
+          popup_scroll_percentage: number | null
+          enable_captcha: boolean
+          captcha_type: string | null
+          captcha_site_key: string | null
+          honeypot_enabled: boolean
+          assignment_rule_id: string | null
+          default_owner_id: string | null
+          default_lead_source: string | null
+          notify_on_submission: boolean
+          notification_emails: string[] | null
+          send_auto_response: boolean
+          auto_response_subject: string | null
+          auto_response_body: string | null
+          capture_utm_params: boolean
+          duplicate_check_enabled: boolean
+          duplicate_field: string | null
+          duplicate_action: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          name: string
+          description?: string | null
+          slug: string
+          status?: 'draft' | 'active' | 'paused' | 'archived'
+          submit_button_text?: string
+          success_message?: string
+          redirect_url?: string | null
+          primary_color?: string | null
+          background_color?: string | null
+          text_color?: string | null
+          font_family?: string | null
+          border_radius?: string | null
+          custom_css?: string | null
+          display_type?: 'embedded' | 'popup' | 'slide_in' | 'full_page'
+          show_branding?: boolean
+          popup_trigger?: string | null
+          popup_delay_seconds?: number | null
+          popup_scroll_percentage?: number | null
+          enable_captcha?: boolean
+          captcha_type?: string | null
+          captcha_site_key?: string | null
+          honeypot_enabled?: boolean
+          assignment_rule_id?: string | null
+          default_owner_id?: string | null
+          default_lead_source?: string | null
+          notify_on_submission?: boolean
+          notification_emails?: string[] | null
+          send_auto_response?: boolean
+          auto_response_subject?: string | null
+          auto_response_body?: string | null
+          capture_utm_params?: boolean
+          duplicate_check_enabled?: boolean
+          duplicate_field?: string | null
+          duplicate_action?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          name?: string
+          description?: string | null
+          slug?: string
+          status?: 'draft' | 'active' | 'paused' | 'archived'
+          submit_button_text?: string
+          success_message?: string
+          redirect_url?: string | null
+          primary_color?: string | null
+          background_color?: string | null
+          text_color?: string | null
+          font_family?: string | null
+          border_radius?: string | null
+          custom_css?: string | null
+          display_type?: 'embedded' | 'popup' | 'slide_in' | 'full_page'
+          show_branding?: boolean
+          popup_trigger?: string | null
+          popup_delay_seconds?: number | null
+          popup_scroll_percentage?: number | null
+          enable_captcha?: boolean
+          captcha_type?: string | null
+          captcha_site_key?: string | null
+          honeypot_enabled?: boolean
+          assignment_rule_id?: string | null
+          default_owner_id?: string | null
+          default_lead_source?: string | null
+          notify_on_submission?: boolean
+          notification_emails?: string[] | null
+          send_auto_response?: boolean
+          auto_response_subject?: string | null
+          auto_response_body?: string | null
+          capture_utm_params?: boolean
+          duplicate_check_enabled?: boolean
+          duplicate_field?: string | null
+          duplicate_action?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      web_form_fields: {
+        Row: {
+          id: string
+          form_id: string
+          field_type: 'text' | 'email' | 'phone' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'number' | 'date' | 'url' | 'hidden'
+          label: string
+          name: string
+          placeholder: string | null
+          help_text: string | null
+          default_value: string | null
+          is_required: boolean
+          min_length: number | null
+          max_length: number | null
+          pattern: string | null
+          pattern_error_message: string | null
+          options: Record<string, unknown>[] | null
+          lead_field_mapping: string | null
+          width: string | null
+          position: number
+          conditional_logic: Record<string, unknown> | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          form_id: string
+          field_type: 'text' | 'email' | 'phone' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'number' | 'date' | 'url' | 'hidden'
+          label: string
+          name: string
+          placeholder?: string | null
+          help_text?: string | null
+          default_value?: string | null
+          is_required?: boolean
+          min_length?: number | null
+          max_length?: number | null
+          pattern?: string | null
+          pattern_error_message?: string | null
+          options?: Record<string, unknown>[] | null
+          lead_field_mapping?: string | null
+          width?: string | null
+          position: number
+          conditional_logic?: Record<string, unknown> | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          form_id?: string
+          field_type?: 'text' | 'email' | 'phone' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'number' | 'date' | 'url' | 'hidden'
+          label?: string
+          name?: string
+          placeholder?: string | null
+          help_text?: string | null
+          default_value?: string | null
+          is_required?: boolean
+          min_length?: number | null
+          max_length?: number | null
+          pattern?: string | null
+          pattern_error_message?: string | null
+          options?: Record<string, unknown>[] | null
+          lead_field_mapping?: string | null
+          width?: string | null
+          position?: number
+          conditional_logic?: Record<string, unknown> | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      web_form_submissions: {
+        Row: {
+          id: string
+          form_id: string
+          tenant_id: string
+          submission_data: Record<string, unknown>
+          lead_id: string | null
+          converted_to_lead: boolean
+          conversion_error: string | null
+          utm_source: string | null
+          utm_medium: string | null
+          utm_campaign: string | null
+          utm_term: string | null
+          utm_content: string | null
+          ip_address: string | null
+          user_agent: string | null
+          referrer_url: string | null
+          page_url: string | null
+          spam_score: number
+          is_spam: boolean
+          honeypot_triggered: boolean
+          captcha_passed: boolean | null
+          processed_at: string | null
+          notification_sent: boolean
+          auto_response_sent: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          form_id: string
+          tenant_id: string
+          submission_data: Record<string, unknown>
+          lead_id?: string | null
+          converted_to_lead?: boolean
+          conversion_error?: string | null
+          utm_source?: string | null
+          utm_medium?: string | null
+          utm_campaign?: string | null
+          utm_term?: string | null
+          utm_content?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+          referrer_url?: string | null
+          page_url?: string | null
+          spam_score?: number
+          is_spam?: boolean
+          honeypot_triggered?: boolean
+          captcha_passed?: boolean | null
+          processed_at?: string | null
+          notification_sent?: boolean
+          auto_response_sent?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          form_id?: string
+          tenant_id?: string
+          submission_data?: Record<string, unknown>
+          lead_id?: string | null
+          converted_to_lead?: boolean
+          conversion_error?: string | null
+          utm_source?: string | null
+          utm_medium?: string | null
+          utm_campaign?: string | null
+          utm_term?: string | null
+          utm_content?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+          referrer_url?: string | null
+          page_url?: string | null
+          spam_score?: number
+          is_spam?: boolean
+          honeypot_triggered?: boolean
+          captcha_passed?: boolean | null
+          processed_at?: string | null
+          notification_sent?: boolean
+          auto_response_sent?: boolean
+          created_at?: string
+        }
+      }
+      web_form_views: {
+        Row: {
+          id: string
+          form_id: string
+          session_id: string | null
+          ip_address: string | null
+          user_agent: string | null
+          referrer_url: string | null
+          page_url: string | null
+          utm_source: string | null
+          utm_medium: string | null
+          utm_campaign: string | null
+          view_type: string | null
+          time_on_form_seconds: number | null
+          fields_filled: number | null
+          last_field_filled: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          form_id: string
+          session_id?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+          referrer_url?: string | null
+          page_url?: string | null
+          utm_source?: string | null
+          utm_medium?: string | null
+          utm_campaign?: string | null
+          view_type?: string | null
+          time_on_form_seconds?: number | null
+          fields_filled?: number | null
+          last_field_filled?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          form_id?: string
+          session_id?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+          referrer_url?: string | null
+          page_url?: string | null
+          utm_source?: string | null
+          utm_medium?: string | null
+          utm_campaign?: string | null
+          view_type?: string | null
+          time_on_form_seconds?: number | null
+          fields_filled?: number | null
+          last_field_filled?: string | null
+          created_at?: string
+        }
+      }
+      web_form_variants: {
+        Row: {
+          id: string
+          form_id: string
+          name: string
+          description: string | null
+          variant_config: Record<string, unknown>
+          traffic_percentage: number
+          is_control: boolean
+          is_active: boolean
+          views_count: number
+          submissions_count: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          form_id: string
+          name: string
+          description?: string | null
+          variant_config: Record<string, unknown>
+          traffic_percentage?: number
+          is_control?: boolean
+          is_active?: boolean
+          views_count?: number
+          submissions_count?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          form_id?: string
+          name?: string
+          description?: string | null
+          variant_config?: Record<string, unknown>
+          traffic_percentage?: number
+          is_control?: boolean
+          is_active?: boolean
+          views_count?: number
+          submissions_count?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }
@@ -1667,3 +2037,27 @@ export type AssignmentRuleMemberUpdate = Database['public']['Tables']['assignmen
 export type AssignmentHistory = Database['public']['Tables']['assignment_history']['Row']
 export type AssignmentHistoryInsert = Database['public']['Tables']['assignment_history']['Insert']
 export type AssignmentHistoryUpdate = Database['public']['Tables']['assignment_history']['Update']
+
+// Web Form types
+export type WebFormFieldType = 'text' | 'email' | 'phone' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'number' | 'date' | 'url' | 'hidden'
+export type WebFormStatus = 'draft' | 'active' | 'paused' | 'archived'
+export type WebFormDisplayType = 'embedded' | 'popup' | 'slide_in' | 'full_page'
+
+export type WebForm = Database['public']['Tables']['web_forms']['Row']
+export type WebFormInsert = Database['public']['Tables']['web_forms']['Insert']
+export type WebFormUpdate = Database['public']['Tables']['web_forms']['Update']
+
+export type WebFormField = Database['public']['Tables']['web_form_fields']['Row']
+export type WebFormFieldInsert = Database['public']['Tables']['web_form_fields']['Insert']
+export type WebFormFieldUpdate = Database['public']['Tables']['web_form_fields']['Update']
+
+export type WebFormSubmission = Database['public']['Tables']['web_form_submissions']['Row']
+export type WebFormSubmissionInsert = Database['public']['Tables']['web_form_submissions']['Insert']
+export type WebFormSubmissionUpdate = Database['public']['Tables']['web_form_submissions']['Update']
+
+export type WebFormView = Database['public']['Tables']['web_form_views']['Row']
+export type WebFormViewInsert = Database['public']['Tables']['web_form_views']['Insert']
+
+export type WebFormVariant = Database['public']['Tables']['web_form_variants']['Row']
+export type WebFormVariantInsert = Database['public']['Tables']['web_form_variants']['Insert']
+export type WebFormVariantUpdate = Database['public']['Tables']['web_form_variants']['Update']

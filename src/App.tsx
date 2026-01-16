@@ -34,6 +34,11 @@ const DataManagementPage = lazy(() => import('@/pages/data-management/DataManage
 const TeamsPage = lazy(() => import('@/pages/teams/Teams').then(m => ({ default: m.TeamsPage })))
 const TerritoriesPage = lazy(() => import('@/pages/territories/Territories').then(m => ({ default: m.TerritoriesPage })))
 const AssignmentRulesPage = lazy(() => import('@/pages/assignment-rules/AssignmentRules').then(m => ({ default: m.AssignmentRulesPage })))
+const FormsPage = lazy(() => import('@/pages/forms/Forms').then(m => ({ default: m.FormsPage })))
+const FormBuilderPage = lazy(() => import('@/pages/forms/FormBuilder').then(m => ({ default: m.FormBuilderPage })))
+const FormAnalyticsPage = lazy(() => import('@/pages/forms/FormAnalytics').then(m => ({ default: m.FormAnalyticsPage })))
+const FormEmbedPage = lazy(() => import('@/pages/forms/FormEmbed').then(m => ({ default: m.FormEmbedPage })))
+const PublicFormPage = lazy(() => import('@/pages/forms/PublicForm').then(m => ({ default: m.PublicFormPage })))
 
 function PageLoader() {
   return (
@@ -55,6 +60,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/book/:slug" element={<Suspense fallback={<PageLoader />}><PublicBookingPage /></Suspense>} />
+          <Route path="/f/:slug/*" element={<Suspense fallback={<PageLoader />}><PublicFormPage /></Suspense>} />
 
           {/* Protected routes */}
           <Route element={<AppLayout />}>
@@ -81,6 +87,10 @@ function App() {
             <Route path="/teams" element={<Suspense fallback={<PageLoader />}><TeamsPage /></Suspense>} />
             <Route path="/territories" element={<Suspense fallback={<PageLoader />}><TerritoriesPage /></Suspense>} />
             <Route path="/assignment-rules" element={<Suspense fallback={<PageLoader />}><AssignmentRulesPage /></Suspense>} />
+            <Route path="/forms" element={<Suspense fallback={<PageLoader />}><FormsPage /></Suspense>} />
+            <Route path="/forms/:id" element={<Suspense fallback={<PageLoader />}><FormBuilderPage /></Suspense>} />
+            <Route path="/forms/:id/analytics" element={<Suspense fallback={<PageLoader />}><FormAnalyticsPage /></Suspense>} />
+            <Route path="/forms/:id/embed" element={<Suspense fallback={<PageLoader />}><FormEmbedPage /></Suspense>} />
           </Route>
         </Routes>
         <Toaster
