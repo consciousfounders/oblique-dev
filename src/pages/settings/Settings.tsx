@@ -8,7 +8,7 @@ import { GoogleTokenService } from '@/lib/services/googleTokenService'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Sun, Moon, Monitor, Eye, EyeOff, Mail, Calendar, HardDrive, Check, X, RefreshCw, Linkedin, Settings, Bell, ChevronRight, Zap, Sliders, UserCog } from 'lucide-react'
+import { Sun, Moon, Monitor, Eye, EyeOff, Mail, Calendar, HardDrive, Check, X, RefreshCw, Linkedin, Settings, Bell, ChevronRight, Zap, Sliders, UserCog, GitBranch } from 'lucide-react'
 import { usePermissions } from '@/lib/hooks/usePermissions'
 
 export function SettingsPage() {
@@ -232,6 +232,25 @@ export function SettingsPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Pipeline Management */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <GitBranch className="w-5 h-5 text-green-500" />
+            Pipeline Management
+          </CardTitle>
+          <CardDescription>Configure sales pipelines and stages</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Link to="/settings/pipelines">
+            <Button variant="outline" className="w-full justify-between">
+              <span>Manage pipelines</span>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
 
       {/* Custom Fields */}
       <Card>

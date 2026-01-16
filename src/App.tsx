@@ -20,6 +20,7 @@ const AccountsPage = lazy(() => import('@/pages/accounts/Accounts').then(m => ({
 const AccountDetailPage = lazy(() => import('@/pages/accounts/AccountDetail').then(m => ({ default: m.AccountDetailPage })))
 const DealsPage = lazy(() => import('@/pages/deals/Deals').then(m => ({ default: m.DealsPage })))
 const DealDetailPage = lazy(() => import('@/pages/deals/DealDetail').then(m => ({ default: m.DealDetailPage })))
+const PipelinesPage = lazy(() => import('@/pages/pipelines/Pipelines').then(m => ({ default: m.PipelinesPage })))
 const EmailPage = lazy(() => import('@/pages/email/Email').then(m => ({ default: m.EmailPage })))
 const CalendarPage = lazy(() => import('@/pages/calendar/Calendar').then(m => ({ default: m.CalendarPage })))
 const DrivePage = lazy(() => import('@/pages/drive/Drive').then(m => ({ default: m.DrivePage })))
@@ -30,6 +31,7 @@ const NotificationSettingsPage = lazy(() => import('@/pages/settings/Notificatio
 const EnrichmentSettingsPage = lazy(() => import('@/pages/settings/EnrichmentSettings').then(m => ({ default: m.EnrichmentSettingsPage })))
 const CustomFieldSettingsPage = lazy(() => import('@/pages/settings/CustomFieldSettings').then(m => ({ default: m.CustomFieldSettingsPage })))
 const UserManagementPage = lazy(() => import('@/pages/settings/UserManagement').then(m => ({ default: m.UserManagementPage })))
+const PipelineSettingsPage = lazy(() => import('@/pages/settings/PipelineSettings').then(m => ({ default: m.PipelineSettings })))
 const DeveloperPage = lazy(() => import('@/pages/developer/Developer').then(m => ({ default: m.DeveloperPage })))
 const ActivityPage = lazy(() => import('@/pages/activity/Activity').then(m => ({ default: m.ActivityPage })))
 const LinkedInPage = lazy(() => import('@/pages/linkedin/LinkedIn').then(m => ({ default: m.LinkedInPage })))
@@ -94,6 +96,7 @@ function App() {
             <Route path="/accounts/:id" element={<Suspense fallback={<PageLoader />}><AccountDetailPage /></Suspense>} />
             <Route path="/deals" element={<Suspense fallback={<PageLoader />}><DealsPage /></Suspense>} />
             <Route path="/deals/:id" element={<Suspense fallback={<PageLoader />}><DealDetailPage /></Suspense>} />
+            <Route path="/pipelines" element={<Suspense fallback={<PageLoader />}><PipelinesPage /></Suspense>} />
             <Route path="/email" element={<Suspense fallback={<PageLoader />}><EmailPage /></Suspense>} />
             <Route path="/calendar" element={<Suspense fallback={<PageLoader />}><CalendarPage /></Suspense>} />
             <Route path="/drive" element={<Suspense fallback={<PageLoader />}><DrivePage /></Suspense>} />
@@ -103,6 +106,7 @@ function App() {
             <Route path="/settings/enrichment" element={<Suspense fallback={<PageLoader />}><EnrichmentSettingsPage /></Suspense>} />
             <Route path="/settings/custom-fields" element={<Suspense fallback={<PageLoader />}><CustomFieldSettingsPage /></Suspense>} />
             <Route path="/settings/users" element={<Suspense fallback={<PageLoader />}><UserManagementPage /></Suspense>} />
+            <Route path="/settings/pipelines" element={<Suspense fallback={<PageLoader />}><PipelineSettingsPage /></Suspense>} />
             <Route path="/developer" element={<Suspense fallback={<PageLoader />}><DeveloperPage /></Suspense>} />
             <Route path="/super-admin" element={<Suspense fallback={<PageLoader />}><SuperAdminPage /></Suspense>} />
             <Route path="/activity" element={<Suspense fallback={<PageLoader />}><ActivityPage /></Suspense>} />

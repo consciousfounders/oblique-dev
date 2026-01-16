@@ -33,6 +33,7 @@ import {
   Search,
   BarChart3,
   PieChart,
+  Workflow,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -47,6 +48,7 @@ const navItems = [
   { href: '/contacts', label: 'Contacts', icon: Users, permission: 'contacts.view' },
   { href: '/accounts', label: 'Accounts', icon: Building2, permission: 'accounts.view' },
   { href: '/deals', label: 'Deals', icon: Kanban, permission: 'deals.view' },
+  { href: '/pipelines', label: 'Pipelines', icon: Workflow, permission: 'deals.view' },
   { href: '/forecasting', label: 'Forecasting', icon: TrendingUp, permission: 'forecasting.view' },
   { href: '/reports', label: 'Reports', icon: BarChart3, permission: 'reports.view' },
   { href: '/dashboards', label: 'Dashboards', icon: PieChart, permission: 'dashboards.view' },

@@ -562,30 +562,124 @@ export type Database = {
           updated_at?: string
         }
       }
-      deal_stages: {
+      pipelines: {
         Row: {
           id: string
           tenant_id: string
           name: string
+          description: string | null
+          pipeline_type: PipelineType
+          is_default: boolean
+          is_active: boolean
+          color: string | null
           position: number
-          probability: number
           created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
           tenant_id: string
           name: string
-          position: number
-          probability?: number
+          description?: string | null
+          pipeline_type?: PipelineType
+          is_default?: boolean
+          is_active?: boolean
+          color?: string | null
+          position?: number
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
           tenant_id?: string
           name?: string
+          description?: string | null
+          pipeline_type?: PipelineType
+          is_default?: boolean
+          is_active?: boolean
+          color?: string | null
+          position?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      deal_stages: {
+        Row: {
+          id: string
+          tenant_id: string
+          pipeline_id: string | null
+          name: string
+          position: number
+          probability: number
+          color: string | null
+          stage_type: StageType
+          description: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          pipeline_id?: string | null
+          name: string
+          position: number
+          probability?: number
+          color?: string | null
+          stage_type?: StageType
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          pipeline_id?: string | null
+          name?: string
           position?: number
           probability?: number
+          color?: string | null
+          stage_type?: StageType
+          description?: string | null
           created_at?: string
+          updated_at?: string
+        }
+      }
+      deal_stage_history: {
+        Row: {
+          id: string
+          tenant_id: string
+          deal_id: string
+          from_stage_id: string | null
+          to_stage_id: string
+          from_pipeline_id: string | null
+          to_pipeline_id: string | null
+          changed_by: string | null
+          changed_at: string
+          time_in_previous_stage: string | null
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          deal_id: string
+          from_stage_id?: string | null
+          to_stage_id: string
+          from_pipeline_id?: string | null
+          to_pipeline_id?: string | null
+          changed_by?: string | null
+          changed_at?: string
+          time_in_previous_stage?: string | null
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          deal_id?: string
+          from_stage_id?: string | null
+          to_stage_id?: string
+          from_pipeline_id?: string | null
+          to_pipeline_id?: string | null
+          changed_by?: string | null
+          changed_at?: string
+          time_in_previous_stage?: string | null
         }
       }
       activities: {
@@ -3443,6 +3537,22 @@ export type TerritoryAccountUpdate = Database['public']['Tables']['territory_acc
 
 // Deal types
 export type DealType = 'new_business' | 'renewal' | 'upsell' | 'cross_sell'
+
+// Pipeline types
+export type PipelineType = 'sales' | 'renewal' | 'upsell' | 'custom'
+export type StageType = 'open' | 'won' | 'lost'
+
+export type Pipeline = Database['public']['Tables']['pipelines']['Row']
+export type PipelineInsert = Database['public']['Tables']['pipelines']['Insert']
+export type PipelineUpdate = Database['public']['Tables']['pipelines']['Update']
+
+export type DealStage = Database['public']['Tables']['deal_stages']['Row']
+export type DealStageInsert = Database['public']['Tables']['deal_stages']['Insert']
+export type DealStageUpdate = Database['public']['Tables']['deal_stages']['Update']
+
+export type DealStageHistory = Database['public']['Tables']['deal_stage_history']['Row']
+export type DealStageHistoryInsert = Database['public']['Tables']['deal_stage_history']['Insert']
+export type DealStageHistoryUpdate = Database['public']['Tables']['deal_stage_history']['Update']
 
 // Account types
 export type AccountType = 'prospect' | 'customer' | 'partner' | 'vendor' | 'other'
