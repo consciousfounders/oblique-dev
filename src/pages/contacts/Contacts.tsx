@@ -16,6 +16,8 @@ import {
 import { AccountCombobox } from '@/components/contacts/AccountCombobox'
 import { Plus, Search, Phone, Mail, Building2, Upload, AlertTriangle, X } from 'lucide-react'
 import { toast } from 'sonner'
+import { CustomFieldRenderer } from '@/components/custom-fields'
+import { useCustomFields } from '@/lib/hooks/useCustomFields'
 
 interface Contact {
   id: string
@@ -83,6 +85,8 @@ export function ContactsPage() {
   const [importing, setImporting] = useState(false)
   const [importResults, setImportResults] = useState<{ success: number; failed: number; duplicates: number } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [customFieldValues, setCustomFieldValues] = useState<Record<string, unknown>>({})
+  const { fields: customFields } = useCustomFields({ module: 'contacts' })
 
   useEffect(() => {
     if (user?.tenantId) {
@@ -173,7 +177,7 @@ export function ContactsPage() {
 
     setSubmitting(true)
     try {
-      const { error } = await supabase.from('contacts').insert({
+      const { data: newContactData, error } = await supabase.from('contacts').insert({
         tenant_id: user.tenantId,
         first_name: newContact.first_name.trim(),
         last_name: newContact.last_name.trim() || null,
@@ -187,13 +191,34 @@ export function ContactsPage() {
         lead_source: newContact.lead_source || null,
         notes: newContact.notes.trim() || null,
         owner_id: user.id,
-      })
+      }).select('id').single()
 
       if (error) throw error
+
+      // Save custom field values if any
+      if (newContactData && Object.keys(customFieldValues).length > 0) {
+        const fieldValuePairs = Object.entries(customFieldValues)
+          .filter(([fieldName]) => customFields.find(f => f.name === fieldName))
+          .map(([fieldName, value]) => {
+            const field = customFields.find(f => f.name === fieldName)
+            return {
+              tenant_id: user.tenantId,
+              field_id: field!.id,
+              entity_id: newContactData.id,
+              module: 'contacts' as const,
+              value: value,
+            }
+          })
+
+        if (fieldValuePairs.length > 0) {
+          await supabase.from('custom_field_values').insert(fieldValuePairs)
+        }
+      }
 
       toast.success('Contact created successfully')
       setShowCreate(false)
       setNewContact(initialContactForm)
+      setCustomFieldValues({})
       setDuplicates([])
       fetchContacts()
     } catch (error) {
@@ -511,6 +536,15 @@ export function ContactsPage() {
                 />
               </div>
 
+              {/* Custom Fields */}
+              {customFields.length > 0 && (
+                <CustomFieldRenderer
+                  module="contacts"
+                  values={customFieldValues}
+                  onChange={setCustomFieldValues}
+                />
+              )}
+
               {/* Duplicate Warning Inline */}
               {duplicates.length > 0 && !showDuplicateWarning && (
                 <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
@@ -537,6 +571,7 @@ export function ContactsPage() {
                   onClick={() => {
                     setShowCreate(false)
                     setNewContact(initialContactForm)
+                    setCustomFieldValues({})
                     setDuplicates([])
                   }}
                 >

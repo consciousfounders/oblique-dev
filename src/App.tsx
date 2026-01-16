@@ -27,6 +27,7 @@ const SuperAdminPage = lazy(() => import('@/pages/super-admin/SuperAdmin').then(
 const SettingsPage = lazy(() => import('@/pages/settings/Settings').then(m => ({ default: m.SettingsPage })))
 const NotificationSettingsPage = lazy(() => import('@/pages/settings/NotificationSettings').then(m => ({ default: m.NotificationSettingsPage })))
 const EnrichmentSettingsPage = lazy(() => import('@/pages/settings/EnrichmentSettings').then(m => ({ default: m.EnrichmentSettingsPage })))
+const CustomFieldSettingsPage = lazy(() => import('@/pages/settings/CustomFieldSettings').then(m => ({ default: m.CustomFieldSettingsPage })))
 const DeveloperPage = lazy(() => import('@/pages/developer/Developer').then(m => ({ default: m.DeveloperPage })))
 const ActivityPage = lazy(() => import('@/pages/activity/Activity').then(m => ({ default: m.ActivityPage })))
 const LinkedInPage = lazy(() => import('@/pages/linkedin/LinkedIn').then(m => ({ default: m.LinkedInPage })))
@@ -90,6 +91,7 @@ function App() {
             <Route path="/settings" element={<Suspense fallback={<PageLoader />}><SettingsPage /></Suspense>} />
             <Route path="/settings/notifications" element={<Suspense fallback={<PageLoader />}><NotificationSettingsPage /></Suspense>} />
             <Route path="/settings/enrichment" element={<Suspense fallback={<PageLoader />}><EnrichmentSettingsPage /></Suspense>} />
+            <Route path="/settings/custom-fields" element={<Suspense fallback={<PageLoader />}><CustomFieldSettingsPage /></Suspense>} />
             <Route path="/developer" element={<Suspense fallback={<PageLoader />}><DeveloperPage /></Suspense>} />
             <Route path="/super-admin" element={<Suspense fallback={<PageLoader />}><SuperAdminPage /></Suspense>} />
             <Route path="/activity" element={<Suspense fallback={<PageLoader />}><ActivityPage /></Suspense>} />

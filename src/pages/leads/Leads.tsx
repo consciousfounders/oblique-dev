@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LeadScoreBadge } from '@/components/leads'
 import { Plus, Search, Phone, Mail, ArrowUpDown, TrendingUp } from 'lucide-react'
+import { CustomFieldRenderer } from '@/components/custom-fields'
+import { useCustomFields } from '@/lib/hooks/useCustomFields'
 
 interface Lead {
   id: string
@@ -39,6 +41,8 @@ export function LeadsPage() {
     phone: '',
     company: '',
   })
+  const [customFieldValues, setCustomFieldValues] = useState<Record<string, unknown>>({})
+  const { fields: customFields } = useCustomFields({ module: 'leads' })
 
   useEffect(() => {
     if (user?.tenantId) {
@@ -69,7 +73,7 @@ export function LeadsPage() {
     if (!user?.tenantId) return
 
     try {
-      const { error } = await supabase.from('leads').insert({
+      const { data: newLeadData, error } = await supabase.from('leads').insert({
         tenant_id: user.tenantId,
         first_name: newLead.first_name,
         last_name: newLead.last_name || null,
@@ -77,12 +81,33 @@ export function LeadsPage() {
         phone: newLead.phone || null,
         company: newLead.company || null,
         owner_id: user.id,
-      })
+      }).select('id').single()
 
       if (error) throw error
 
+      // Save custom field values if any
+      if (newLeadData && Object.keys(customFieldValues).length > 0) {
+        const fieldValuePairs = Object.entries(customFieldValues)
+          .filter(([fieldName]) => customFields.find(f => f.name === fieldName))
+          .map(([fieldName, value]) => {
+            const field = customFields.find(f => f.name === fieldName)
+            return {
+              tenant_id: user.tenantId,
+              field_id: field!.id,
+              entity_id: newLeadData.id,
+              module: 'leads' as const,
+              value: value,
+            }
+          })
+
+        if (fieldValuePairs.length > 0) {
+          await supabase.from('custom_field_values').insert(fieldValuePairs)
+        }
+      }
+
       setShowCreate(false)
       setNewLead({ first_name: '', last_name: '', email: '', phone: '', company: '' })
+      setCustomFieldValues({})
       fetchLeads()
     } catch (error) {
       console.error('Error creating lead:', error)
@@ -257,9 +282,17 @@ export function LeadsPage() {
                 value={newLead.company}
                 onChange={(e) => setNewLead({ ...newLead, company: e.target.value })}
               />
+              {/* Custom Fields */}
+              {customFields.length > 0 && (
+                <CustomFieldRenderer
+                  module="leads"
+                  values={customFieldValues}
+                  onChange={setCustomFieldValues}
+                />
+              )}
               <div className="flex gap-2">
                 <Button type="submit">Create Lead</Button>
-                <Button type="button" variant="outline" onClick={() => setShowCreate(false)}>
+                <Button type="button" variant="outline" onClick={() => { setShowCreate(false); setCustomFieldValues({}); }}>
                   Cancel
                 </Button>
               </div>

@@ -2796,8 +2796,212 @@ export type Database = {
           created_at?: string
         }
       }
+      custom_fields: {
+        Row: {
+          id: string
+          tenant_id: string
+          module: CustomFieldModule
+          name: string
+          label: string
+          description: string | null
+          field_type: CustomFieldType
+          is_required: boolean
+          is_unique: boolean
+          default_value: string | null
+          min_value: number | null
+          max_value: number | null
+          decimal_places: number
+          currency_code: string
+          min_length: number | null
+          max_length: number | null
+          pattern: string | null
+          pattern_error_message: string | null
+          picklist_options: PicklistOption[] | null
+          allow_multiple: boolean
+          lookup_module: CustomFieldModule | null
+          is_active: boolean
+          visible_to_roles: string[] | null
+          editable_by_roles: string[] | null
+          position: number
+          field_group: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          module: CustomFieldModule
+          name: string
+          label: string
+          description?: string | null
+          field_type: CustomFieldType
+          is_required?: boolean
+          is_unique?: boolean
+          default_value?: string | null
+          min_value?: number | null
+          max_value?: number | null
+          decimal_places?: number
+          currency_code?: string
+          min_length?: number | null
+          max_length?: number | null
+          pattern?: string | null
+          pattern_error_message?: string | null
+          picklist_options?: PicklistOption[] | null
+          allow_multiple?: boolean
+          lookup_module?: CustomFieldModule | null
+          is_active?: boolean
+          visible_to_roles?: string[] | null
+          editable_by_roles?: string[] | null
+          position: number
+          field_group?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          module?: CustomFieldModule
+          name?: string
+          label?: string
+          description?: string | null
+          field_type?: CustomFieldType
+          is_required?: boolean
+          is_unique?: boolean
+          default_value?: string | null
+          min_value?: number | null
+          max_value?: number | null
+          decimal_places?: number
+          currency_code?: string
+          min_length?: number | null
+          max_length?: number | null
+          pattern?: string | null
+          pattern_error_message?: string | null
+          picklist_options?: PicklistOption[] | null
+          allow_multiple?: boolean
+          lookup_module?: CustomFieldModule | null
+          is_active?: boolean
+          visible_to_roles?: string[] | null
+          editable_by_roles?: string[] | null
+          position?: number
+          field_group?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      custom_field_values: {
+        Row: {
+          id: string
+          tenant_id: string
+          field_id: string
+          entity_id: string
+          module: CustomFieldModule
+          value: unknown
+          lookup_value_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          field_id: string
+          entity_id: string
+          module: CustomFieldModule
+          value?: unknown
+          lookup_value_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          field_id?: string
+          entity_id?: string
+          module?: CustomFieldModule
+          value?: unknown
+          lookup_value_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
+}
+
+// Custom field types
+export type CustomFieldType =
+  | 'text'
+  | 'textarea'
+  | 'number'
+  | 'decimal'
+  | 'currency'
+  | 'date'
+  | 'datetime'
+  | 'picklist'
+  | 'multi_picklist'
+  | 'checkbox'
+  | 'url'
+  | 'email'
+  | 'phone'
+  | 'lookup'
+
+export type CustomFieldModule = 'accounts' | 'contacts' | 'leads' | 'deals'
+
+export interface PicklistOption {
+  label: string
+  value: string
+  color?: string
+  is_default?: boolean
+}
+
+export interface CustomField {
+  id: string
+  tenant_id: string
+  module: CustomFieldModule
+  name: string
+  label: string
+  description: string | null
+  field_type: CustomFieldType
+  is_required: boolean
+  is_unique: boolean
+  default_value: string | null
+  min_value: number | null
+  max_value: number | null
+  decimal_places: number
+  currency_code: string
+  min_length: number | null
+  max_length: number | null
+  pattern: string | null
+  pattern_error_message: string | null
+  picklist_options: PicklistOption[] | null
+  allow_multiple: boolean
+  lookup_module: CustomFieldModule | null
+  is_active: boolean
+  visible_to_roles: string[] | null
+  editable_by_roles: string[] | null
+  position: number
+  field_group: string | null
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface CustomFieldValue {
+  id: string
+  tenant_id: string
+  field_id: string
+  entity_id: string
+  module: CustomFieldModule
+  value: unknown
+  lookup_value_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface CustomFieldWithValue extends CustomField {
+  fieldValue?: CustomFieldValue
 }
 
 // LinkedIn activity types

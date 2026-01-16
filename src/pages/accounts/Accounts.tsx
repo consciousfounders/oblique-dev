@@ -22,6 +22,8 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { AccountType } from '@/lib/supabase'
+import { CustomFieldRenderer } from '@/components/custom-fields'
+import { useCustomFields } from '@/lib/hooks/useCustomFields'
 
 interface Account {
   id: string
@@ -112,6 +114,8 @@ export function AccountsPage() {
   const [creating, setCreating] = useState(false)
   const [newAccount, setNewAccount] = useState(initialFormState)
   const [copyBillingToShipping, setCopyBillingToShipping] = useState(false)
+  const [customFieldValues, setCustomFieldValues] = useState<Record<string, unknown>>({})
+  const { fields: customFields } = useCustomFields({ module: 'accounts' })
 
   // Filtering
   const [showFilters, setShowFilters] = useState(false)
@@ -178,7 +182,7 @@ export function AccountsPage() {
 
     setCreating(true)
     try {
-      const { error } = await supabase.from('accounts').insert({
+      const { data: newAccountData, error } = await supabase.from('accounts').insert({
         tenant_id: user.tenantId,
         name: newAccount.name,
         domain: newAccount.domain || null,
@@ -202,13 +206,34 @@ export function AccountsPage() {
         shipping_state: newAccount.shipping_state || null,
         shipping_postal_code: newAccount.shipping_postal_code || null,
         shipping_country: newAccount.shipping_country || null,
-      })
+      }).select('id').single()
 
       if (error) throw error
+
+      // Save custom field values if any
+      if (newAccountData && Object.keys(customFieldValues).length > 0) {
+        const fieldValuePairs = Object.entries(customFieldValues)
+          .filter(([fieldName]) => customFields.find(f => f.name === fieldName))
+          .map(([fieldName, value]) => {
+            const field = customFields.find(f => f.name === fieldName)
+            return {
+              tenant_id: user.tenantId,
+              field_id: field!.id,
+              entity_id: newAccountData.id,
+              module: 'accounts' as const,
+              value: value,
+            }
+          })
+
+        if (fieldValuePairs.length > 0) {
+          await supabase.from('custom_field_values').insert(fieldValuePairs)
+        }
+      }
 
       toast.success('Account created successfully')
       setShowCreate(false)
       setNewAccount(initialFormState)
+      setCustomFieldValues({})
       setCopyBillingToShipping(false)
       fetchAccounts()
     } catch (error) {
@@ -645,6 +670,15 @@ export function AccountsPage() {
                 />
               </div>
 
+              {/* Custom Fields */}
+              {customFields.length > 0 && (
+                <CustomFieldRenderer
+                  module="accounts"
+                  values={customFieldValues}
+                  onChange={setCustomFieldValues}
+                />
+              )}
+
               <div className="flex gap-2">
                 <Button type="submit" disabled={creating}>
                   {creating ? 'Creating...' : 'Create Account'}
@@ -655,6 +689,7 @@ export function AccountsPage() {
                   onClick={() => {
                     setShowCreate(false)
                     setNewAccount(initialFormState)
+                    setCustomFieldValues({})
                     setCopyBillingToShipping(false)
                   }}
                 >

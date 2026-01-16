@@ -10,6 +10,8 @@ import { ContactCombobox, UserCombobox, DealQuickCreate } from '@/components/dea
 import { Plus, DollarSign, Building2, Calendar, Search, User } from 'lucide-react'
 import { toast } from 'sonner'
 import type { DealType } from '@/lib/supabase'
+import { CustomFieldRenderer } from '@/components/custom-fields'
+import { useCustomFields } from '@/lib/hooks/useCustomFields'
 
 interface DealStage {
   id: string
@@ -74,6 +76,8 @@ export function DealsPage() {
     next_step: '',
     description: '',
   })
+  const [customFieldValues, setCustomFieldValues] = useState<Record<string, unknown>>({})
+  const { fields: customFields } = useCustomFields({ module: 'deals' })
 
   useEffect(() => {
     if (user?.tenantId) {
@@ -129,7 +133,7 @@ export function DealsPage() {
     }
 
     try {
-      const { error } = await supabase.from('deals').insert({
+      const { data: newDealData, error } = await supabase.from('deals').insert({
         tenant_id: user.tenantId,
         name: newDeal.name.trim(),
         value: newDeal.value ? parseFloat(newDeal.value) : null,
@@ -142,9 +146,29 @@ export function DealsPage() {
         deal_type: newDeal.deal_type,
         next_step: newDeal.next_step.trim() || null,
         description: newDeal.description.trim() || null,
-      })
+      }).select('id').single()
 
       if (error) throw error
+
+      // Save custom field values if any
+      if (newDealData && Object.keys(customFieldValues).length > 0) {
+        const fieldValuePairs = Object.entries(customFieldValues)
+          .filter(([fieldName]) => customFields.find(f => f.name === fieldName))
+          .map(([fieldName, value]) => {
+            const field = customFields.find(f => f.name === fieldName)
+            return {
+              tenant_id: user.tenantId,
+              field_id: field!.id,
+              entity_id: newDealData.id,
+              module: 'deals' as const,
+              value: value,
+            }
+          })
+
+        if (fieldValuePairs.length > 0) {
+          await supabase.from('custom_field_values').insert(fieldValuePairs)
+        }
+      }
 
       toast.success('Deal created successfully')
       setShowCreate(false)
@@ -161,6 +185,7 @@ export function DealsPage() {
         next_step: '',
         description: '',
       })
+      setCustomFieldValues({})
       fetchData()
     } catch (error) {
       console.error('Error creating deal:', error)
@@ -413,9 +438,18 @@ export function DealsPage() {
                 </div>
               </div>
 
+              {/* Custom Fields */}
+              {customFields.length > 0 && (
+                <CustomFieldRenderer
+                  module="deals"
+                  values={customFieldValues}
+                  onChange={setCustomFieldValues}
+                />
+              )}
+
               <div className="flex gap-2 pt-2">
                 <Button type="submit">Create Deal</Button>
-                <Button type="button" variant="outline" onClick={() => setShowCreate(false)}>
+                <Button type="button" variant="outline" onClick={() => { setShowCreate(false); setCustomFieldValues({}); }}>
                   Cancel
                 </Button>
               </div>
