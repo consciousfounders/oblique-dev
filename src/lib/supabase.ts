@@ -76,11 +76,27 @@ export type Database = {
           tenant_id: string
           name: string
           domain: string | null
+          website: string | null
           industry: string | null
           employee_count: string | null
           annual_revenue: string | null
           owner_id: string | null
           territory_id: string | null
+          phone: string | null
+          fax: string | null
+          account_type: AccountType
+          description: string | null
+          parent_account_id: string | null
+          billing_street: string | null
+          billing_city: string | null
+          billing_state: string | null
+          billing_postal_code: string | null
+          billing_country: string | null
+          shipping_street: string | null
+          shipping_city: string | null
+          shipping_state: string | null
+          shipping_postal_code: string | null
+          shipping_country: string | null
           created_at: string
           updated_at: string
         }
@@ -89,11 +105,27 @@ export type Database = {
           tenant_id: string
           name: string
           domain?: string | null
+          website?: string | null
           industry?: string | null
           employee_count?: string | null
           annual_revenue?: string | null
           owner_id?: string | null
           territory_id?: string | null
+          phone?: string | null
+          fax?: string | null
+          account_type?: AccountType
+          description?: string | null
+          parent_account_id?: string | null
+          billing_street?: string | null
+          billing_city?: string | null
+          billing_state?: string | null
+          billing_postal_code?: string | null
+          billing_country?: string | null
+          shipping_street?: string | null
+          shipping_city?: string | null
+          shipping_state?: string | null
+          shipping_postal_code?: string | null
+          shipping_country?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -102,11 +134,27 @@ export type Database = {
           tenant_id?: string
           name?: string
           domain?: string | null
+          website?: string | null
           industry?: string | null
           employee_count?: string | null
           annual_revenue?: string | null
           owner_id?: string | null
           territory_id?: string | null
+          phone?: string | null
+          fax?: string | null
+          account_type?: AccountType
+          description?: string | null
+          parent_account_id?: string | null
+          billing_street?: string | null
+          billing_city?: string | null
+          billing_state?: string | null
+          billing_postal_code?: string | null
+          billing_country?: string | null
+          shipping_street?: string | null
+          shipping_city?: string | null
+          shipping_state?: string | null
+          shipping_postal_code?: string | null
+          shipping_country?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -1596,6 +1644,14 @@ export type TerritoryAccountUpdate = Database['public']['Tables']['territory_acc
 
 // Deal types
 export type DealType = 'new_business' | 'renewal' | 'upsell' | 'cross_sell'
+
+// Account types
+export type AccountType = 'prospect' | 'customer' | 'partner' | 'vendor' | 'other'
+
+// Account helper type
+export type Account = Database['public']['Tables']['accounts']['Row']
+export type AccountInsert = Database['public']['Tables']['accounts']['Insert']
+export type AccountUpdate = Database['public']['Tables']['accounts']['Update']
 
 // Assignment rule types
 export type AssignmentRuleType = 'round_robin' | 'load_balanced' | 'skill_based'
