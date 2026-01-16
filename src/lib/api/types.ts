@@ -10,6 +10,8 @@ export type ApiScope =
   | 'leads:write'
   | 'deals:read'
   | 'deals:write'
+  | 'campaigns:read'
+  | 'campaigns:write'
   | 'activities:read'
   | 'activities:write'
   | 'users:read'
@@ -25,6 +27,8 @@ export const API_SCOPES: { scope: ApiScope; label: string; description: string }
   { scope: 'leads:write', label: 'Write Leads', description: 'Create, update, and delete leads' },
   { scope: 'deals:read', label: 'Read Deals', description: 'View deal records and stages' },
   { scope: 'deals:write', label: 'Write Deals', description: 'Create, update, and delete deals' },
+  { scope: 'campaigns:read', label: 'Read Campaigns', description: 'View campaign records and members' },
+  { scope: 'campaigns:write', label: 'Write Campaigns', description: 'Create, update, and delete campaigns' },
   { scope: 'activities:read', label: 'Read Activities', description: 'View activity logs' },
   { scope: 'activities:write', label: 'Write Activities', description: 'Create activity entries' },
   { scope: 'users:read', label: 'Read Users', description: 'View user information' },
@@ -148,6 +152,14 @@ export type WebhookEventType =
   | 'deal.stage_changed'
   | 'deal.won'
   | 'deal.lost'
+  | 'campaign.created'
+  | 'campaign.updated'
+  | 'campaign.deleted'
+  | 'campaign.activated'
+  | 'campaign.completed'
+  | 'campaign_member.added'
+  | 'campaign_member.status_changed'
+  | 'campaign_member.converted'
 
 export const WEBHOOK_EVENTS: { event: WebhookEventType; label: string; description: string }[] = [
   { event: 'account.created', label: 'Account Created', description: 'Triggered when a new account is created' },
@@ -166,6 +178,14 @@ export const WEBHOOK_EVENTS: { event: WebhookEventType; label: string; descripti
   { event: 'deal.stage_changed', label: 'Deal Stage Changed', description: 'Triggered when a deal moves to a new stage' },
   { event: 'deal.won', label: 'Deal Won', description: 'Triggered when a deal is marked as won' },
   { event: 'deal.lost', label: 'Deal Lost', description: 'Triggered when a deal is marked as lost' },
+  { event: 'campaign.created', label: 'Campaign Created', description: 'Triggered when a new campaign is created' },
+  { event: 'campaign.updated', label: 'Campaign Updated', description: 'Triggered when a campaign is updated' },
+  { event: 'campaign.deleted', label: 'Campaign Deleted', description: 'Triggered when a campaign is deleted' },
+  { event: 'campaign.activated', label: 'Campaign Activated', description: 'Triggered when a campaign is activated' },
+  { event: 'campaign.completed', label: 'Campaign Completed', description: 'Triggered when a campaign is marked as completed' },
+  { event: 'campaign_member.added', label: 'Campaign Member Added', description: 'Triggered when a lead/contact is added to a campaign' },
+  { event: 'campaign_member.status_changed', label: 'Campaign Member Status Changed', description: 'Triggered when a campaign member status changes' },
+  { event: 'campaign_member.converted', label: 'Campaign Member Converted', description: 'Triggered when a campaign member converts' },
 ]
 
 // Rate limit info returned in headers

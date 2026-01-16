@@ -39,6 +39,8 @@ const FormBuilderPage = lazy(() => import('@/pages/forms/FormBuilder').then(m =>
 const FormAnalyticsPage = lazy(() => import('@/pages/forms/FormAnalytics').then(m => ({ default: m.FormAnalyticsPage })))
 const FormEmbedPage = lazy(() => import('@/pages/forms/FormEmbed').then(m => ({ default: m.FormEmbedPage })))
 const PublicFormPage = lazy(() => import('@/pages/forms/PublicForm').then(m => ({ default: m.PublicFormPage })))
+const CampaignsPage = lazy(() => import('@/pages/campaigns/Campaigns').then(m => ({ default: m.CampaignsPage })))
+const CampaignDetailPage = lazy(() => import('@/pages/campaigns/CampaignDetail').then(m => ({ default: m.CampaignDetailPage })))
 
 function PageLoader() {
   return (
@@ -91,6 +93,8 @@ function App() {
             <Route path="/forms/:id" element={<Suspense fallback={<PageLoader />}><FormBuilderPage /></Suspense>} />
             <Route path="/forms/:id/analytics" element={<Suspense fallback={<PageLoader />}><FormAnalyticsPage /></Suspense>} />
             <Route path="/forms/:id/embed" element={<Suspense fallback={<PageLoader />}><FormEmbedPage /></Suspense>} />
+            <Route path="/campaigns" element={<Suspense fallback={<PageLoader />}><CampaignsPage /></Suspense>} />
+            <Route path="/campaigns/:id" element={<Suspense fallback={<PageLoader />}><CampaignDetailPage /></Suspense>} />
           </Route>
         </Routes>
         <Toaster

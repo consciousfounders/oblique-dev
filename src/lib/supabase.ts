@@ -214,6 +214,7 @@ export type Database = {
           status: 'new' | 'contacted' | 'qualified' | 'unqualified' | 'converted'
           owner_id: string | null
           territory_id: string | null
+          campaign_id: string | null
           converted_contact_id: string | null
           converted_account_id: string | null
           converted_at: string | null
@@ -233,6 +234,7 @@ export type Database = {
           status?: 'new' | 'contacted' | 'qualified' | 'unqualified' | 'converted'
           owner_id?: string | null
           territory_id?: string | null
+          campaign_id?: string | null
           converted_contact_id?: string | null
           converted_account_id?: string | null
           converted_at?: string | null
@@ -252,6 +254,7 @@ export type Database = {
           status?: 'new' | 'contacted' | 'qualified' | 'unqualified' | 'converted'
           owner_id?: string | null
           territory_id?: string | null
+          campaign_id?: string | null
           converted_contact_id?: string | null
           converted_account_id?: string | null
           converted_at?: string | null
@@ -269,6 +272,7 @@ export type Database = {
           account_id: string | null
           contact_id: string | null
           owner_id: string | null
+          campaign_id: string | null
           expected_close_date: string | null
           closed_at: string | null
           won: boolean | null
@@ -290,6 +294,7 @@ export type Database = {
           account_id?: string | null
           contact_id?: string | null
           owner_id?: string | null
+          campaign_id?: string | null
           expected_close_date?: string | null
           closed_at?: string | null
           won?: boolean | null
@@ -311,6 +316,7 @@ export type Database = {
           account_id?: string | null
           contact_id?: string | null
           owner_id?: string | null
+          campaign_id?: string | null
           expected_close_date?: string | null
           closed_at?: string | null
           won?: boolean | null
@@ -1903,6 +1909,198 @@ export type Database = {
           updated_at?: string
         }
       }
+      campaigns: {
+        Row: {
+          id: string
+          tenant_id: string
+          name: string
+          description: string | null
+          campaign_type: 'email' | 'event' | 'webinar' | 'ads' | 'content' | 'social' | 'direct_mail' | 'referral' | 'other'
+          status: 'planned' | 'active' | 'paused' | 'completed' | 'archived'
+          budget: number | null
+          actual_cost: number | null
+          start_date: string | null
+          end_date: string | null
+          owner_id: string | null
+          parent_campaign_id: string | null
+          utm_source: string | null
+          utm_medium: string | null
+          utm_campaign: string | null
+          utm_term: string | null
+          utm_content: string | null
+          expected_response_rate: number | null
+          expected_revenue: number | null
+          total_leads: number
+          total_contacts: number
+          total_responses: number
+          total_converted: number
+          total_revenue: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          name: string
+          description?: string | null
+          campaign_type: 'email' | 'event' | 'webinar' | 'ads' | 'content' | 'social' | 'direct_mail' | 'referral' | 'other'
+          status?: 'planned' | 'active' | 'paused' | 'completed' | 'archived'
+          budget?: number | null
+          actual_cost?: number | null
+          start_date?: string | null
+          end_date?: string | null
+          owner_id?: string | null
+          parent_campaign_id?: string | null
+          utm_source?: string | null
+          utm_medium?: string | null
+          utm_campaign?: string | null
+          utm_term?: string | null
+          utm_content?: string | null
+          expected_response_rate?: number | null
+          expected_revenue?: number | null
+          total_leads?: number
+          total_contacts?: number
+          total_responses?: number
+          total_converted?: number
+          total_revenue?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          name?: string
+          description?: string | null
+          campaign_type?: 'email' | 'event' | 'webinar' | 'ads' | 'content' | 'social' | 'direct_mail' | 'referral' | 'other'
+          status?: 'planned' | 'active' | 'paused' | 'completed' | 'archived'
+          budget?: number | null
+          actual_cost?: number | null
+          start_date?: string | null
+          end_date?: string | null
+          owner_id?: string | null
+          parent_campaign_id?: string | null
+          utm_source?: string | null
+          utm_medium?: string | null
+          utm_campaign?: string | null
+          utm_term?: string | null
+          utm_content?: string | null
+          expected_response_rate?: number | null
+          expected_revenue?: number | null
+          total_leads?: number
+          total_contacts?: number
+          total_responses?: number
+          total_converted?: number
+          total_revenue?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      campaign_members: {
+        Row: {
+          id: string
+          campaign_id: string
+          tenant_id: string
+          lead_id: string | null
+          contact_id: string | null
+          is_primary_source: boolean
+          status: 'added' | 'sent' | 'opened' | 'clicked' | 'responded' | 'converted' | 'unsubscribed' | 'bounced'
+          responded_at: string | null
+          converted_at: string | null
+          first_touch: boolean
+          last_touch: boolean
+          touch_count: number
+          attribution_percentage: number | null
+          attributed_revenue: number | null
+          utm_source: string | null
+          utm_medium: string | null
+          utm_campaign: string | null
+          utm_term: string | null
+          utm_content: string | null
+          landing_page_url: string | null
+          referrer_url: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          campaign_id: string
+          tenant_id: string
+          lead_id?: string | null
+          contact_id?: string | null
+          is_primary_source?: boolean
+          status?: 'added' | 'sent' | 'opened' | 'clicked' | 'responded' | 'converted' | 'unsubscribed' | 'bounced'
+          responded_at?: string | null
+          converted_at?: string | null
+          first_touch?: boolean
+          last_touch?: boolean
+          touch_count?: number
+          attribution_percentage?: number | null
+          attributed_revenue?: number | null
+          utm_source?: string | null
+          utm_medium?: string | null
+          utm_campaign?: string | null
+          utm_term?: string | null
+          utm_content?: string | null
+          landing_page_url?: string | null
+          referrer_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          campaign_id?: string
+          tenant_id?: string
+          lead_id?: string | null
+          contact_id?: string | null
+          is_primary_source?: boolean
+          status?: 'added' | 'sent' | 'opened' | 'clicked' | 'responded' | 'converted' | 'unsubscribed' | 'bounced'
+          responded_at?: string | null
+          converted_at?: string | null
+          first_touch?: boolean
+          last_touch?: boolean
+          touch_count?: number
+          attribution_percentage?: number | null
+          attributed_revenue?: number | null
+          utm_source?: string | null
+          utm_medium?: string | null
+          utm_campaign?: string | null
+          utm_term?: string | null
+          utm_content?: string | null
+          landing_page_url?: string | null
+          referrer_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      campaign_responses: {
+        Row: {
+          id: string
+          campaign_member_id: string
+          tenant_id: string
+          response_type: string
+          response_date: string
+          response_data: Record<string, unknown> | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          campaign_member_id: string
+          tenant_id: string
+          response_type: string
+          response_date?: string
+          response_data?: Record<string, unknown> | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          campaign_member_id?: string
+          tenant_id?: string
+          response_type?: string
+          response_date?: string
+          response_data?: Record<string, unknown> | null
+          created_at?: string
+        }
+      }
     }
   }
 }
@@ -2061,3 +2259,19 @@ export type WebFormViewInsert = Database['public']['Tables']['web_form_views']['
 export type WebFormVariant = Database['public']['Tables']['web_form_variants']['Row']
 export type WebFormVariantInsert = Database['public']['Tables']['web_form_variants']['Insert']
 export type WebFormVariantUpdate = Database['public']['Tables']['web_form_variants']['Update']
+
+// Campaign types
+export type CampaignType = 'email' | 'event' | 'webinar' | 'ads' | 'content' | 'social' | 'direct_mail' | 'referral' | 'other'
+export type CampaignStatus = 'planned' | 'active' | 'paused' | 'completed' | 'archived'
+export type CampaignMemberStatus = 'added' | 'sent' | 'opened' | 'clicked' | 'responded' | 'converted' | 'unsubscribed' | 'bounced'
+
+export type Campaign = Database['public']['Tables']['campaigns']['Row']
+export type CampaignInsert = Database['public']['Tables']['campaigns']['Insert']
+export type CampaignUpdate = Database['public']['Tables']['campaigns']['Update']
+
+export type CampaignMember = Database['public']['Tables']['campaign_members']['Row']
+export type CampaignMemberInsert = Database['public']['Tables']['campaign_members']['Insert']
+export type CampaignMemberUpdate = Database['public']['Tables']['campaign_members']['Update']
+
+export type CampaignResponse = Database['public']['Tables']['campaign_responses']['Row']
+export type CampaignResponseInsert = Database['public']['Tables']['campaign_responses']['Insert']

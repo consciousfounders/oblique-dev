@@ -24,6 +24,7 @@ import {
   MapPin,
   GitBranch,
   FileText,
+  Megaphone,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -46,6 +47,7 @@ const navItems = [
   { href: '/linkedin', label: 'LinkedIn', icon: Linkedin },
   { href: '/data-management', label: 'Data', icon: Database },
   { href: '/forms', label: 'Web Forms', icon: FileText },
+  { href: '/campaigns', label: 'Campaigns', icon: Megaphone },
 ]
 
 export function Sidebar() {
