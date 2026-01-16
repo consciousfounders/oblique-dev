@@ -8,7 +8,7 @@ import { GoogleTokenService } from '@/lib/services/googleTokenService'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Sun, Moon, Monitor, Eye, EyeOff, Mail, Calendar, HardDrive, Check, X, RefreshCw, Linkedin, Settings, Bell, ChevronRight, Zap, Sliders, UserCog, GitBranch } from 'lucide-react'
+import { Sun, Moon, Monitor, Eye, EyeOff, Mail, Calendar, HardDrive, Check, X, RefreshCw, Linkedin, Settings, Bell, ChevronRight, Zap, Sliders, UserCog, GitBranch, Shield } from 'lucide-react'
 import { usePermissions } from '@/lib/hooks/usePermissions'
 
 export function SettingsPage() {
@@ -270,6 +270,33 @@ export function SettingsPage() {
           </Link>
         </CardContent>
       </Card>
+
+      {/* Audit Trail - Admin only */}
+      {isAdmin && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-amber-500" />
+              Audit Trail
+            </CardTitle>
+            <CardDescription>Track and review all changes to your CRM data</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Link to="/settings/audit">
+              <Button variant="outline" className="w-full justify-between">
+                <span>Audit settings</span>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </Link>
+            <Link to="/admin/audit">
+              <Button variant="outline" className="w-full justify-between">
+                <span>View audit report</span>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Appearance */}
       <Card>

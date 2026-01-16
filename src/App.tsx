@@ -68,6 +68,10 @@ const WorkflowsPage = lazy(() => import('@/pages/workflows/Workflows'))
 const WorkflowBuilderPage = lazy(() => import('@/pages/workflows/WorkflowBuilderPage'))
 const WorkflowHistoryPage = lazy(() => import('@/pages/workflows/WorkflowHistoryPage'))
 
+// Audit Trail
+const AuditSettingsPage = lazy(() => import('@/pages/settings/AuditSettings').then(m => ({ default: m.AuditSettingsPage })))
+const AuditReportPage = lazy(() => import('@/pages/admin/AuditReport').then(m => ({ default: m.AuditReportPage })))
+
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-64">
@@ -113,6 +117,8 @@ function App() {
             <Route path="/settings/custom-fields" element={<Suspense fallback={<PageLoader />}><CustomFieldSettingsPage /></Suspense>} />
             <Route path="/settings/users" element={<Suspense fallback={<PageLoader />}><UserManagementPage /></Suspense>} />
             <Route path="/settings/pipelines" element={<Suspense fallback={<PageLoader />}><PipelineSettingsPage /></Suspense>} />
+            <Route path="/settings/audit" element={<Suspense fallback={<PageLoader />}><AuditSettingsPage /></Suspense>} />
+            <Route path="/admin/audit" element={<Suspense fallback={<PageLoader />}><AuditReportPage /></Suspense>} />
             <Route path="/developer" element={<Suspense fallback={<PageLoader />}><DeveloperPage /></Suspense>} />
             <Route path="/super-admin" element={<Suspense fallback={<PageLoader />}><SuperAdminPage /></Suspense>} />
             <Route path="/activity" element={<Suspense fallback={<PageLoader />}><ActivityPage /></Suspense>} />

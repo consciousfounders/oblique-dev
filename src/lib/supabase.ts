@@ -55,6 +55,17 @@ export interface DashboardWidgetLayout {
   h: number
 }
 
+// Audit Trail types (defined before Database type)
+export type AuditOperation = 'create' | 'update' | 'delete'
+export type AuditSource = 'web' | 'api' | 'import' | 'workflow' | 'system'
+
+export interface AuditChange {
+  field: string
+  old_value: unknown
+  new_value: unknown
+  field_label: string
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -3681,6 +3692,115 @@ export type Database = {
           created_at?: string
         }
       }
+      audit_logs: {
+        Row: {
+          id: string
+          tenant_id: string
+          entity_type: string
+          entity_id: string
+          entity_name: string | null
+          operation: AuditOperation
+          user_id: string | null
+          user_email: string | null
+          user_name: string | null
+          changed_at: string
+          changes: AuditChange[]
+          old_values: Record<string, unknown> | null
+          new_values: Record<string, unknown> | null
+          ip_address: string | null
+          user_agent: string | null
+          source: AuditSource
+          is_immutable: boolean
+          retention_until: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          entity_type: string
+          entity_id: string
+          entity_name?: string | null
+          operation: AuditOperation
+          user_id?: string | null
+          user_email?: string | null
+          user_name?: string | null
+          changed_at?: string
+          changes?: AuditChange[]
+          old_values?: Record<string, unknown> | null
+          new_values?: Record<string, unknown> | null
+          ip_address?: string | null
+          user_agent?: string | null
+          source?: AuditSource
+          is_immutable?: boolean
+          retention_until?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          entity_type?: string
+          entity_id?: string
+          entity_name?: string | null
+          operation?: AuditOperation
+          user_id?: string | null
+          user_email?: string | null
+          user_name?: string | null
+          changed_at?: string
+          changes?: AuditChange[]
+          old_values?: Record<string, unknown> | null
+          new_values?: Record<string, unknown> | null
+          ip_address?: string | null
+          user_agent?: string | null
+          source?: AuditSource
+          is_immutable?: boolean
+          retention_until?: string | null
+          created_at?: string
+        }
+      }
+      audit_settings: {
+        Row: {
+          id: string
+          tenant_id: string
+          track_creates: boolean
+          track_updates: boolean
+          track_deletes: boolean
+          tracked_entities: string[]
+          excluded_fields: string[]
+          retention_days: number
+          enable_data_export: boolean
+          gdpr_mode: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          track_creates?: boolean
+          track_updates?: boolean
+          track_deletes?: boolean
+          tracked_entities?: string[]
+          excluded_fields?: string[]
+          retention_days?: number
+          enable_data_export?: boolean
+          gdpr_mode?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          track_creates?: boolean
+          track_updates?: boolean
+          track_deletes?: boolean
+          tracked_entities?: string[]
+          excluded_fields?: string[]
+          retention_days?: number
+          enable_data_export?: boolean
+          gdpr_mode?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }
@@ -4315,4 +4435,48 @@ export interface BookingWebhookLog {
   success: boolean
   error_message: string | null
   created_at: string
+}
+
+// Audit Trail types
+export type AuditLog = Database['public']['Tables']['audit_logs']['Row'] & {
+  users?: { full_name: string | null } | null
+}
+export type AuditLogInsert = Database['public']['Tables']['audit_logs']['Insert']
+export type AuditLogUpdate = Database['public']['Tables']['audit_logs']['Update']
+
+export type AuditSettings = Database['public']['Tables']['audit_settings']['Row']
+export type AuditSettingsInsert = Database['public']['Tables']['audit_settings']['Insert']
+export type AuditSettingsUpdate = Database['public']['Tables']['audit_settings']['Update']
+
+// Audit trail entity types that can be audited
+export type AuditEntityType = 'account' | 'contact' | 'lead' | 'deal' | 'task' | 'campaign' | 'product'
+
+export const AUDIT_ENTITY_TYPES: { value: AuditEntityType; label: string; plural: string }[] = [
+  { value: 'account', label: 'Account', plural: 'accounts' },
+  { value: 'contact', label: 'Contact', plural: 'contacts' },
+  { value: 'lead', label: 'Lead', plural: 'leads' },
+  { value: 'deal', label: 'Deal', plural: 'deals' },
+  { value: 'task', label: 'Task', plural: 'tasks' },
+  { value: 'campaign', label: 'Campaign', plural: 'campaigns' },
+  { value: 'product', label: 'Product', plural: 'products' },
+]
+
+export const AUDIT_OPERATION_LABELS: Record<AuditOperation, string> = {
+  create: 'Created',
+  update: 'Updated',
+  delete: 'Deleted',
+}
+
+export const AUDIT_OPERATION_COLORS: Record<AuditOperation, { bg: string; text: string }> = {
+  create: { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-300' },
+  update: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-300' },
+  delete: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-700 dark:text-red-300' },
+}
+
+export const AUDIT_SOURCE_LABELS: Record<AuditSource, string> = {
+  web: 'Web UI',
+  api: 'API',
+  import: 'Import',
+  workflow: 'Workflow',
+  system: 'System',
 }
