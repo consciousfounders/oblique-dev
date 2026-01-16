@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { usePermissions } from '@/lib/hooks/usePermissions'
+import { useRecentItems } from '@/lib/hooks/useRecentItems'
 import {
   LayoutDashboard,
   Users,
@@ -41,6 +42,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { NotificationBell } from '@/components/notifications/NotificationBell'
 import { useCommandPalette } from '@/lib/hooks/useCommandPalette'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 
 // Navigation items with optional permission requirements
 const navItems = [
@@ -76,11 +78,21 @@ interface SidebarProps {
   onQuickSearch?: () => void
 }
 
+const recentItemIcons = {
+  contact: Users,
+  account: Building2,
+  deal: Kanban,
+  lead: UserCircle,
+  task: CheckSquare,
+}
+
 export function Sidebar({ onQuickSearch: _onQuickSearch }: SidebarProps) {
   const location = useLocation()
   const { user, signOut } = useAuth()
   const { hasPermission, isAdmin } = usePermissions()
+  const { recentItems } = useRecentItems()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [recentOpen, setRecentOpen] = useState(true)
 
   // Use try-catch since useCommandPalette might not be available if Sidebar is rendered outside CommandPaletteProvider
   let commandPalette: ReturnType<typeof useCommandPalette> | null = null
@@ -111,6 +123,37 @@ export function Sidebar({ onQuickSearch: _onQuickSearch }: SidebarProps) {
               <span className="text-xs">⌘</span>K
             </kbd>
           </button>
+        </div>
+      )}
+
+      {/* Recent Items */}
+      {recentItems.length > 0 && (
+        <div className="px-4 pt-4">
+          <Collapsible open={recentOpen} onOpenChange={setRecentOpen}>
+            <CollapsibleTrigger className="flex items-center gap-2 w-full px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider hover:text-sidebar-foreground transition-colors">
+              <Clock className="w-3 h-3" />
+              Recent
+              <span className="ml-auto text-[10px] bg-muted px-1.5 py-0.5 rounded">
+                {recentItems.length}
+              </span>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-0.5">
+              {recentItems.slice(0, 5).map((item) => {
+                const Icon = recentItemIcons[item.type]
+                return (
+                  <Link
+                    key={`${item.type}-${item.id}`}
+                    to={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
+                  >
+                    <Icon className="w-4 h-4 shrink-0" />
+                    <span className="truncate">{item.name}</span>
+                  </Link>
+                )
+              })}
+            </CollapsibleContent>
+          </Collapsible>
         </div>
       )}
 
