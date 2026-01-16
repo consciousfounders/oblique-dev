@@ -1,9 +1,12 @@
 import { Outlet, Navigate } from 'react-router-dom'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { Sidebar } from './Sidebar'
+import { CommandPalette } from '@/components/search/CommandPalette'
+import { CommandPaletteProvider, useCommandPalette } from '@/lib/hooks/useCommandPalette'
 
-export function AppLayout() {
+function AppLayoutContent() {
   const { user, loading } = useAuth()
+  const { isOpen, close } = useCommandPalette()
 
   if (loading) {
     return (
@@ -25,6 +28,15 @@ export function AppLayout() {
           <Outlet />
         </div>
       </main>
+      <CommandPalette open={isOpen} onOpenChange={(open) => !open && close()} />
     </div>
+  )
+}
+
+export function AppLayout() {
+  return (
+    <CommandPaletteProvider>
+      <AppLayoutContent />
+    </CommandPaletteProvider>
   )
 }

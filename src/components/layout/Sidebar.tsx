@@ -29,10 +29,12 @@ import {
   BookOpen,
   FileCheck,
   TrendingUp,
+  Search,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { NotificationBell } from '@/components/notifications/NotificationBell'
+import { useCommandPalette } from '@/lib/hooks/useCommandPalette'
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -63,6 +65,14 @@ export function Sidebar() {
   const { user, signOut } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
 
+  // Use try-catch since useCommandPalette might not be available if Sidebar is rendered outside CommandPaletteProvider
+  let commandPalette: ReturnType<typeof useCommandPalette> | null = null
+  try {
+    commandPalette = useCommandPalette()
+  } catch {
+    // CommandPaletteProvider not available, search button will be disabled
+  }
+
   const sidebarContent = (
     <div className="flex flex-col h-full">
       {/* Logo and Notifications */}
@@ -70,6 +80,22 @@ export function Sidebar() {
         <h1 className="text-xl font-bold text-sidebar-foreground">CRM</h1>
         <NotificationBell />
       </div>
+
+      {/* Search Button */}
+      {commandPalette && (
+        <div className="px-4 pt-4">
+          <button
+            onClick={commandPalette.open}
+            className="flex items-center gap-3 w-full px-3 py-2 text-sm text-muted-foreground bg-muted/50 hover:bg-muted rounded-md transition-colors"
+          >
+            <Search className="w-4 h-4" />
+            <span className="flex-1 text-left">Search...</span>
+            <kbd className="pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+              <span className="text-xs">⌘</span>K
+            </kbd>
+          </button>
+        </div>
+      )}
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1">
