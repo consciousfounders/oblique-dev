@@ -45,6 +45,7 @@ export type Database = {
           email: string
           full_name: string | null
           role: 'admin' | 'sdr' | 'ae' | 'am'
+          team_id: string | null
           created_at: string
           updated_at: string
         }
@@ -54,6 +55,7 @@ export type Database = {
           email: string
           full_name?: string | null
           role?: 'admin' | 'sdr' | 'ae' | 'am'
+          team_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -63,6 +65,7 @@ export type Database = {
           email?: string
           full_name?: string | null
           role?: 'admin' | 'sdr' | 'ae' | 'am'
+          team_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -77,6 +80,7 @@ export type Database = {
           employee_count: string | null
           annual_revenue: string | null
           owner_id: string | null
+          territory_id: string | null
           created_at: string
           updated_at: string
         }
@@ -89,6 +93,7 @@ export type Database = {
           employee_count?: string | null
           annual_revenue?: string | null
           owner_id?: string | null
+          territory_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -101,6 +106,7 @@ export type Database = {
           employee_count?: string | null
           annual_revenue?: string | null
           owner_id?: string | null
+          territory_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -159,6 +165,7 @@ export type Database = {
           source: string | null
           status: 'new' | 'contacted' | 'qualified' | 'unqualified' | 'converted'
           owner_id: string | null
+          territory_id: string | null
           converted_contact_id: string | null
           converted_account_id: string | null
           converted_at: string | null
@@ -177,6 +184,7 @@ export type Database = {
           source?: string | null
           status?: 'new' | 'contacted' | 'qualified' | 'unqualified' | 'converted'
           owner_id?: string | null
+          territory_id?: string | null
           converted_contact_id?: string | null
           converted_account_id?: string | null
           converted_at?: string | null
@@ -195,6 +203,7 @@ export type Database = {
           source?: string | null
           status?: 'new' | 'contacted' | 'qualified' | 'unqualified' | 'converted'
           owner_id?: string | null
+          territory_id?: string | null
           converted_contact_id?: string | null
           converted_account_id?: string | null
           converted_at?: string | null
@@ -1140,6 +1149,277 @@ export type Database = {
           updated_at?: string
         }
       }
+      teams: {
+        Row: {
+          id: string
+          tenant_id: string
+          name: string
+          description: string | null
+          level: TeamLevel
+          parent_team_id: string | null
+          manager_id: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          name: string
+          description?: string | null
+          level?: TeamLevel
+          parent_team_id?: string | null
+          manager_id?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          name?: string
+          description?: string | null
+          level?: TeamLevel
+          parent_team_id?: string | null
+          manager_id?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      team_members: {
+        Row: {
+          id: string
+          team_id: string
+          user_id: string
+          is_lead: boolean
+          joined_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          team_id: string
+          user_id: string
+          is_lead?: boolean
+          joined_at?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          team_id?: string
+          user_id?: string
+          is_lead?: boolean
+          joined_at?: string
+          created_at?: string
+        }
+      }
+      territories: {
+        Row: {
+          id: string
+          tenant_id: string
+          name: string
+          description: string | null
+          team_id: string | null
+          owner_id: string | null
+          is_active: boolean
+          auto_assign: boolean
+          priority: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          name: string
+          description?: string | null
+          team_id?: string | null
+          owner_id?: string | null
+          is_active?: boolean
+          auto_assign?: boolean
+          priority?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          name?: string
+          description?: string | null
+          team_id?: string | null
+          owner_id?: string | null
+          is_active?: boolean
+          auto_assign?: boolean
+          priority?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      territory_criteria: {
+        Row: {
+          id: string
+          territory_id: string
+          criteria_type: TerritoryCriteriaType
+          field_name: string
+          operator: string
+          field_value: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          territory_id: string
+          criteria_type: TerritoryCriteriaType
+          field_name: string
+          operator: string
+          field_value: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          territory_id?: string
+          criteria_type?: TerritoryCriteriaType
+          field_name?: string
+          operator?: string
+          field_value?: string
+          created_at?: string
+        }
+      }
+      territory_accounts: {
+        Row: {
+          id: string
+          territory_id: string
+          account_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          territory_id: string
+          account_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          territory_id?: string
+          account_id?: string
+          created_at?: string
+        }
+      }
+      assignment_rules: {
+        Row: {
+          id: string
+          tenant_id: string
+          name: string
+          description: string | null
+          rule_type: AssignmentRuleType
+          entity_type: string
+          team_id: string | null
+          territory_id: string | null
+          is_active: boolean
+          priority: number
+          config: Record<string, unknown>
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          name: string
+          description?: string | null
+          rule_type: AssignmentRuleType
+          entity_type: string
+          team_id?: string | null
+          territory_id?: string | null
+          is_active?: boolean
+          priority?: number
+          config?: Record<string, unknown>
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          name?: string
+          description?: string | null
+          rule_type?: AssignmentRuleType
+          entity_type?: string
+          team_id?: string | null
+          territory_id?: string | null
+          is_active?: boolean
+          priority?: number
+          config?: Record<string, unknown>
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      assignment_rule_members: {
+        Row: {
+          id: string
+          rule_id: string
+          user_id: string
+          weight: number
+          max_assignments: number | null
+          current_assignments: number
+          skills: string[]
+          last_assigned_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          rule_id: string
+          user_id: string
+          weight?: number
+          max_assignments?: number | null
+          current_assignments?: number
+          skills?: string[]
+          last_assigned_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          rule_id?: string
+          user_id?: string
+          weight?: number
+          max_assignments?: number | null
+          current_assignments?: number
+          skills?: string[]
+          last_assigned_at?: string | null
+          created_at?: string
+        }
+      }
+      assignment_history: {
+        Row: {
+          id: string
+          tenant_id: string
+          rule_id: string | null
+          entity_type: string
+          entity_id: string
+          assigned_to: string
+          assigned_by: string | null
+          assignment_reason: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          rule_id?: string | null
+          entity_type: string
+          entity_id: string
+          assigned_to: string
+          assigned_by?: string | null
+          assignment_reason?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          rule_id?: string | null
+          entity_type?: string
+          entity_id?: string
+          assigned_to?: string
+          assigned_by?: string | null
+          assignment_reason?: string | null
+          created_at?: string
+        }
+      }
       notification_preferences: {
         Row: {
           id: string
@@ -1269,3 +1549,44 @@ export type NotificationUpdate = Database['public']['Tables']['notifications']['
 export type NotificationPreferences = Database['public']['Tables']['notification_preferences']['Row']
 export type NotificationPreferencesInsert = Database['public']['Tables']['notification_preferences']['Insert']
 export type NotificationPreferencesUpdate = Database['public']['Tables']['notification_preferences']['Update']
+
+// Team types
+export type TeamLevel = 'organization' | 'region' | 'team'
+
+export type Team = Database['public']['Tables']['teams']['Row']
+export type TeamInsert = Database['public']['Tables']['teams']['Insert']
+export type TeamUpdate = Database['public']['Tables']['teams']['Update']
+
+export type TeamMember = Database['public']['Tables']['team_members']['Row']
+export type TeamMemberInsert = Database['public']['Tables']['team_members']['Insert']
+export type TeamMemberUpdate = Database['public']['Tables']['team_members']['Update']
+
+// Territory types
+export type TerritoryCriteriaType = 'geographic' | 'industry' | 'company_size' | 'named_accounts'
+
+export type Territory = Database['public']['Tables']['territories']['Row']
+export type TerritoryInsert = Database['public']['Tables']['territories']['Insert']
+export type TerritoryUpdate = Database['public']['Tables']['territories']['Update']
+
+export type TerritoryCriteria = Database['public']['Tables']['territory_criteria']['Row']
+export type TerritoryCriteriaInsert = Database['public']['Tables']['territory_criteria']['Insert']
+export type TerritoryCriteriaUpdate = Database['public']['Tables']['territory_criteria']['Update']
+
+export type TerritoryAccount = Database['public']['Tables']['territory_accounts']['Row']
+export type TerritoryAccountInsert = Database['public']['Tables']['territory_accounts']['Insert']
+export type TerritoryAccountUpdate = Database['public']['Tables']['territory_accounts']['Update']
+
+// Assignment rule types
+export type AssignmentRuleType = 'round_robin' | 'load_balanced' | 'skill_based'
+
+export type AssignmentRule = Database['public']['Tables']['assignment_rules']['Row']
+export type AssignmentRuleInsert = Database['public']['Tables']['assignment_rules']['Insert']
+export type AssignmentRuleUpdate = Database['public']['Tables']['assignment_rules']['Update']
+
+export type AssignmentRuleMember = Database['public']['Tables']['assignment_rule_members']['Row']
+export type AssignmentRuleMemberInsert = Database['public']['Tables']['assignment_rule_members']['Insert']
+export type AssignmentRuleMemberUpdate = Database['public']['Tables']['assignment_rule_members']['Update']
+
+export type AssignmentHistory = Database['public']['Tables']['assignment_history']['Row']
+export type AssignmentHistoryInsert = Database['public']['Tables']['assignment_history']['Insert']
+export type AssignmentHistoryUpdate = Database['public']['Tables']['assignment_history']['Update']

@@ -20,6 +20,9 @@ import {
   Activity,
   Linkedin,
   Database,
+  UsersRound,
+  MapPin,
+  GitBranch,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -32,6 +35,9 @@ const navItems = [
   { href: '/contacts', label: 'Contacts', icon: Users },
   { href: '/accounts', label: 'Accounts', icon: Building2 },
   { href: '/deals', label: 'Deals', icon: Kanban },
+  { href: '/teams', label: 'Teams', icon: UsersRound },
+  { href: '/territories', label: 'Territories', icon: MapPin },
+  { href: '/assignment-rules', label: 'Assign Rules', icon: GitBranch },
   { href: '/email', label: 'Email', icon: Mail },
   { href: '/calendar', label: 'Calendar', icon: Calendar },
   { href: '/drive', label: 'Drive', icon: FolderOpen },

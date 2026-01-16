@@ -31,6 +31,9 @@ const ActivityPage = lazy(() => import('@/pages/activity/Activity').then(m => ({
 const LinkedInPage = lazy(() => import('@/pages/linkedin/LinkedIn').then(m => ({ default: m.LinkedInPage })))
 const PublicBookingPage = lazy(() => import('@/pages/booking/PublicBooking').then(m => ({ default: m.PublicBookingPage })))
 const DataManagementPage = lazy(() => import('@/pages/data-management/DataManagement').then(m => ({ default: m.DataManagementPage })))
+const TeamsPage = lazy(() => import('@/pages/teams/Teams').then(m => ({ default: m.TeamsPage })))
+const TerritoriesPage = lazy(() => import('@/pages/territories/Territories').then(m => ({ default: m.TerritoriesPage })))
+const AssignmentRulesPage = lazy(() => import('@/pages/assignment-rules/AssignmentRules').then(m => ({ default: m.AssignmentRulesPage })))
 
 function PageLoader() {
   return (
@@ -75,6 +78,9 @@ function App() {
             <Route path="/activity" element={<Suspense fallback={<PageLoader />}><ActivityPage /></Suspense>} />
             <Route path="/linkedin" element={<Suspense fallback={<PageLoader />}><LinkedInPage /></Suspense>} />
             <Route path="/data-management" element={<Suspense fallback={<PageLoader />}><DataManagementPage /></Suspense>} />
+            <Route path="/teams" element={<Suspense fallback={<PageLoader />}><TeamsPage /></Suspense>} />
+            <Route path="/territories" element={<Suspense fallback={<PageLoader />}><TerritoriesPage /></Suspense>} />
+            <Route path="/assignment-rules" element={<Suspense fallback={<PageLoader />}><AssignmentRulesPage /></Suspense>} />
           </Route>
         </Routes>
         <Toaster
