@@ -25,6 +25,9 @@ import {
   GitBranch,
   FileText,
   Megaphone,
+  Package,
+  BookOpen,
+  FileCheck,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -37,6 +40,9 @@ const navItems = [
   { href: '/contacts', label: 'Contacts', icon: Users },
   { href: '/accounts', label: 'Accounts', icon: Building2 },
   { href: '/deals', label: 'Deals', icon: Kanban },
+  { href: '/products', label: 'Products', icon: Package },
+  { href: '/price-books', label: 'Price Books', icon: BookOpen },
+  { href: '/quotes', label: 'Quotes', icon: FileCheck },
   { href: '/teams', label: 'Teams', icon: UsersRound },
   { href: '/territories', label: 'Territories', icon: MapPin },
   { href: '/assignment-rules', label: 'Assign Rules', icon: GitBranch },

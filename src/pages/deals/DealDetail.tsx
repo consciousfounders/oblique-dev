@@ -10,6 +10,7 @@ import { NotesPanel } from '@/components/notes'
 import { AttachmentsPanel } from '@/components/attachments'
 import { AccountCombobox } from '@/components/contacts/AccountCombobox'
 import { ContactCombobox, UserCombobox } from '@/components/deals'
+import { DealProductsPanel } from '@/components/products'
 import {
   ArrowLeft,
   DollarSign,
@@ -715,6 +716,7 @@ export function DealDetailPage() {
             </Card>
           )}
 
+          <DealProductsPanel dealId={deal.id} />
           <NotesPanel entityType="deal" entityId={deal.id} />
           <AttachmentsPanel entityType="deal" entityId={deal.id} />
         </div>

@@ -41,6 +41,12 @@ const FormEmbedPage = lazy(() => import('@/pages/forms/FormEmbed').then(m => ({ 
 const PublicFormPage = lazy(() => import('@/pages/forms/PublicForm').then(m => ({ default: m.PublicFormPage })))
 const CampaignsPage = lazy(() => import('@/pages/campaigns/Campaigns').then(m => ({ default: m.CampaignsPage })))
 const CampaignDetailPage = lazy(() => import('@/pages/campaigns/CampaignDetail').then(m => ({ default: m.CampaignDetailPage })))
+const ProductsPage = lazy(() => import('@/pages/products/Products').then(m => ({ default: m.ProductsPage })))
+const ProductDetailPage = lazy(() => import('@/pages/products/ProductDetail').then(m => ({ default: m.ProductDetailPage })))
+const PriceBooksPage = lazy(() => import('@/pages/price-books/PriceBooks').then(m => ({ default: m.PriceBooksPage })))
+const PriceBookDetailPage = lazy(() => import('@/pages/price-books/PriceBookDetail').then(m => ({ default: m.PriceBookDetailPage })))
+const QuotesPage = lazy(() => import('@/pages/quotes/Quotes').then(m => ({ default: m.QuotesPage })))
+const QuoteDetailPage = lazy(() => import('@/pages/quotes/QuoteDetail').then(m => ({ default: m.QuoteDetailPage })))
 
 function PageLoader() {
   return (
@@ -95,6 +101,12 @@ function App() {
             <Route path="/forms/:id/embed" element={<Suspense fallback={<PageLoader />}><FormEmbedPage /></Suspense>} />
             <Route path="/campaigns" element={<Suspense fallback={<PageLoader />}><CampaignsPage /></Suspense>} />
             <Route path="/campaigns/:id" element={<Suspense fallback={<PageLoader />}><CampaignDetailPage /></Suspense>} />
+            <Route path="/products" element={<Suspense fallback={<PageLoader />}><ProductsPage /></Suspense>} />
+            <Route path="/products/:id" element={<Suspense fallback={<PageLoader />}><ProductDetailPage /></Suspense>} />
+            <Route path="/price-books" element={<Suspense fallback={<PageLoader />}><PriceBooksPage /></Suspense>} />
+            <Route path="/price-books/:id" element={<Suspense fallback={<PageLoader />}><PriceBookDetailPage /></Suspense>} />
+            <Route path="/quotes" element={<Suspense fallback={<PageLoader />}><QuotesPage /></Suspense>} />
+            <Route path="/quotes/:id" element={<Suspense fallback={<PageLoader />}><QuoteDetailPage /></Suspense>} />
           </Route>
         </Routes>
         <Toaster

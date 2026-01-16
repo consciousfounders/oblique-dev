@@ -2101,6 +2101,359 @@ export type Database = {
           created_at?: string
         }
       }
+      products: {
+        Row: {
+          id: string
+          tenant_id: string
+          name: string
+          sku: string
+          description: string | null
+          category: string | null
+          family: string | null
+          status: ProductStatus
+          list_price: number | null
+          image_url: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          name: string
+          sku: string
+          description?: string | null
+          category?: string | null
+          family?: string | null
+          status?: ProductStatus
+          list_price?: number | null
+          image_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          name?: string
+          sku?: string
+          description?: string | null
+          category?: string | null
+          family?: string | null
+          status?: ProductStatus
+          list_price?: number | null
+          image_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      price_books: {
+        Row: {
+          id: string
+          tenant_id: string
+          name: string
+          type: PriceBookType
+          description: string | null
+          is_active: boolean
+          is_default: boolean
+          currency: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          name: string
+          type?: PriceBookType
+          description?: string | null
+          is_active?: boolean
+          is_default?: boolean
+          currency?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          name?: string
+          type?: PriceBookType
+          description?: string | null
+          is_active?: boolean
+          is_default?: boolean
+          currency?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      price_book_entries: {
+        Row: {
+          id: string
+          price_book_id: string
+          product_id: string
+          unit_price: number
+          min_quantity: number
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          price_book_id: string
+          product_id: string
+          unit_price: number
+          min_quantity?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          price_book_id?: string
+          product_id?: string
+          unit_price?: number
+          min_quantity?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      volume_pricing_tiers: {
+        Row: {
+          id: string
+          price_book_entry_id: string
+          min_quantity: number
+          max_quantity: number | null
+          unit_price: number
+          discount_percentage: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          price_book_entry_id: string
+          min_quantity: number
+          max_quantity?: number | null
+          unit_price: number
+          discount_percentage?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          price_book_entry_id?: string
+          min_quantity?: number
+          max_quantity?: number | null
+          unit_price?: number
+          discount_percentage?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      deal_products: {
+        Row: {
+          id: string
+          deal_id: string
+          product_id: string
+          price_book_entry_id: string | null
+          quantity: number
+          unit_price: number
+          discount_percentage: number
+          discount_amount: number
+          line_total: number
+          description: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          deal_id: string
+          product_id: string
+          price_book_entry_id?: string | null
+          quantity?: number
+          unit_price: number
+          discount_percentage?: number
+          discount_amount?: number
+          line_total: number
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          deal_id?: string
+          product_id?: string
+          price_book_entry_id?: string | null
+          quantity?: number
+          unit_price?: number
+          discount_percentage?: number
+          discount_amount?: number
+          line_total?: number
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      quotes: {
+        Row: {
+          id: string
+          tenant_id: string
+          deal_id: string | null
+          quote_number: string
+          name: string
+          status: QuoteStatus
+          account_id: string | null
+          contact_id: string | null
+          price_book_id: string | null
+          billing_name: string | null
+          billing_street: string | null
+          billing_city: string | null
+          billing_state: string | null
+          billing_postal_code: string | null
+          billing_country: string | null
+          shipping_name: string | null
+          shipping_street: string | null
+          shipping_city: string | null
+          shipping_state: string | null
+          shipping_postal_code: string | null
+          shipping_country: string | null
+          subtotal: number
+          discount_percentage: number
+          discount_amount: number
+          tax_percentage: number
+          tax_amount: number
+          total_amount: number
+          terms: string | null
+          notes: string | null
+          expires_at: string | null
+          sent_at: string | null
+          accepted_at: string | null
+          rejected_at: string | null
+          owner_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          deal_id?: string | null
+          quote_number: string
+          name: string
+          status?: QuoteStatus
+          account_id?: string | null
+          contact_id?: string | null
+          price_book_id?: string | null
+          billing_name?: string | null
+          billing_street?: string | null
+          billing_city?: string | null
+          billing_state?: string | null
+          billing_postal_code?: string | null
+          billing_country?: string | null
+          shipping_name?: string | null
+          shipping_street?: string | null
+          shipping_city?: string | null
+          shipping_state?: string | null
+          shipping_postal_code?: string | null
+          shipping_country?: string | null
+          subtotal?: number
+          discount_percentage?: number
+          discount_amount?: number
+          tax_percentage?: number
+          tax_amount?: number
+          total_amount?: number
+          terms?: string | null
+          notes?: string | null
+          expires_at?: string | null
+          sent_at?: string | null
+          accepted_at?: string | null
+          rejected_at?: string | null
+          owner_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          deal_id?: string | null
+          quote_number?: string
+          name?: string
+          status?: QuoteStatus
+          account_id?: string | null
+          contact_id?: string | null
+          price_book_id?: string | null
+          billing_name?: string | null
+          billing_street?: string | null
+          billing_city?: string | null
+          billing_state?: string | null
+          billing_postal_code?: string | null
+          billing_country?: string | null
+          shipping_name?: string | null
+          shipping_street?: string | null
+          shipping_city?: string | null
+          shipping_state?: string | null
+          shipping_postal_code?: string | null
+          shipping_country?: string | null
+          subtotal?: number
+          discount_percentage?: number
+          discount_amount?: number
+          tax_percentage?: number
+          tax_amount?: number
+          total_amount?: number
+          terms?: string | null
+          notes?: string | null
+          expires_at?: string | null
+          sent_at?: string | null
+          accepted_at?: string | null
+          rejected_at?: string | null
+          owner_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      quote_line_items: {
+        Row: {
+          id: string
+          quote_id: string
+          product_id: string | null
+          name: string
+          description: string | null
+          quantity: number
+          unit_price: number
+          discount_percentage: number
+          discount_amount: number
+          line_total: number
+          position: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          quote_id: string
+          product_id?: string | null
+          name: string
+          description?: string | null
+          quantity?: number
+          unit_price: number
+          discount_percentage?: number
+          discount_amount?: number
+          line_total: number
+          position?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          quote_id?: string
+          product_id?: string | null
+          name?: string
+          description?: string | null
+          quantity?: number
+          unit_price?: number
+          discount_percentage?: number
+          discount_amount?: number
+          line_total?: number
+          position?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }
@@ -2275,3 +2628,36 @@ export type CampaignMemberUpdate = Database['public']['Tables']['campaign_member
 
 export type CampaignResponse = Database['public']['Tables']['campaign_responses']['Row']
 export type CampaignResponseInsert = Database['public']['Tables']['campaign_responses']['Insert']
+
+// Product types
+export type ProductStatus = 'active' | 'inactive' | 'discontinued'
+export type PriceBookType = 'standard' | 'partner' | 'enterprise' | 'custom'
+export type QuoteStatus = 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired'
+
+export type Product = Database['public']['Tables']['products']['Row']
+export type ProductInsert = Database['public']['Tables']['products']['Insert']
+export type ProductUpdate = Database['public']['Tables']['products']['Update']
+
+export type PriceBook = Database['public']['Tables']['price_books']['Row']
+export type PriceBookInsert = Database['public']['Tables']['price_books']['Insert']
+export type PriceBookUpdate = Database['public']['Tables']['price_books']['Update']
+
+export type PriceBookEntry = Database['public']['Tables']['price_book_entries']['Row']
+export type PriceBookEntryInsert = Database['public']['Tables']['price_book_entries']['Insert']
+export type PriceBookEntryUpdate = Database['public']['Tables']['price_book_entries']['Update']
+
+export type VolumePricingTier = Database['public']['Tables']['volume_pricing_tiers']['Row']
+export type VolumePricingTierInsert = Database['public']['Tables']['volume_pricing_tiers']['Insert']
+export type VolumePricingTierUpdate = Database['public']['Tables']['volume_pricing_tiers']['Update']
+
+export type DealProduct = Database['public']['Tables']['deal_products']['Row']
+export type DealProductInsert = Database['public']['Tables']['deal_products']['Insert']
+export type DealProductUpdate = Database['public']['Tables']['deal_products']['Update']
+
+export type Quote = Database['public']['Tables']['quotes']['Row']
+export type QuoteInsert = Database['public']['Tables']['quotes']['Insert']
+export type QuoteUpdate = Database['public']['Tables']['quotes']['Update']
+
+export type QuoteLineItem = Database['public']['Tables']['quote_line_items']['Row']
+export type QuoteLineItemInsert = Database['public']['Tables']['quote_line_items']['Insert']
+export type QuoteLineItemUpdate = Database['public']['Tables']['quote_line_items']['Update']
