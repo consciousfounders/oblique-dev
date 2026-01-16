@@ -160,6 +160,11 @@ export type WebhookEventType =
   | 'campaign_member.added'
   | 'campaign_member.status_changed'
   | 'campaign_member.converted'
+  | 'booking.created'
+  | 'booking.confirmed'
+  | 'booking.cancelled'
+  | 'booking.rescheduled'
+  | 'booking.completed'
 
 export const WEBHOOK_EVENTS: { event: WebhookEventType; label: string; description: string }[] = [
   { event: 'account.created', label: 'Account Created', description: 'Triggered when a new account is created' },
@@ -186,6 +191,11 @@ export const WEBHOOK_EVENTS: { event: WebhookEventType; label: string; descripti
   { event: 'campaign_member.added', label: 'Campaign Member Added', description: 'Triggered when a lead/contact is added to a campaign' },
   { event: 'campaign_member.status_changed', label: 'Campaign Member Status Changed', description: 'Triggered when a campaign member status changes' },
   { event: 'campaign_member.converted', label: 'Campaign Member Converted', description: 'Triggered when a campaign member converts' },
+  { event: 'booking.created', label: 'Booking Created', description: 'Triggered when a new booking is scheduled via Cal.com' },
+  { event: 'booking.confirmed', label: 'Booking Confirmed', description: 'Triggered when a booking is confirmed' },
+  { event: 'booking.cancelled', label: 'Booking Cancelled', description: 'Triggered when a booking is cancelled' },
+  { event: 'booking.rescheduled', label: 'Booking Rescheduled', description: 'Triggered when a booking is rescheduled' },
+  { event: 'booking.completed', label: 'Booking Completed', description: 'Triggered when a booking/meeting is marked as completed' },
 ]
 
 // Rate limit info returned in headers

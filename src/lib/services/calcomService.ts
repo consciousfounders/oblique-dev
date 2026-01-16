@@ -2,6 +2,7 @@
 // Handles Cal.com webhook events and booking synchronization
 
 import { supabase } from '@/lib/supabase'
+import type { NotificationCategory } from '@/lib/supabase'
 
 // Cal.com webhook event types
 export type CalcomWebhookEvent =
@@ -120,7 +121,102 @@ function parseLocationType(location?: string): { type: string; value: string } {
   return { type: 'other', value: location }
 }
 
+// Webhook processing result with additional context
+export interface WebhookProcessingResult {
+  success: boolean
+  bookingId?: string
+  contactId?: string
+  activityId?: string
+  error?: string
+}
+
+// Format booking time for display
+function formatBookingTime(startTime: string, endTime: string, timezone: string): string {
+  const start = new Date(startTime)
+  const end = new Date(endTime)
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: timezone || 'UTC',
+  }
+  const dateStr = start.toLocaleDateString('en-US', options)
+  const endTimeStr = end.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: timezone || 'UTC',
+  })
+  return `${dateStr} - ${endTimeStr}`
+}
+
 export class CalcomService {
+  /**
+   * Create an activity record for a booking event
+   */
+  private async createBookingActivity(
+    tenantId: string,
+    userId: string,
+    entityType: 'contact' | 'booking',
+    entityId: string,
+    subject: string,
+    description: string
+  ): Promise<string | undefined> {
+    try {
+      const { data, error } = await supabase
+        .from('activities')
+        .insert({
+          tenant_id: tenantId,
+          user_id: userId,
+          entity_type: entityType,
+          entity_id: entityId,
+          activity_type: 'meeting',
+          subject,
+          description,
+        })
+        .select('id')
+        .single()
+
+      if (error) {
+        console.error('Error creating booking activity:', error)
+        return undefined
+      }
+      return data?.id
+    } catch (err) {
+      console.error('Error creating booking activity:', err)
+      return undefined
+    }
+  }
+
+  /**
+   * Create a notification for a booking event
+   */
+  private async createBookingNotification(
+    tenantId: string,
+    userId: string,
+    title: string,
+    message: string,
+    bookingId: string,
+    category: NotificationCategory = 'meeting_reminder'
+  ): Promise<void> {
+    try {
+      await supabase.from('notifications').insert({
+        tenant_id: tenantId,
+        user_id: userId,
+        title,
+        message,
+        notification_type: 'activity',
+        category,
+        entity_type: 'booking',
+        entity_id: bookingId,
+        action_url: `/bookings/${bookingId}`,
+      })
+    } catch (err) {
+      console.error('Error creating booking notification:', err)
+    }
+  }
+
   /**
    * Process incoming webhook from Cal.com
    */
@@ -128,11 +224,15 @@ export class CalcomService {
     payload: CalcomWebhookPayload,
     tenantId: string,
     userId: string
-  ): Promise<{ success: boolean; bookingId?: string; error?: string }> {
+  ): Promise<WebhookProcessingResult> {
     try {
       const { triggerEvent, payload: data } = payload
       const attendee = data.attendees[0]
       const { type: locationType, value: locationValue } = parseLocationType(data.location)
+
+      let bookingId: string | undefined
+      let contactId: string | undefined
+      let activityId: string | undefined
 
       switch (triggerEvent) {
         case 'BOOKING_CREATED':
@@ -140,7 +240,7 @@ export class CalcomService {
           // Check if booking already exists (by cal_booking_uid)
           const { data: existingBooking } = await supabase
             .from('bookings')
-            .select('id')
+            .select('id, contact_id')
             .eq('cal_booking_uid', data.uid)
             .single()
 
@@ -160,7 +260,44 @@ export class CalcomService {
               .eq('id', existingBooking.id)
 
             if (updateError) throw updateError
-            return { success: true, bookingId: existingBooking.id }
+            const confirmedBookingId = existingBooking.id
+            bookingId = confirmedBookingId
+            contactId = existingBooking.contact_id || undefined
+
+            // Create activity for confirmation
+            const timeStr = formatBookingTime(data.startTime, data.endTime, data.timezone || 'UTC')
+            const entityId = contactId || confirmedBookingId
+            activityId = await this.createBookingActivity(
+              tenantId,
+              userId,
+              contactId ? 'contact' : 'booking',
+              entityId,
+              `Meeting Confirmed: ${data.title}`,
+              `Meeting confirmed with ${attendee?.name || 'Guest'}\n${timeStr}`
+            )
+
+            // Create notification
+            await this.createBookingNotification(
+              tenantId,
+              userId,
+              'Meeting Confirmed',
+              `${data.title} with ${attendee?.name || 'Guest'}`,
+              confirmedBookingId
+            )
+
+            return { success: true, bookingId, contactId, activityId }
+          }
+
+          // Try to find existing contact by email first
+          if (attendee?.email) {
+            const { data: contact } = await supabase
+              .from('contacts')
+              .select('id')
+              .eq('tenant_id', tenantId)
+              .eq('email', attendee.email)
+              .single()
+
+            contactId = contact?.id
           }
 
           // Create new booking
@@ -185,57 +322,112 @@ export class CalcomService {
               location_value: locationValue,
               meeting_url: data.meetingUrl || null,
               status: mapCalcomStatus(triggerEvent, data.status),
+              contact_id: contactId || null,
               metadata: data.metadata || {},
             })
             .select('id')
             .single()
 
           if (insertError) throw insertError
+          const newBookingId = newBooking?.id
+          bookingId = newBookingId
 
-          // Try to auto-link to existing contact by email
-          if (attendee?.email && newBooking) {
-            const { data: contact } = await supabase
-              .from('contacts')
-              .select('id')
-              .eq('tenant_id', tenantId)
-              .eq('email', attendee.email)
-              .single()
-
-            if (contact) {
-              await supabase
-                .from('bookings')
-                .update({ contact_id: contact.id })
-                .eq('id', newBooking.id)
+          // Create activity for new booking
+          if (newBookingId) {
+            const timeStr = formatBookingTime(data.startTime, data.endTime, data.timezone || 'UTC')
+            let description = `New meeting scheduled with ${attendee?.name || 'Guest'}\n${timeStr}`
+            if (data.meetingUrl) {
+              description += `\nMeeting link: ${data.meetingUrl}`
             }
+
+            const activityEntityId = contactId || newBookingId
+            activityId = await this.createBookingActivity(
+              tenantId,
+              userId,
+              contactId ? 'contact' : 'booking',
+              activityEntityId,
+              `Meeting Scheduled: ${data.title}`,
+              description
+            )
+
+            // Create notification
+            await this.createBookingNotification(
+              tenantId,
+              userId,
+              'New Meeting Scheduled',
+              `${data.title} with ${attendee?.name || 'Guest'}`,
+              newBookingId
+            )
           }
 
-          return { success: true, bookingId: newBooking?.id }
+          return { success: true, bookingId, contactId, activityId }
         }
 
         case 'BOOKING_CANCELLED':
         case 'BOOKING_REJECTED': {
-          const { error: cancelError } = await supabase
+          // Get booking to find contact
+          const { data: booking } = await supabase
             .from('bookings')
-            .update({
-              status: 'cancelled',
-              cancelled_at: new Date().toISOString(),
-              cancellation_reason: data.cancelledReason || null,
-            })
+            .select('id, contact_id, title, attendee_name')
             .eq('cal_booking_uid', data.uid)
             .eq('tenant_id', tenantId)
+            .single()
 
-          if (cancelError) throw cancelError
-          return { success: true }
+          if (booking) {
+            const cancelledBookingId = booking.id
+            bookingId = cancelledBookingId
+            contactId = booking.contact_id || undefined
+
+            const { error: cancelError } = await supabase
+              .from('bookings')
+              .update({
+                status: 'cancelled',
+                cancelled_at: new Date().toISOString(),
+                cancellation_reason: data.cancelledReason || null,
+              })
+              .eq('id', booking.id)
+
+            if (cancelError) throw cancelError
+
+            // Create cancellation activity
+            let description = `Meeting with ${booking.attendee_name || 'Guest'} was cancelled`
+            if (data.cancelledReason) {
+              description += `\nReason: ${data.cancelledReason}`
+            }
+
+            const activityEntityId = contactId || cancelledBookingId
+            activityId = await this.createBookingActivity(
+              tenantId,
+              userId,
+              contactId ? 'contact' : 'booking',
+              activityEntityId,
+              `Meeting Cancelled: ${booking.title}`,
+              description
+            )
+
+            // Create notification
+            await this.createBookingNotification(
+              tenantId,
+              userId,
+              'Meeting Cancelled',
+              `${booking.title} with ${booking.attendee_name || 'Guest'}`,
+              cancelledBookingId
+            )
+          }
+
+          return { success: true, bookingId, contactId, activityId }
         }
 
         case 'BOOKING_RESCHEDULED': {
           // Mark old booking as rescheduled
           const { data: oldBooking } = await supabase
             .from('bookings')
-            .select('id')
+            .select('id, contact_id')
             .eq('cal_booking_uid', data.rescheduleUid)
             .eq('tenant_id', tenantId)
             .single()
+
+          contactId = oldBooking?.contact_id || undefined
 
           // Create new booking with link to old one
           const { data: newBooking, error: insertError } = await supabase
@@ -259,6 +451,7 @@ export class CalcomService {
               location_value: locationValue,
               meeting_url: data.meetingUrl || null,
               status: 'confirmed',
+              contact_id: contactId || null,
               rescheduled_from_id: oldBooking?.id || null,
               metadata: data.metadata || {},
             })
@@ -266,6 +459,8 @@ export class CalcomService {
             .single()
 
           if (insertError) throw insertError
+          const rescheduledBookingId = newBooking?.id
+          bookingId = rescheduledBookingId
 
           // Update old booking to point to new one
           if (oldBooking && newBooking) {
@@ -278,18 +473,65 @@ export class CalcomService {
               .eq('id', oldBooking.id)
           }
 
-          return { success: true, bookingId: newBooking?.id }
+          // Create reschedule activity
+          if (rescheduledBookingId) {
+            const timeStr = formatBookingTime(data.startTime, data.endTime, data.timezone || 'UTC')
+            const activityEntityId = contactId || rescheduledBookingId
+            activityId = await this.createBookingActivity(
+              tenantId,
+              userId,
+              contactId ? 'contact' : 'booking',
+              activityEntityId,
+              `Meeting Rescheduled: ${data.title}`,
+              `Meeting with ${attendee?.name || 'Guest'} rescheduled to ${timeStr}`
+            )
+
+            // Create notification
+            await this.createBookingNotification(
+              tenantId,
+              userId,
+              'Meeting Rescheduled',
+              `${data.title} with ${attendee?.name || 'Guest'}`,
+              rescheduledBookingId
+            )
+          }
+
+          return { success: true, bookingId, contactId, activityId }
         }
 
         case 'BOOKING_COMPLETED': {
-          const { error: completeError } = await supabase
+          const { data: booking } = await supabase
             .from('bookings')
-            .update({ status: 'completed' })
+            .select('id, contact_id, title, attendee_name')
             .eq('cal_booking_uid', data.uid)
             .eq('tenant_id', tenantId)
+            .single()
 
-          if (completeError) throw completeError
-          return { success: true }
+          if (booking) {
+            const completedBookingId = booking.id
+            bookingId = completedBookingId
+            contactId = booking.contact_id || undefined
+
+            const { error: completeError } = await supabase
+              .from('bookings')
+              .update({ status: 'completed' })
+              .eq('id', booking.id)
+
+            if (completeError) throw completeError
+
+            // Create completion activity
+            const activityEntityId = contactId || completedBookingId
+            activityId = await this.createBookingActivity(
+              tenantId,
+              userId,
+              contactId ? 'contact' : 'booking',
+              activityEntityId,
+              `Meeting Completed: ${booking.title}`,
+              `Meeting with ${booking.attendee_name || 'Guest'} has been completed`
+            )
+          }
+
+          return { success: true, bookingId, contactId, activityId }
         }
 
         default:

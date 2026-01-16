@@ -4264,3 +4264,55 @@ export const WORKFLOW_EXECUTION_STATUS_COLORS: Record<WorkflowExecutionStatus, {
   failed: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-700 dark:text-red-300' },
   skipped: { bg: 'bg-gray-100 dark:bg-gray-900/30', text: 'text-gray-700 dark:text-gray-300' },
 }
+
+// Booking webhook configuration types
+export type IntegrationProvider = 'calcom' | 'calendly' | 'google_calendar'
+
+export interface BookingWebhookConfig {
+  id: string
+  tenant_id: string
+  user_id: string
+  provider: IntegrationProvider
+  webhook_secret: string | null
+  cal_username: string | null
+  default_event_type: string | null
+  is_active: boolean
+  last_webhook_at: string | null
+  last_error: string | null
+  last_error_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface BookingWebhookConfigInsert {
+  id?: string
+  tenant_id: string
+  user_id: string
+  provider?: IntegrationProvider
+  webhook_secret?: string | null
+  cal_username?: string | null
+  default_event_type?: string | null
+  is_active?: boolean
+}
+
+export interface BookingWebhookConfigUpdate {
+  webhook_secret?: string | null
+  cal_username?: string | null
+  default_event_type?: string | null
+  is_active?: boolean
+}
+
+export interface BookingWebhookLog {
+  id: string
+  tenant_id: string
+  config_id: string | null
+  event_type: string
+  cal_booking_uid: string | null
+  request_payload: Record<string, unknown> | null
+  response_status: number | null
+  response_body: string | null
+  processing_time_ms: number | null
+  success: boolean
+  error_message: string | null
+  created_at: string
+}
