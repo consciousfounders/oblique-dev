@@ -31,6 +31,8 @@ import {
   FileCheck,
   TrendingUp,
   Search,
+  BarChart3,
+  PieChart,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -46,6 +48,8 @@ const navItems = [
   { href: '/accounts', label: 'Accounts', icon: Building2, permission: 'accounts.view' },
   { href: '/deals', label: 'Deals', icon: Kanban, permission: 'deals.view' },
   { href: '/forecasting', label: 'Forecasting', icon: TrendingUp, permission: 'forecasting.view' },
+  { href: '/reports', label: 'Reports', icon: BarChart3, permission: 'reports.view' },
+  { href: '/dashboards', label: 'Dashboards', icon: PieChart, permission: 'dashboards.view' },
   { href: '/products', label: 'Products', icon: Package, permission: 'products.view' },
   { href: '/price-books', label: 'Price Books', icon: BookOpen, permission: 'products.view' },
   { href: '/quotes', label: 'Quotes', icon: FileCheck, permission: 'quotes.view' },

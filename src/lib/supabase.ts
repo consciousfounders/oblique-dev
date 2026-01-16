@@ -12,6 +12,32 @@ export const supabase = createClient(
   supabaseAnonKey || ''
 )
 
+// Report and Dashboard types (defined before Database type)
+export type ReportType = 'standard' | 'custom'
+export type ReportObjectType = 'leads' | 'contacts' | 'accounts' | 'deals' | 'activities' | 'campaigns' | 'users'
+export type ChartType = 'bar' | 'line' | 'pie' | 'funnel' | 'gauge' | 'table' | 'kpi'
+export type WidgetType = 'chart' | 'kpi' | 'list' | 'activity_feed'
+
+export interface ReportFilter {
+  field: string
+  operator: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'greater_than' | 'less_than' | 'between' | 'in' | 'not_in' | 'is_null' | 'is_not_null'
+  value: unknown
+  value2?: unknown // For 'between' operator
+}
+
+export interface ReportSummarization {
+  type?: 'count' | 'sum' | 'avg' | 'min' | 'max'
+  field?: string
+}
+
+export interface DashboardWidgetLayout {
+  widget_id: string
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -2946,6 +2972,292 @@ export type Database = {
           updated_at?: string
         }
       }
+      reports: {
+        Row: {
+          id: string
+          tenant_id: string
+          name: string
+          description: string | null
+          report_type: ReportType
+          object_type: ReportObjectType
+          fields: string[]
+          filters: ReportFilter[]
+          grouping: string | null
+          summarization: ReportSummarization
+          sort_field: string | null
+          sort_direction: string
+          standard_report_key: string | null
+          chart_type: ChartType
+          chart_config: Record<string, unknown>
+          is_public: boolean
+          owner_id: string | null
+          shared_with_roles: string[]
+          schedule_enabled: boolean
+          schedule_cron: string | null
+          schedule_recipients: string[]
+          last_run_at: string | null
+          cache_enabled: boolean
+          cache_ttl_minutes: number
+          cached_at: string | null
+          cached_results: unknown
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          name: string
+          description?: string | null
+          report_type?: ReportType
+          object_type: ReportObjectType
+          fields?: string[]
+          filters?: ReportFilter[]
+          grouping?: string | null
+          summarization?: ReportSummarization
+          sort_field?: string | null
+          sort_direction?: string
+          standard_report_key?: string | null
+          chart_type?: ChartType
+          chart_config?: Record<string, unknown>
+          is_public?: boolean
+          owner_id?: string | null
+          shared_with_roles?: string[]
+          schedule_enabled?: boolean
+          schedule_cron?: string | null
+          schedule_recipients?: string[]
+          last_run_at?: string | null
+          cache_enabled?: boolean
+          cache_ttl_minutes?: number
+          cached_at?: string | null
+          cached_results?: unknown
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          name?: string
+          description?: string | null
+          report_type?: ReportType
+          object_type?: ReportObjectType
+          fields?: string[]
+          filters?: ReportFilter[]
+          grouping?: string | null
+          summarization?: ReportSummarization
+          sort_field?: string | null
+          sort_direction?: string
+          standard_report_key?: string | null
+          chart_type?: ChartType
+          chart_config?: Record<string, unknown>
+          is_public?: boolean
+          owner_id?: string | null
+          shared_with_roles?: string[]
+          schedule_enabled?: boolean
+          schedule_cron?: string | null
+          schedule_recipients?: string[]
+          last_run_at?: string | null
+          cache_enabled?: boolean
+          cache_ttl_minutes?: number
+          cached_at?: string | null
+          cached_results?: unknown
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      dashboards: {
+        Row: {
+          id: string
+          tenant_id: string
+          name: string
+          description: string | null
+          layout: DashboardWidgetLayout[]
+          is_default: boolean
+          is_public: boolean
+          owner_id: string | null
+          shared_with_roles: string[]
+          auto_refresh_enabled: boolean
+          auto_refresh_interval: number
+          date_range_type: string
+          date_range_start: string | null
+          date_range_end: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          name: string
+          description?: string | null
+          layout?: DashboardWidgetLayout[]
+          is_default?: boolean
+          is_public?: boolean
+          owner_id?: string | null
+          shared_with_roles?: string[]
+          auto_refresh_enabled?: boolean
+          auto_refresh_interval?: number
+          date_range_type?: string
+          date_range_start?: string | null
+          date_range_end?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          name?: string
+          description?: string | null
+          layout?: DashboardWidgetLayout[]
+          is_default?: boolean
+          is_public?: boolean
+          owner_id?: string | null
+          shared_with_roles?: string[]
+          auto_refresh_enabled?: boolean
+          auto_refresh_interval?: number
+          date_range_type?: string
+          date_range_start?: string | null
+          date_range_end?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      dashboard_widgets: {
+        Row: {
+          id: string
+          dashboard_id: string
+          report_id: string | null
+          widget_type: WidgetType
+          title: string
+          position_x: number
+          position_y: number
+          width: number
+          height: number
+          config: Record<string, unknown>
+          kpi_metric: string | null
+          kpi_target: number | null
+          kpi_comparison_type: string | null
+          chart_type: ChartType | null
+          chart_config: Record<string, unknown> | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          dashboard_id: string
+          report_id?: string | null
+          widget_type: WidgetType
+          title: string
+          position_x?: number
+          position_y?: number
+          width?: number
+          height?: number
+          config?: Record<string, unknown>
+          kpi_metric?: string | null
+          kpi_target?: number | null
+          kpi_comparison_type?: string | null
+          chart_type?: ChartType | null
+          chart_config?: Record<string, unknown> | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          dashboard_id?: string
+          report_id?: string | null
+          widget_type?: WidgetType
+          title?: string
+          position_x?: number
+          position_y?: number
+          width?: number
+          height?: number
+          config?: Record<string, unknown>
+          kpi_metric?: string | null
+          kpi_target?: number | null
+          kpi_comparison_type?: string | null
+          chart_type?: ChartType | null
+          chart_config?: Record<string, unknown> | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      report_executions: {
+        Row: {
+          id: string
+          report_id: string
+          tenant_id: string
+          user_id: string | null
+          execution_type: string
+          started_at: string
+          completed_at: string | null
+          row_count: number | null
+          execution_time_ms: number | null
+          filters_applied: unknown
+          export_format: string | null
+          error_message: string | null
+        }
+        Insert: {
+          id?: string
+          report_id: string
+          tenant_id: string
+          user_id?: string | null
+          execution_type?: string
+          started_at?: string
+          completed_at?: string | null
+          row_count?: number | null
+          execution_time_ms?: number | null
+          filters_applied?: unknown
+          export_format?: string | null
+          error_message?: string | null
+        }
+        Update: {
+          id?: string
+          report_id?: string
+          tenant_id?: string
+          user_id?: string | null
+          execution_type?: string
+          started_at?: string
+          completed_at?: string | null
+          row_count?: number | null
+          execution_time_ms?: number | null
+          filters_applied?: unknown
+          export_format?: string | null
+          error_message?: string | null
+        }
+      }
+      saved_report_filters: {
+        Row: {
+          id: string
+          tenant_id: string
+          user_id: string
+          name: string
+          object_type: ReportObjectType
+          filters: ReportFilter[]
+          is_default: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          user_id: string
+          name: string
+          object_type: ReportObjectType
+          filters?: ReportFilter[]
+          is_default?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          user_id?: string
+          name?: string
+          object_type?: ReportObjectType
+          filters?: ReportFilter[]
+          is_default?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }
@@ -3267,3 +3579,45 @@ export type LeadScoringSettingsUpdate = Database['public']['Tables']['lead_scori
 export type LeadScoreHistory = Database['public']['Tables']['lead_score_history']['Row']
 export type LeadScoreHistoryInsert = Database['public']['Tables']['lead_score_history']['Insert']
 export type LeadScoreHistoryUpdate = Database['public']['Tables']['lead_score_history']['Update']
+
+// Report types
+export type Report = Database['public']['Tables']['reports']['Row']
+export type ReportInsert = Database['public']['Tables']['reports']['Insert']
+export type ReportUpdate = Database['public']['Tables']['reports']['Update']
+
+// Dashboard types
+export type Dashboard = Database['public']['Tables']['dashboards']['Row']
+export type DashboardInsert = Database['public']['Tables']['dashboards']['Insert']
+export type DashboardUpdate = Database['public']['Tables']['dashboards']['Update']
+
+export type DashboardWidget = Database['public']['Tables']['dashboard_widgets']['Row']
+export type DashboardWidgetInsert = Database['public']['Tables']['dashboard_widgets']['Insert']
+export type DashboardWidgetUpdate = Database['public']['Tables']['dashboard_widgets']['Update']
+
+export type ReportExecution = Database['public']['Tables']['report_executions']['Row']
+export type ReportExecutionInsert = Database['public']['Tables']['report_executions']['Insert']
+export type ReportExecutionUpdate = Database['public']['Tables']['report_executions']['Update']
+
+export type SavedReportFilter = Database['public']['Tables']['saved_report_filters']['Row']
+export type SavedReportFilterInsert = Database['public']['Tables']['saved_report_filters']['Insert']
+export type SavedReportFilterUpdate = Database['public']['Tables']['saved_report_filters']['Update']
+
+// Standard report keys
+export type StandardReportKey =
+  | 'pipeline_by_stage'
+  | 'deals_closed_won'
+  | 'deals_closed_lost'
+  | 'lead_conversion_rate'
+  | 'sales_by_rep'
+  | 'sales_by_team'
+  | 'activity_by_type'
+  | 'activity_by_rep'
+  | 'forecast_vs_actual'
+
+// Report result types
+export interface ReportResult {
+  data: Record<string, unknown>[]
+  totalCount: number
+  summary?: Record<string, number>
+  executionTimeMs: number
+}

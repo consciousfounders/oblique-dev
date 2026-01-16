@@ -53,6 +53,13 @@ const QuotesPage = lazy(() => import('@/pages/quotes/Quotes').then(m => ({ defau
 const QuoteDetailPage = lazy(() => import('@/pages/quotes/QuoteDetail').then(m => ({ default: m.QuoteDetailPage })))
 const ForecastingPage = lazy(() => import('@/pages/forecasting/Forecasting').then(m => ({ default: m.ForecastingPage })))
 
+// Reports and Dashboards
+const ReportsPage = lazy(() => import('@/pages/reports/Reports'))
+const ReportBuilderPage = lazy(() => import('@/pages/reports/ReportBuilderPage'))
+const ReportViewerPage = lazy(() => import('@/pages/reports/ReportViewerPage'))
+const DashboardsPage = lazy(() => import('@/pages/dashboards/Dashboards'))
+const DashboardViewerPage = lazy(() => import('@/pages/dashboards/DashboardViewerPage'))
+
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-64">
@@ -117,6 +124,17 @@ function App() {
             <Route path="/quotes" element={<Suspense fallback={<PageLoader />}><QuotesPage /></Suspense>} />
             <Route path="/quotes/:id" element={<Suspense fallback={<PageLoader />}><QuoteDetailPage /></Suspense>} />
             <Route path="/forecasting" element={<Suspense fallback={<PageLoader />}><ForecastingPage /></Suspense>} />
+
+            {/* Reports */}
+            <Route path="/reports" element={<Suspense fallback={<PageLoader />}><ReportsPage /></Suspense>} />
+            <Route path="/reports/builder" element={<Suspense fallback={<PageLoader />}><ReportBuilderPage /></Suspense>} />
+            <Route path="/reports/builder/:id" element={<Suspense fallback={<PageLoader />}><ReportBuilderPage /></Suspense>} />
+            <Route path="/reports/:id" element={<Suspense fallback={<PageLoader />}><ReportViewerPage /></Suspense>} />
+
+            {/* Dashboards */}
+            <Route path="/dashboards" element={<Suspense fallback={<PageLoader />}><DashboardsPage /></Suspense>} />
+            <Route path="/dashboards/:id" element={<Suspense fallback={<PageLoader />}><DashboardViewerPage /></Suspense>} />
+            <Route path="/dashboards/:id/edit" element={<Suspense fallback={<PageLoader />}><DashboardViewerPage /></Suspense>} />
           </Route>
         </Routes>
         <Toaster
